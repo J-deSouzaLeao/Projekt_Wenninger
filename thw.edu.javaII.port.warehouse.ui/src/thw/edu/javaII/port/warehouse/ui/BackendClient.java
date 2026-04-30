@@ -225,15 +225,53 @@ public class BackendClient {
         }
     }
 
-//    public boolean initDemoData() throws Exception {
-//        var deo = new WarehouseDEO();
-//        deo.setZone(Zone.INIT);
-//        deo.setCommand(Command.INIT);
-//
-//        var ret = sendRequest(deo);
-//        System.out.println("Server-Nachricht nach Init: " + ret.getMessage());
-//        return ret.getStatus() == Status.OK;
-//    }
+    // ==========================================
+    // BEREICH: KASSE
+    // ==========================================
+
+    public thw.edu.javaII.port.warehouse.model.Kassierer loginKassierer(int nummer, String pin) throws Exception {
+        var k = new thw.edu.javaII.port.warehouse.model.Kassierer();
+        k.setNummer(nummer);
+        k.setPin(pin);
+
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.LOGIN);
+        deo.setData(k);
+
+        var ret = sendRequest(deo);
+
+        if (ret.getStatus() == Status.OK && ret.getData() != null) {
+            return Cast.safeCast(ret.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
+        }
+        return null;
+    }
+
+    public Produkt getProduktById(int id) throws Exception {
+        var p = new Produkt(id, null, null, 0.0);
+
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.PRODUKT);
+        deo.setCommand(Command.GETBYMODEL);
+        deo.setData(p);
+
+        var ret = sendRequest(deo);
+
+        if (ret.getStatus() == Status.OK && ret.getData() != null) {
+            return Cast.safeCast(ret.getData(), Produkt.class);
+        }
+        return null;
+    }
+
+    public boolean initDemoData() throws Exception {
+        var deo = new thw.edu.javaII.port.warehouse.model.deo.WarehouseDEO();
+        deo.setZone(thw.edu.javaII.port.warehouse.model.deo.Zone.INIT);
+        deo.setCommand(thw.edu.javaII.port.warehouse.model.deo.Command.INIT);
+
+        var ret = sendRequest(deo);
+        System.out.println("Server-Nachricht nach Init: " + ret.getMessage());
+        return ret.getStatus() == thw.edu.javaII.port.warehouse.model.deo.Status.OK;
+    }
 //
 //    public static void main(String[] args) {
 //        try {
