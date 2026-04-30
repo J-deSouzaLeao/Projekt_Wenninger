@@ -76,4 +76,6 @@ public interface IStorage {
 
 	void reduceLagerbestand(int produktId, int anzahl) throws NegativeStockException;
 
+	double getBargeldEinnahmenSeitLetztemAbschluss();
+
 }

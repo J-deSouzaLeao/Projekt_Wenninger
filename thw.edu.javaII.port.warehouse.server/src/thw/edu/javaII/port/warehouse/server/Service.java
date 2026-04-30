@@ -420,6 +420,23 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
+			case ABSCHLUSS_LADEN:
+				thw.edu.javaII.port.warehouse.model.Kassenabschluss last = store.getLastKassenabschluss();
+				double barEinnahmen = store.getBargeldEinnahmenSeitLetztemAbschluss();
+				double letzterIstBestand = (last != null) ? last.getIstBestand() : 0.0;
+
+				// Wir senden ein Array zurück: [0] = Letzter IstBestand, [1] = Neue Bar-Einnahmen
+				deoOut = new WarehouseReturnDEO(new double[]{letzterIstBestand, barEinnahmen}, "Abschlussdaten geladen", Status.OK);
+				break;
+			case ABSCHLUSS_SPEICHERN:
+				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassenabschluss) {
+					thw.edu.javaII.port.warehouse.model.Kassenabschluss abschluss = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassenabschluss.class);
+					store.saveKassenabschluss(abschluss);
+					deoOut = new WarehouseReturnDEO(null, "Kassenabschluss gespeichert", Status.OK);
+				} else {
+					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
+				}
+				break;
 			default:
 				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando in Zone KASSE", Status.ERROR);
 				break;
