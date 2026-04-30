@@ -397,6 +397,29 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
+			case KAUFEN:
+				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassenzettel) {
+					thw.edu.javaII.port.warehouse.model.Kassenzettel zettel = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassenzettel.class);
+
+					try {
+						// 1. Zettel und Positionen speichern
+						store.saveKassenzettel(zettel);
+
+						// 2. Lagerbestand reduzieren
+						for (thw.edu.javaII.port.warehouse.model.KassenzettelPosition pos : zettel.getPositionen()) {
+							store.reduceLagerbestand(pos.getProdukt().getId(), pos.getAnzahl());
+						}
+
+						deoOut = new WarehouseReturnDEO(null, "Bezahlung erfolgreich verbucht", Status.OK);
+					} catch (thw.edu.javaII.port.warehouse.model.exception.NegativeStockException e) {
+						deoOut = new WarehouseReturnDEO(null, "Bestandsfehler: " + e.getMessage(), Status.ERROR);
+					} catch (Exception e) {
+						deoOut = new WarehouseReturnDEO(null, "Fehler beim Speichern: " + e.getMessage(), Status.ERROR);
+					}
+				} else {
+					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
+				}
+				break;
 			default:
 				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando in Zone KASSE", Status.ERROR);
 				break;

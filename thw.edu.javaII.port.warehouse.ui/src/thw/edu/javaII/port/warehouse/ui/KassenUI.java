@@ -18,6 +18,8 @@ public class KassenUI extends JFrame {
     private JTextField eingabeFeld;
     private JLabel summenLabel;
 
+    private int stornoZaehler = 0;
+
     public KassenUI(BackendClient client, Kassierer kassierer, double startBestand) {
         this.client = client;
         this.kassierer = kassierer;
@@ -87,11 +89,15 @@ public class KassenUI extends JFrame {
         // Aktions-Buttons (Vorbereitung für Phase 4)
         JPanel aktionPanel = new JPanel(new GridLayout(2, 1, 5, 5));
         JButton bezahlenBtn = new JButton("BEZAHLEN");
+        bezahlenBtn.addActionListener(e -> bezahlenVorgang());
+
         bezahlenBtn.setFont(new Font("Arial", Font.BOLD, 24));
         bezahlenBtn.setBackground(new Color(70, 130, 180));
         bezahlenBtn.setForeground(Color.WHITE);
 
         JButton stornoBtn = new JButton("STORNO");
+        stornoBtn.addActionListener(e -> stornoVorgang());
+
         stornoBtn.setFont(new Font("Arial", Font.BOLD, 24));
         stornoBtn.setBackground(new Color(220, 20, 60));
         stornoBtn.setForeground(Color.WHITE);
@@ -146,6 +152,117 @@ public class KassenUI extends JFrame {
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Verbindungsfehler zum Server.", "Fehler", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void stornoVorgang() {
+        int selectedRow = artikelTabelle.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Bitte einen Artikel zum Stornieren in der Tabelle auswählen.", "Hinweis", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // Autorisierung prüfen nach 2 Stornos
+        if (stornoZaehler >= 2) {
+            boolean autorisiert = false;
+            while (!autorisiert) {
+                String chefNrStr = JOptionPane.showInputDialog(this, "Sicherheits-Sperre! 2 Stornos erreicht.\nBitte andere Kassierer-Nr eingeben:");
+                if (chefNrStr == null) return; // Abbrechen gedrückt
+                String chefPin = showPasswordDialog();
+                if (chefPin == null) return;
+
+                try {
+                    int chefNr = Integer.parseInt(chefNrStr);
+                    if (chefNr == this.kassierer.getNummer()) {
+                        JOptionPane.showMessageDialog(this, "Sie können sich nicht selbst autorisieren!", "Fehler", JOptionPane.ERROR_MESSAGE);
+                        continue;
+                    }
+                    Kassierer chef = client.loginKassierer(chefNr, chefPin);
+                    if (chef != null) {
+                        autorisiert = true;
+                        stornoZaehler = 0; // Reset nach Autorisierung
+                        JOptionPane.showMessageDialog(this, "Autorisierung durch " + chef.getName() + " erfolgreich.");
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Autorisierung fehlgeschlagen!", "Fehler", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Ungültige Eingabe oder Verbindungsfehler.", "Fehler", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+
+        // Artikel aus Tabelle entfernen und Summe anpassen
+        String gesamtStr = (String) tableModel.getValueAt(selectedRow, 4);
+        double gesamtPos = Double.parseDouble(gesamtStr.replace(" €", "").replace(",", "."));
+
+        gesamtSumme -= gesamtPos;
+        summenLabel.setText(String.format("Gesamt: %.2f €", Math.max(0, gesamtSumme)));
+
+        tableModel.removeRow(selectedRow);
+        stornoZaehler++;
+    }
+
+    private String showPasswordDialog() {
+        JPasswordField pf = new JPasswordField();
+        int okCxl = JOptionPane.showConfirmDialog(null, pf, "Bitte PIN eingeben:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (okCxl == JOptionPane.OK_OPTION) {
+            return new String(pf.getPassword());
+        }
+        return null;
+    }
+
+    private void bezahlenVorgang() {
+        if (tableModel.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "Der Kassenzettel ist leer!", "Hinweis", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        ZahlungDialog dialog = new ZahlungDialog(this, gesamtSumme);
+        dialog.setVisible(true);
+
+        if (dialog.isErfolgreich()) {
+            // Kassenzettel-Objekt aufbauen
+            thw.edu.javaII.port.warehouse.model.Kassenzettel zettel = new thw.edu.javaII.port.warehouse.model.Kassenzettel();
+            zettel.setZahlart(dialog.getGewaehlteZahlart());
+            zettel.setGesamtpreis(gesamtSumme);
+            zettel.setKassierer(this.kassierer);
+
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            java.time.format.DateTimeFormatter dateFormatter = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss");
+            zettel.setDatum(now.format(dateFormatter));
+            zettel.setUhrzeit(now.format(timeFormatter));
+
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                thw.edu.javaII.port.warehouse.model.KassenzettelPosition pos = new thw.edu.javaII.port.warehouse.model.KassenzettelPosition();
+
+                int prodId = (int) tableModel.getValueAt(i, 0);
+                Produkt p = new Produkt();
+                p.setId(prodId);
+                pos.setProdukt(p);
+
+                pos.setAnzahl((int) tableModel.getValueAt(i, 2));
+
+                String preisStr = (String) tableModel.getValueAt(i, 4);
+                pos.setGesamtpreis(Double.parseDouble(preisStr.replace(" €", "").replace(",", ".")));
+
+                zettel.getPositionen().add(pos);
+            }
+
+            try {
+                // An Server senden
+                client.kassenzettelBuchen(zettel);
+                JOptionPane.showMessageDialog(this, "Bezahlung erfolgreich abgeschlossen!\nZahlart: " + dialog.getGewaehlteZahlart());
+
+                // UI für nächsten Kunden zurücksetzen
+                tableModel.setRowCount(0);
+                gesamtSumme = 0.0;
+                stornoZaehler = 0;
+                summenLabel.setText("Gesamt: 0.00 €");
+
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Fehler beim Verbuchen: " + ex.getMessage(), "Backend-Fehler", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 }
