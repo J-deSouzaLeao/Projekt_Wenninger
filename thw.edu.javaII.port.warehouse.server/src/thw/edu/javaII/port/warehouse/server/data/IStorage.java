@@ -7,6 +7,11 @@ import thw.edu.javaII.port.warehouse.model.Lager;
 import thw.edu.javaII.port.warehouse.model.LagerBestand;
 import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.model.Produkt;
+import thw.edu.javaII.port.warehouse.model.Kassierer;
+import thw.edu.javaII.port.warehouse.model.Kassenzettel;
+import thw.edu.javaII.port.warehouse.model.Kassenabschluss;
+import thw.edu.javaII.port.warehouse.model.KassenzettelPosition;
+import thw.edu.javaII.port.warehouse.model.exception.NegativeStockException;
 
 public interface IStorage {
 
@@ -58,5 +63,17 @@ public interface IStorage {
 	
 	List<DemoModel> getDemos();
 
+	// Kassen-Erweiterungen
+	void initKassenTabellen();
+
+	Kassierer getKassiererByNummer(int nummer);
+
+	void saveKassenzettel(Kassenzettel kassenzettel);
+
+	void saveKassenabschluss(Kassenabschluss abschluss);
+
+	Kassenabschluss getLastKassenabschluss();
+
+	void reduceLagerbestand(int produktId, int anzahl) throws NegativeStockException;
 
 }
