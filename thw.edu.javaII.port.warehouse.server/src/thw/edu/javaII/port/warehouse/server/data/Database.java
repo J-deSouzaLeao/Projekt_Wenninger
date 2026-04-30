@@ -1254,4 +1254,18 @@ public class Database implements IStorage {
 		}
 	}
 
+	@Override
+	public double getBargeldEinnahmenSeitLetztemAbschluss() {
+		// Berechnet die Summe aller Bar-Kassenzettel, die neuer sind als der letzte Kassenabschluss
+		String sql = "SELECT SUM(gesamtpreis) FROM KASSENZETTEL WHERE zahlart='Bar' AND id > COALESCE((SELECT MAX(id) FROM KASSENABSCHLUSS), 0)";
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+			if (rs.next()) {
+				return rs.getDouble(1);
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+		return 0.0;
+	}
+
 }

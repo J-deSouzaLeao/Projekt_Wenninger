@@ -286,6 +286,30 @@ public class BackendClient {
         }
         return ret.getMessage();
     }
+
+    public double[] getAbschlussDaten() throws Exception {
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.ABSCHLUSS_LADEN);
+
+        var ret = sendRequest(deo);
+        if (ret.getStatus() == Status.OK && ret.getData() != null) {
+            return (double[]) ret.getData();
+        }
+        return new double[]{0.0, 0.0};
+    }
+
+    public void saveKassenabschluss(thw.edu.javaII.port.warehouse.model.Kassenabschluss abschluss) throws Exception {
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.ABSCHLUSS_SPEICHERN);
+        deo.setData(abschluss);
+
+        var ret = sendRequest(deo);
+        if (ret.getStatus() != Status.OK) {
+            throw new Exception(ret.getMessage());
+        }
+    }
 //
 //    public static void main(String[] args) {
 //        try {

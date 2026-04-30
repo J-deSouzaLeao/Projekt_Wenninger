@@ -107,6 +107,18 @@ public class KassenUI extends JFrame {
         eingabePanel.add(aktionPanel, BorderLayout.SOUTH);
 
         add(eingabePanel, BorderLayout.EAST);
+
+        JButton abschlussBtn = new JButton("ABSCHLUSS");
+        abschlussBtn.setFont(new Font("Arial", Font.BOLD, 24));
+        abschlussBtn.setBackground(new Color(255, 140, 0));
+        abschlussBtn.setForeground(Color.WHITE);
+        abschlussBtn.addActionListener(e -> new KassenabschlussDialog(this, client, kassierer).setVisible(true));
+
+        // Raster anpassen von 2 Zeilen auf 3 Zeilen
+        aktionPanel.setLayout(new GridLayout(3, 1, 5, 5));
+        aktionPanel.add(bezahlenBtn);
+        aktionPanel.add(stornoBtn);
+        aktionPanel.add(abschlussBtn); // NEU
     }
 
     private JButton createNumButton(String text) {
