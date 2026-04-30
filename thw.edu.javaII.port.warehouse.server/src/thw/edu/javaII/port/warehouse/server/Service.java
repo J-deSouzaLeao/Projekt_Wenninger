@@ -77,6 +77,9 @@ public class Service extends Thread {
 				case GENERAL:
 					deoOut = handleZoneGeneral(deoIn, deoOut);
 					break;
+					case KASSE:
+						deoOut = handleZoneKasse(deoIn, deoOut);
+						break;
 				default:
 					deoOut = new WarehouseReturnDEO(null, "Unbekannte Zone", Status.ERROR);
 					break;
@@ -374,6 +377,29 @@ public class Service extends Thread {
 		default:
 			deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando", Status.ERROR);
 			break;
+		}
+		return deoOut;
+	}
+
+	private WarehouseReturnDEO handleZoneKasse(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+		switch (deoIn.getCommand()) {
+			case LOGIN:
+				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
+					thw.edu.javaII.port.warehouse.model.Kassierer req = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
+					thw.edu.javaII.port.warehouse.model.Kassierer k = store.getKassiererByNummer(req.getNummer());
+
+					if (k != null && k.getPin().equals(req.getPin())) {
+						deoOut = new WarehouseReturnDEO(k, "Login erfolgreich", Status.OK);
+					} else {
+						deoOut = new WarehouseReturnDEO(null, "Ungültige Nummer oder PIN", Status.ERROR);
+					}
+				} else {
+					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
+				}
+				break;
+			default:
+				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando in Zone KASSE", Status.ERROR);
+				break;
 		}
 		return deoOut;
 	}
