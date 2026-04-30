@@ -19,6 +19,12 @@ import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.model.Produkt;
 import thw.edu.javaII.port.warehouse.model.common.Info;
 
+import thw.edu.javaII.port.warehouse.model.Kassierer;
+import thw.edu.javaII.port.warehouse.model.Kassenzettel;
+import thw.edu.javaII.port.warehouse.model.Kassenabschluss;
+import thw.edu.javaII.port.warehouse.model.KassenzettelPosition;
+import thw.edu.javaII.port.warehouse.model.exception.NegativeStockException;
+
 public class Database implements IStorage {
 	private static final String driverClass = "org.sqlite.JDBC";
 	private static final String dbUrl = "jdbc:sqlite:warehouse.sqlite";
@@ -1130,4 +1136,122 @@ public class Database implements IStorage {
 		}
 		return false;
 	}
+
+	@Override
+	public void initKassenTabellen() {
+		String sqlKassierer = "CREATE TABLE IF NOT EXISTS KASSIERER (id integer PRIMARY KEY AUTOINCREMENT, nummer integer UNIQUE NOT NULL, pin text NOT NULL, name text NOT NULL)";
+		String sqlKassenzettel = "CREATE TABLE IF NOT EXISTS KASSENZETTEL (id integer PRIMARY KEY AUTOINCREMENT, datum text NOT NULL, uhrzeit text NOT NULL, zahlart text NOT NULL, kassierer_id integer NOT NULL, gesamtpreis real NOT NULL)";
+		String sqlPositionen = "CREATE TABLE IF NOT EXISTS KASSENZETTEL_POSITION (id integer PRIMARY KEY AUTOINCREMENT, kassenzettel_id integer NOT NULL, produkt_id integer NOT NULL, anzahl integer NOT NULL, gesamtpreis real NOT NULL)";
+		String sqlAbschluss = "CREATE TABLE IF NOT EXISTS KASSENABSCHLUSS (id integer PRIMARY KEY AUTOINCREMENT, datum text NOT NULL, uhrzeit text NOT NULL, kassierer_id integer NOT NULL, soll real NOT NULL, ist real NOT NULL)";
+
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
+			st.executeUpdate(sqlKassierer);
+			st.executeUpdate(sqlKassenzettel);
+			st.executeUpdate(sqlPositionen);
+			st.executeUpdate(sqlAbschluss);
+
+			// Dummy Kassierer anlegen falls Tabelle leer
+			ResultSet rs = st.executeQuery("SELECT count(*) FROM KASSIERER");
+			if (rs.next() && rs.getInt(1) == 0) {
+				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name) VALUES (1001, '1234', 'Max Muster')");
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public Kassierer getKassiererByNummer(int nummer) {
+		String sql = "SELECT * FROM KASSIERER WHERE nummer=" + nummer;
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+			if (rs.next()) {
+				return new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+		return null;
+	}
+
+	@Override
+	public void saveKassenzettel(Kassenzettel kassenzettel) {
+		String sqlInsertZettel = "INSERT INTO KASSENZETTEL (datum, uhrzeit, zahlart, kassierer_id, gesamtpreis) VALUES ('" +
+				kassenzettel.getDatum() + "', '" + kassenzettel.getUhrzeit() + "', '" + kassenzettel.getZahlart() + "', " +
+				kassenzettel.getKassierer().getId() + ", " + kassenzettel.getGesamtpreis() + ")";
+
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
+			st.executeUpdate(sqlInsertZettel);
+			ResultSet rs = st.executeQuery("SELECT last_insert_rowid()");
+			int lastId = 0;
+			if (rs.next()) {
+				lastId = rs.getInt(1);
+			}
+
+			for (KassenzettelPosition pos : kassenzettel.getPositionen()) {
+				String sqlInsertPos = "INSERT INTO KASSENZETTEL_POSITION (kassenzettel_id, produkt_id, anzahl, gesamtpreis) VALUES (" +
+						lastId + ", " + pos.getProdukt().getId() + ", " + pos.getAnzahl() + ", " + pos.getGesamtpreis() + ")";
+				st.executeUpdate(sqlInsertPos);
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+	}
+
+	@Override
+	public void saveKassenabschluss(Kassenabschluss abschluss) {
+		String sql = "INSERT INTO KASSENABSCHLUSS (datum, uhrzeit, kassierer_id, soll, ist) VALUES ('" +
+				abschluss.getDatum() + "', '" + abschluss.getUhrzeit() + "', " + abschluss.getKassierer().getId() + ", " +
+				abschluss.getSollBestand() + ", " + abschluss.getIstBestand() + ")";
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
+			st.executeUpdate(sql);
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+	}
+
+	@Override
+	public Kassenabschluss getLastKassenabschluss() {
+		String sql = "SELECT * FROM KASSENABSCHLUSS ORDER BY id DESC LIMIT 1";
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+			if (rs.next()) {
+				Kassenabschluss abschluss = new Kassenabschluss();
+				abschluss.setId(rs.getInt("id"));
+				abschluss.setDatum(rs.getString("datum"));
+				abschluss.setUhrzeit(rs.getString("uhrzeit"));
+				abschluss.setSollBestand(rs.getDouble("soll"));
+				abschluss.setIstBestand(rs.getDouble("ist"));
+				return abschluss;
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+		return null; // Kein vorheriger Abschluss vorhanden
+	}
+
+	@Override
+	public void reduceLagerbestand(int produktId, int anzahl) throws NegativeStockException {
+		String selectSql = "SELECT id, anzahl FROM LAGERBESTAND WHERE produkt_id=" + produktId + " ORDER BY id ASC LIMIT 1";
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
+			ResultSet rs = st.executeQuery(selectSql);
+			if (rs.next()) {
+				int bestandId = rs.getInt("id");
+				int aktuellerBestand = rs.getInt("anzahl");
+
+				if (aktuellerBestand - anzahl < 0) {
+					// Hier jetzt nur noch NegativeStockException statt dem langen Pfad
+					throw new NegativeStockException("Lagerbestand für Produkt ID " + produktId + " darf nicht negativ werden.");
+				}
+
+				String updateSql = "UPDATE LAGERBESTAND SET anzahl=" + (aktuellerBestand - anzahl) + " WHERE id=" + bestandId;
+				st.executeUpdate(updateSql);
+			} else {
+				// Hier ebenfalls
+				throw new NegativeStockException("Kein Lagerbestand für Produkt ID " + produktId + " gefunden.");
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+	}
+
 }
