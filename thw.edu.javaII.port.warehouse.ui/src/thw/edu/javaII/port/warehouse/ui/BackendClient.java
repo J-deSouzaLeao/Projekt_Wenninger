@@ -272,6 +272,20 @@ public class BackendClient {
         System.out.println("Server-Nachricht nach Init: " + ret.getMessage());
         return ret.getStatus() == thw.edu.javaII.port.warehouse.model.deo.Status.OK;
     }
+
+    public String kassenzettelBuchen(thw.edu.javaII.port.warehouse.model.Kassenzettel zettel) throws Exception {
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.KAUFEN);
+        deo.setData(zettel);
+
+        var ret = sendRequest(deo);
+
+        if (ret.getStatus() != Status.OK) {
+            throw new Exception(ret.getMessage());
+        }
+        return ret.getMessage();
+    }
 //
 //    public static void main(String[] args) {
 //        try {
