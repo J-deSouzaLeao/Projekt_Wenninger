@@ -310,6 +310,18 @@ public class BackendClient {
             throw new Exception(ret.getMessage());
         }
     }
+
+    public List<thw.edu.javaII.port.warehouse.model.Kassenzettel> getAllKassenzettel() throws Exception {
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.KASSENZETTEL_LISTE);
+        var ret = sendRequest(deo);
+
+        if (ret.getStatus() == Status.OK && ret.getData() != null) {
+            return Cast.safeListCast(ret.getData(), thw.edu.javaII.port.warehouse.model.Kassenzettel.class);
+        }
+        return List.of();
+    }
 //
 //    public static void main(String[] args) {
 //        try {

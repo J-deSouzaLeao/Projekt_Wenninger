@@ -1268,4 +1268,38 @@ public class Database implements IStorage {
 		return 0.0;
 	}
 
+	public thw.edu.javaII.port.warehouse.model.Kassierer getKassiererById(int id) {
+		String sql = "SELECT * FROM KASSIERER WHERE id=" + id;
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+			if (rs.next()) {
+				return new thw.edu.javaII.port.warehouse.model.Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+		return null;
+	}
+
+	@Override
+	public List<thw.edu.javaII.port.warehouse.model.Kassenzettel> getAllKassenzettel() {
+		List<thw.edu.javaII.port.warehouse.model.Kassenzettel> list = new ArrayList<>();
+		String sql = "SELECT * FROM KASSENZETTEL";
+		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+			while (rs.next()) {
+				thw.edu.javaII.port.warehouse.model.Kassenzettel z = new thw.edu.javaII.port.warehouse.model.Kassenzettel();
+				z.setId(rs.getInt("id"));
+				z.setDatum(rs.getString("datum"));
+				z.setUhrzeit(rs.getString("uhrzeit"));
+				z.setZahlart(rs.getString("zahlart"));
+				z.setGesamtpreis(rs.getDouble("gesamtpreis"));
+				z.setKassierer(getKassiererById(rs.getInt("kassierer_id")));
+				list.add(z);
+			}
+		} catch (SQLException e) {
+			logger.log(Level.ERROR, e);
+		}
+		return list;
+	}
+
+
 }

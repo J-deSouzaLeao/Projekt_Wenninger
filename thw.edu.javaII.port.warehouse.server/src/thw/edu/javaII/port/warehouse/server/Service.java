@@ -437,6 +437,9 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
+			case KASSENZETTEL_LISTE:
+				deoOut = new WarehouseReturnDEO(store.getAllKassenzettel(), "Kassenzettel geladen", Status.OK);
+				break;
 			default:
 				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando in Zone KASSE", Status.ERROR);
 				break;

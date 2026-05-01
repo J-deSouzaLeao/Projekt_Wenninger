@@ -149,6 +149,14 @@ public class LagerUI extends JFrame {
 		this.menuBar.add(menuStammdaten);
 		this.menuBar.add(menuLagerbetrieb);
 
+		// Menü Kasse
+		JMenu menuKasse = new JMenu("Kasse");
+		JMenuItem itemKassenzettel = new JMenuItem("Kassenzettel verwalten");
+		menuKasse.add(itemKassenzettel);
+		itemKassenzettel.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.KassenzettelVerwaltungPanel()));
+
+		this.menuBar.add(menuKasse);
+
 		// this.setJMenuBar() entfällt, da die Leiste bereits im Fenster hängt
 	}
 
