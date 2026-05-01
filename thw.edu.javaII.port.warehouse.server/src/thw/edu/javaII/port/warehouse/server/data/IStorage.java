@@ -78,4 +78,6 @@ public interface IStorage {
 
 	double getBargeldEinnahmenSeitLetztemAbschluss();
 
+	List<thw.edu.javaII.port.warehouse.model.Kassenzettel> getAllKassenzettel();
+
 }
