@@ -35,6 +35,9 @@ public class Database implements IStorage {
 		try {
 			Class.forName(driverClass);
 			init = new Initizilaizer();
+
+			initKassenTabellen();
+
 		} catch (ClassNotFoundException e) {
 			throw new Exception(e);
 		}
@@ -515,7 +518,11 @@ public class Database implements IStorage {
 
 			ResultSet rs = st.executeQuery("SELECT count(*) FROM KASSIERER");
 			if (rs.next() && rs.getInt(1) == 0) {
+				// Der normale Kassierer (für den Login)
 				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name) VALUES (1001, '1234', 'Max Muster')");
+
+				// NEU: Der Chef für die Storno-Autorisierung
+				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name) VALUES (9999, '0000', 'Chef Autorisierung')");
 			}
 			rs.close();
 		} catch (SQLException e) {
