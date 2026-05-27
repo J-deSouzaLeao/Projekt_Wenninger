@@ -7,28 +7,19 @@ import java.net.Socket;
 import thw.edu.javaII.port.warehouse.model.common.Info;
 
 public class Server {
+	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Server.class.getName());
 	public static boolean run = true;
 	
 	public static void main(String[] args) {
-		ServerSocket server = null;
-		try {		
-			server = new ServerSocket(Info.PORT_SERVER);
-			System.out.println("Lagerverwaltungsserver läuft");
-			while (run) {
-				Socket sock = server.accept();
-				new Service(sock).start();
-			}
-		}  catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (server != null) {
-				try {
-					server.close();
-				} catch (IOException e) {
-					;
-				}
-			}
-		}
+        try (ServerSocket server = new ServerSocket(Info.PORT_SERVER)) {
+            System.out.println("Lagerverwaltungsserver läuft");
+            while (run) {
+                Socket sock = server.accept();
+                new Service(sock).start();
+            }
+        } catch (IOException e) {
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler im Server aufgetreten", e);
+        }
 	}
 	
 }

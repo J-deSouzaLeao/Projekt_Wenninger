@@ -11,9 +11,6 @@ public class KassenLoginTest {
                 BackendClient client = new BackendClient();
 
                 System.out.println("Initialisiere Demo-Datenbank...");
-                client.initDemoData(); // <--- DIESE ZEILE HINZUFÜGEN
-
-                System.out.println("Initialisiere Demo-Datenbank...");
                 client.initDemoData();
 
                 // --- NEUER DIAGNOSE-BLOCK START ---
@@ -26,13 +23,11 @@ public class KassenLoginTest {
                 // --- NEUER DIAGNOSE-BLOCK ENDE ---
 
                 System.out.println("Öffne Login-Screen...");
-
-                System.out.println("Öffne Login-Screen...");
                 KassenLoginScreen login = new KassenLoginScreen(client);
                 login.setVisible(true);
 
             } catch (Exception e) {
-                e.printStackTrace();
+                // printStackTrace() entfernt, stattdessen nur das saubere GUI-Popup
                 JOptionPane.showMessageDialog(null,
                         "Verbindung zum Server fehlgeschlagen! Läuft Server.java?",
                         "Fehler",

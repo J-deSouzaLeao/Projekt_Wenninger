@@ -10,11 +10,11 @@ import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.model.Produkt;
 
 public class Initizilaizer {
-	private List<Lager> lager;
-	private List<LagerPlatz> lagerplatz;
-	private List<LagerBestand> lagerbestand;
-	private List<Produkt> produkt;
-	private List<DemoModel> demo;
+	private final List<Lager> lager;
+	private final List<LagerPlatz> lagerplatz;
+	private final List<LagerBestand> lagerbestand;
+	private final List<Produkt> produkt;
+	private final List<DemoModel> demo;
 	
 	
 	public Initizilaizer() {

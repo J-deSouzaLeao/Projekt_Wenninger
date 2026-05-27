@@ -9,8 +9,8 @@ import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.ui.BackendClient;
 
 public class LagerPlatzVerwaltungPanel extends JPanel {
-    private JTable table;
-    private DefaultTableModel tableModel;
+    private final JTable table;
+    private final DefaultTableModel tableModel;
 
     public LagerPlatzVerwaltungPanel() {
         setLayout(new BorderLayout());
@@ -66,14 +66,11 @@ public class LagerPlatzVerwaltungPanel extends JPanel {
 
         if (JOptionPane.showConfirmDialog(this, msg, "Neuer Lagerplatz", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             try {
-                var client = new BackendClient();
-                Lager lager = getLagerById(client, Integer.parseInt(txtLagerId.getText().trim()));
-                if (lager == null) { showError("Lager-ID nicht gefunden."); client.close(); return; }
-
-                var lp = new LagerPlatz(Integer.parseInt(txtId.getText().trim()), txtName.getText().trim(), Integer.parseInt(txtKapa.getText().trim()), lager);
-                if (client.addLagerPlatz(lp)) loadData();
-                client.close();
-            } catch (Exception ex) { showError("Ungültige Eingabe."); }
+                int id = Integer.parseInt(txtId.getText().trim());
+                saveLagerPlatz(id, txtName.getText(), txtKapa.getText(), txtLagerId.getText(), false);
+            } catch (NumberFormatException ex) {
+                showError("Ungültige Eingabe für ID.");
+            }
         }
     }
 
@@ -88,15 +85,26 @@ public class LagerPlatzVerwaltungPanel extends JPanel {
         Object[] msg = {"ID: " + id, "Name:", txtName, "Kapazität:", txtKapa, "Lager-ID:", txtLagerId};
 
         if (JOptionPane.showConfirmDialog(this, msg, "Lagerplatz bearbeiten", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            try {
-                var client = new BackendClient();
-                Lager lager = getLagerById(client, Integer.parseInt(txtLagerId.getText().trim()));
-                if (lager == null) { showError("Lager-ID nicht gefunden."); client.close(); return; }
+            saveLagerPlatz(id, txtName.getText(), txtKapa.getText(), txtLagerId.getText(), true);
+        }
+    }
 
-                var lp = new LagerPlatz(id, txtName.getText().trim(), Integer.parseInt(txtKapa.getText().trim()), lager);
-                if (client.updateLagerPlatz(lp)) loadData();
+    private void saveLagerPlatz(int id, String name, String kapaText, String lagerIdText, boolean isUpdate) {
+        try {
+            var client = new BackendClient();
+            Lager lager = getLagerById(client, Integer.parseInt(lagerIdText.trim()));
+            if (lager == null) {
+                showError("Lager-ID nicht gefunden.");
                 client.close();
-            } catch (Exception ex) { showError("Ungültige Eingabe."); }
+                return;
+            }
+
+            var lp = new LagerPlatz(id, name.trim(), Integer.parseInt(kapaText.trim()), lager);
+            boolean success = isUpdate ? client.updateLagerPlatz(lp) : client.addLagerPlatz(lp);
+            if (success) loadData();
+            client.close();
+        } catch (Exception ex) {
+            showError("Ungültige Eingabe.");
         }
     }
 

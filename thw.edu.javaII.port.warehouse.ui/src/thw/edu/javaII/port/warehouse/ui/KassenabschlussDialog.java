@@ -11,18 +11,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class KassenabschlussDialog extends JDialog {
-    private BackendClient client;
-    private Kassierer kassierer;
+    private final BackendClient client;
+    private final Kassierer kassierer;
     private double sollBestand;
     private double ermittelterIstBestand = 0.0;
 
-    private JLabel sollLabel;
-    private JLabel istLabel;
-    private JLabel differenzLabel;
-    private JButton abschlussBtn;
+    private final JLabel istLabel;
+    private final JLabel differenzLabel;
+    private final JButton abschlussBtn;
 
     // Stückelungen: Wert in Euro -> Eingabefeld
-    private Map<Double, JTextField> stueckelungFields = new LinkedHashMap<>();
+    private final Map<Double, JTextField> stueckelungFields = new LinkedHashMap<>();
 
     public KassenabschlussDialog(JFrame parent, BackendClient client, Kassierer kassierer) {
         super(parent, "Kassenabschluss durchführen", true);
@@ -38,7 +37,7 @@ public class KassenabschlussDialog extends JDialog {
         // Header
         JPanel headerPanel = new JPanel(new GridLayout(3, 1));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        sollLabel = new JLabel(String.format("Sollbestand: %.2f €", sollBestand), SwingConstants.CENTER);
+        JLabel sollLabel = new JLabel(String.format("Sollbestand: %.2f €", sollBestand), SwingConstants.CENTER);
         sollLabel.setFont(new Font("Arial", Font.BOLD, 22));
         istLabel = new JLabel("Istbestand: 0.00 €", SwingConstants.CENTER);
         istLabel.setFont(new Font("Arial", Font.BOLD, 22));

@@ -10,8 +10,8 @@ import thw.edu.javaII.port.warehouse.model.Produkt;
 import thw.edu.javaII.port.warehouse.ui.BackendClient;
 
 public class LagerBestandVerwaltungPanel extends JPanel {
-    private JTable table;
-    private DefaultTableModel tableModel;
+    private final JTable table;
+    private final DefaultTableModel tableModel;
 
     public LagerBestandVerwaltungPanel() {
         setLayout(new BorderLayout());

@@ -1,5 +1,6 @@
 package thw.edu.javaII.port.warehouse.ui.model;
 
+import java.io.Serial;
 import java.util.List;
 
 import javax.swing.JTable;
@@ -10,7 +11,8 @@ import thw.edu.javaII.port.warehouse.model.LagerBestand;
 
 public class BestandTableModel extends AbstractTableModel {
 	
-	private static final long serialVersionUID = -6145988449443265248L;
+	@Serial
+    private static final long serialVersionUID = -6145988449443265248L;
 	private List<LagerBestand> data;
 
 	public BestandTableModel(List<LagerBestand> data) {

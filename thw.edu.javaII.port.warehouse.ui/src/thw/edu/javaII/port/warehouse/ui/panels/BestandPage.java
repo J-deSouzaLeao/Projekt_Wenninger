@@ -13,13 +13,14 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
 import thw.edu.javaII.port.warehouse.ui.model.BestandTableModel;
 
 import java.awt.Font;
+import java.io.Serial;
 
 public class BestandPage extends JPanel {
 
-	private static final long serialVersionUID = 2848864973063147806L;
-	private JTable table;
+	@Serial
+    private static final long serialVersionUID = 2848864973063147806L;
 
-	/**
+    /**
 	 * Create the panel.
 	 */
 	public BestandPage(Session ses) {
@@ -29,7 +30,7 @@ public class BestandPage extends JPanel {
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 16));
 		add(lblNewLabel, BorderLayout.NORTH);
 		BestandTableModel model = new BestandTableModel(ses.getCommunicator().getBestand());
-		table = new JTable(model);
+        JTable table = new JTable(model);
 		model.setJTableColumnsWidth(table, 800, 10, 20, 20, 10, 20, 20);
 		table.setShowGrid(true);
 		table.setShowVerticalLines(true);

@@ -1,10 +1,11 @@
 package thw.edu.javaII.port.warehouse.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class LagerBestand implements Serializable {
-	private static final long serialVersionUID = 5335970888396140828L;
-	private static final String PRINT_FORMAT = "[%-20s - %-50s - %-30s - %-40s]";
+	@Serial
+    private static final long serialVersionUID = 5335970888396140828L;
 	private int id;
 	private int anzahl;
 	private Produkt produkt_id;
@@ -39,10 +40,6 @@ public class LagerBestand implements Serializable {
 		return lagerplatz_id;
 	}
 
-	public void setLagerplatz_id(LagerPlatz lagerplatz_id) {
-		this.lagerplatz_id = lagerplatz_id;
-	}
-
 	public LagerBestand() {
 
 	}
@@ -55,27 +52,16 @@ public class LagerBestand implements Serializable {
 		this.lagerplatz_id = lagerplatz_id;
 	}
 
-	public String toListString() {
-		return String.format(PRINT_FORMAT, id, anzahl, produkt_id.getName(), lagerplatz_id.getName());
-	}
-
 	public Object getValueAtColumn(int column) {
-		switch (column) {
-		case 0:
-			return getProdukt_id().getId();
-		case 1:
-			return getProdukt_id().getName();
-		case 2:
-			return getProdukt_id().getHersteller();
-		case 3:
-			return getAnzahl();
-		case 4:
-			return getLagerplatz_id().getName();
-		case 5:
-			return getLagerplatz_id().getLager_id().getName();
-		default:
-			return null;
-		}
+        return switch (column) {
+            case 0 -> getProdukt_id().getId();
+            case 1 -> getProdukt_id().getName();
+            case 2 -> getProdukt_id().getHersteller();
+            case 3 -> getAnzahl();
+            case 4 -> getLagerplatz_id().getName();
+            case 5 -> getLagerplatz_id().getLager_id().getName();
+            default -> null;
+        };
 	}
 
 }

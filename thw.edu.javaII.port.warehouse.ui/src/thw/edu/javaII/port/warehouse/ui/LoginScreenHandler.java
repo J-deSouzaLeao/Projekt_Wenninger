@@ -13,11 +13,11 @@ import javax.swing.JTextField;
 import thw.edu.javaII.port.warehouse.ui.common.Session;
 
 public class LoginScreenHandler implements ActionListener, KeyListener {
-	private Session ses;
-	private JFrame frame;
-	private JTextField txtUser;
-	private JPasswordField txtPassword;
-	private JLabel lblHint;
+	private final Session ses;
+	private final JFrame frame;
+	private final JTextField txtUser;
+	private final JPasswordField txtPassword;
+	private final JLabel lblHint;
 
 	public LoginScreenHandler(Session ses, JFrame frame, JTextField txtUser, JPasswordField txtPassword,
 			JLabel lblHint) {
@@ -34,7 +34,7 @@ public class LoginScreenHandler implements ActionListener, KeyListener {
 	}
 
 	private void checkLogin() {
-		if (txtUser.getText().length() > 0 && String.valueOf(txtPassword.getPassword()).length() > 0) {
+		if (!txtUser.getText().isEmpty() && !String.valueOf(txtPassword.getPassword()).isEmpty()) {
 			if (ses.getUserService().checkLogin(txtUser.getText(), String.valueOf(txtPassword.getPassword()))) {
 				ses.setLogin(true);
 				frame.dispose();
@@ -55,11 +55,9 @@ public class LoginScreenHandler implements ActionListener, KeyListener {
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		;
-	}
+    }
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		;
-	}
+    }
 }

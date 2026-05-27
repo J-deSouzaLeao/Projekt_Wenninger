@@ -11,9 +11,8 @@ public class Cast {
 	// Es wird geprüft und dann erst gecasted daher eigentlich 99,9% safe
 	public static <T> List<T> safeListCast(Object o, Class<T> clazz) {
 		if (clazz != null) {
-			if (o instanceof List<?>) {
-				List<?> list = (List<?>) o;
-				if (list.size() > 0) {
+			if (o instanceof List<?> list) {
+                if (!list.isEmpty()) {
 					if (list.get(0).getClass().equals(clazz)) {
 						return (List<T>) o;
 					}

@@ -4,11 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ZahlungDialog extends JDialog {
-    private double zuZahlen;
+    private final double zuZahlen;
     private boolean erfolgreich = false;
     private String gewaehlteZahlart = "";
-    private JTextField gegebenFeld;
-    private JLabel rueckgeldLabel;
+    private final JTextField gegebenFeld;
+    private final JLabel rueckgeldLabel;
 
     public ZahlungDialog(JFrame parent, double zuZahlenSumme) {
         super(parent, "Bezahlvorgang", true);

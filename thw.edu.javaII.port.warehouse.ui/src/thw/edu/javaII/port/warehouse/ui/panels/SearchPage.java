@@ -7,13 +7,11 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.Serial;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -27,54 +25,23 @@ import thw.edu.javaII.port.warehouse.ui.model.BestandTableModel;
 
 public class SearchPage extends JPanel {
 
+	@Serial
 	private static final long serialVersionUID = 8512898500044030449L;
-	private JTable table;
-	private JTextField textField;
-	private JScrollPane js;
-	private BestandTableModel model;
+	private final JTable table;
+	private final JTextField textField;
+	private final BestandTableModel model;
 
 	/**
 	 * Create the panel.
 	 */
-	public SearchPage(Session ses, JFrame parent) {
+	public SearchPage(Session ses) {
 		setLayout(new BorderLayout(0, 0));
 
 		JLabel lblNewLabel = new JLabel("Suche");
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 16));
 		add(lblNewLabel, BorderLayout.NORTH);
 
-		JPanel pannel_2 = new JPanel();
-		JButton btnNewButton = new JButton("Verändern");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				LagerBestand l = model.getObjectAt(table.getSelectedRow());
-				ChangeLagerBestand clb = new ChangeLagerBestand(l, ses);
-				clb.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-				clb.setModalityType(ModalityType.APPLICATION_MODAL);
-				clb.setVisible(true);
-				if (textField.getText().length() < 3) {
-					model.setData(ses.getCommunicator().getBestand());
-					model.fireTableDataChanged();
-				} else {
-					model.setData(ses.getCommunicator().search(textField.getText()));
-					model.fireTableDataChanged();
-				}
-			}
-		});
-		pannel_2.add(btnNewButton);
-		JButton btnNewButton_2 = new JButton("Neues Prdoukt einlagern");
-		btnNewButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AddProdukt ap = new AddProdukt(ses);
-				ap.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-				ap.setModalityType(ModalityType.APPLICATION_MODAL);
-				ap.setVisible(true);
-				model.setData(ses.getCommunicator().getBestand());
-				model.fireTableDataChanged();
-
-			}
-		});
-		pannel_2.add(btnNewButton_2);
+		JPanel pannel_2 = getJPanel(ses);
 		add(pannel_2, BorderLayout.SOUTH);
 
 		JPanel panel = new JPanel();
@@ -99,36 +66,24 @@ public class SearchPage extends JPanel {
 		panel_1.add(textField);
 		textField.setColumns(20);
 
-		JButton btnSearch = new JButton("Suchen");
-		btnSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (textField.getText().length() < 3) {
-					/// FIXME ggf. ein ICON einfügen das ein Die Info entsprechend darstellt.
-					JOptionPane.showMessageDialog(null, "Für eine Suche müssen mindestens 3 Zeichen eingegeben werden!",
-							"Hinweis: Eingabefehler", JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					List<LagerBestand> searchBestand = ses.getCommunicator().search(textField.getText());
-					if (searchBestand.size() > 0) {
-						model.setData(searchBestand);
-						model.fireTableDataChanged();
-					}
-				}
-			}
-		});
+		JButton btnSearch = createBtnSearch(ses);
 		panel_1.add(btnSearch);
+
 		JLabel lblNewLabel_1 = new JLabel("Ergebnisse");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
 		gbc_lblNewLabel_1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblNewLabel_1.gridx = 0;
 		gbc_lblNewLabel_1.gridy = 1;
 		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
+
 		model = new BestandTableModel(ses.getCommunicator().getBestand());
 		table = new JTable(model);
 		table.setShowGrid(true);
 		table.setShowVerticalLines(true);
 		table.setShowHorizontalLines(true);
 		table.setGridColor(Color.DARK_GRAY);
-		js = new JScrollPane(table);
+
+		JScrollPane js = new JScrollPane(table);
 		js.setVisible(true);
 		GridBagConstraints gbc_table = new GridBagConstraints();
 		gbc_table.fill = GridBagConstraints.BOTH;
@@ -136,7 +91,62 @@ public class SearchPage extends JPanel {
 		gbc_table.gridy = 2;
 		gbc_table.weighty = 1.0;
 		panel.add(js, gbc_table);
-
 	}
 
+	private JPanel getJPanel(Session ses) {
+		JPanel pannel_2 = new JPanel();
+
+		JButton btnNewButton = createBtnNewButton(ses);
+		pannel_2.add(btnNewButton);
+
+		JButton btnNewButton_2 = new JButton("Neues Produkt einlagern");
+		btnNewButton_2.addActionListener(e -> {
+			AddProdukt ap = new AddProdukt(ses);
+			ap.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			ap.setModalityType(ModalityType.APPLICATION_MODAL);
+			ap.setVisible(true);
+			model.setData(ses.getCommunicator().getBestand());
+			model.fireTableDataChanged();
+		});
+		pannel_2.add(btnNewButton_2);
+
+		return pannel_2;
+	}
+
+	private JButton createBtnSearch(Session ses) {
+		JButton btnSearch = new JButton("Suchen");
+		btnSearch.addActionListener(e -> {
+			if (textField.getText().length() < 3) {
+				// FIXME ggf. ein ICON einfügen das ein Die Info entsprechend darstellt.
+				JOptionPane.showMessageDialog(null, "Für eine Suche müssen mindestens 3 Zeichen eingegeben werden!",
+						"Hinweis: Eingabefehler", JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				List<LagerBestand> searchBestand = ses.getCommunicator().search(textField.getText());
+				if (!searchBestand.isEmpty()) {
+					model.setData(searchBestand);
+					model.fireTableDataChanged();
+				}
+			}
+		});
+		return btnSearch;
+	}
+
+	private JButton createBtnNewButton(Session ses) {
+		JButton btnNewButton = new JButton("Verändern");
+		btnNewButton.addActionListener(e -> {
+			LagerBestand l = model.getObjectAt(table.getSelectedRow());
+			ChangeLagerBestand clb = new ChangeLagerBestand(l, ses);
+			clb.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			clb.setModalityType(ModalityType.APPLICATION_MODAL);
+			clb.setVisible(true);
+			if (textField.getText().length() < 3) {
+				model.setData(ses.getCommunicator().getBestand());
+				model.fireTableDataChanged();
+			} else {
+				model.setData(ses.getCommunicator().search(textField.getText()));
+				model.fireTableDataChanged();
+			}
+		});
+		return btnNewButton;
+	}
 }

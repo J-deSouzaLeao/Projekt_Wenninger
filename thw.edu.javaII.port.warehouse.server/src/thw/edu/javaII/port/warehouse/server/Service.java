@@ -24,6 +24,7 @@ import thw.edu.javaII.port.warehouse.server.data.IStorage;
 import thw.edu.javaII.port.warehouse.server.init.Loading;
 
 public class Service extends Thread {
+	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Service.class.getName());
 	static int count = 0;
 	private int currentNumber = 0;
 	private Socket sock;
@@ -42,10 +43,10 @@ public class Service extends Thread {
 			fromClient = new ObjectInputStream(sock.getInputStream());
 		} catch (IOException e) {
 			System.out.println("IO-Error bei Client " + currentNumber);
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Ein Fehler in der Netzwerkkommunikation ist aufgetreten", e);
 		} catch (Exception e) {
 			System.out.println("Fehler bei der Erzeugung der Datenbank");
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Ein Fehler in der Netzwerkkommunikation ist aufgetreten", e);
 		}
 	}
 
@@ -54,36 +55,18 @@ public class Service extends Thread {
 		try {
 			while (run) {
 				WarehouseDEO deoIn = (WarehouseDEO) fromClient.readObject();
-				WarehouseReturnDEO deoOut = null;
-				switch (deoIn.getZone()) {
-				case INIT:
-					deoOut = handleZoneInit(deoIn, deoOut);
-					break;
-				case LAGER:
-					deoOut = handleZoneLager(deoIn, deoOut);
-					break;
-				case LAGERBESTAND:
-					deoOut = handleZoneLagerBestand(deoIn, deoOut);
-					break;
-				case LAGERPLATZ:
-					deoOut = handleZoneLagerPlatz(deoIn, deoOut);
-					break;
-				case PRODUKT:
-					deoOut = handleZoneProdukt(deoIn, deoOut);
-					break;
-				case STATISTIK:
-					deoOut = handleZoneStatistik(deoIn, deoOut);
-					break;
-				case GENERAL:
-					deoOut = handleZoneGeneral(deoIn, deoOut);
-					break;
-					case KASSE:
-						deoOut = handleZoneKasse(deoIn, deoOut);
-						break;
-				default:
-					deoOut = new WarehouseReturnDEO(null, "Unbekannte Zone", Status.ERROR);
-					break;
-				}
+				WarehouseReturnDEO deoOut;
+                deoOut = switch (deoIn.getZone()) {
+                    case INIT -> handleZoneInit(deoIn);
+                    case LAGER -> handleZoneLager(deoIn);
+                    case LAGERBESTAND -> handleZoneLagerBestand(deoIn);
+                    case LAGERPLATZ -> handleZoneLagerPlatz(deoIn);
+                    case PRODUKT -> handleZoneProdukt(deoIn);
+                    case STATISTIK -> handleZoneStatistik(deoIn);
+                    case GENERAL -> handleZoneGeneral(deoIn);
+                    case KASSE -> handleZoneKasse(deoIn);
+                    default -> new WarehouseReturnDEO(null, "Unbekannte Zone", Status.ERROR);
+                };
 				toClient.writeObject(deoOut);
 			}
 		} catch (IOException e) {
@@ -98,15 +81,15 @@ public class Service extends Thread {
 					toClient.close();
 				if (sock != null)
 					sock.close();
-			} catch (IOException e) {
-				;
-			}
+			} catch (IOException ignored) {
+            }
 
 		}
 		System.out.println("Protokoll fuer Client " + currentNumber + " beendet");
 	}
 
-	private WarehouseReturnDEO handleZoneLager(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneLager(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
 		switch (deoIn.getCommand()) {
 		case ADD:
 			if (deoIn.getData() != null && deoIn.getData() instanceof Lager) {
@@ -148,7 +131,8 @@ public class Service extends Thread {
 		return deoOut;
 	}
 
-	private WarehouseReturnDEO handleZoneLagerPlatz(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneLagerPlatz(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
 		switch (deoIn.getCommand()) {
 		case ADD:
 			if (deoIn.getData() != null && deoIn.getData() instanceof LagerPlatz) {
@@ -190,7 +174,8 @@ public class Service extends Thread {
 		return deoOut;
 	}
 
-	private WarehouseReturnDEO handleZoneLagerBestand(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneLagerBestand(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
 		switch (deoIn.getCommand()) {
 		case ADD:
 			if (deoIn.getData() != null && deoIn.getData() instanceof LagerBestand) {
@@ -229,7 +214,7 @@ public class Service extends Thread {
 			if (deoIn.getData() != null && deoIn.getData() instanceof String) {
 				String search = Cast.safeCast(deoIn.getData(), String.class);
 				List<LagerBestand> all = store.getLagerBestands();
-				List<LagerBestand> relevantData = new ArrayList<LagerBestand>();
+				List<LagerBestand> relevantData = new ArrayList<>();
 				for (LagerBestand mod : all) {
 					String searchData = mod.getProdukt_id().getName() + mod.getProdukt_id().getHersteller()
 							+ mod.getLagerplatz_id().getName() + mod.getLagerplatz_id().getLager_id().getName()
@@ -251,7 +236,8 @@ public class Service extends Thread {
 		return deoOut;
 	}
 
-	private WarehouseReturnDEO handleZoneProdukt(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneProdukt(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
 		switch (deoIn.getCommand()) {
 		case ADD:
 			if (deoIn.getData() != null && deoIn.getData() instanceof Produkt) {
@@ -302,41 +288,47 @@ public class Service extends Thread {
 		return deoOut;
 	}
 
-	private WarehouseReturnDEO handleZoneStatistik(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneStatistik(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
+
+		List<LagerBestand> data;
+		List<LagerBestand> relevantData;
+
 		switch (deoIn.getCommand()) {
-		case ADD:
-		case DELETE:
-		case INIT:
-		case LIST:
-		case UPDATE:
-			deoOut = new WarehouseReturnDEO(null, "Für die Zone nicht unterstütztes Kommando", Status.INFO);
-			break;
-		case BESTAND:
-			List<LagerBestand> data = store.getLagerBestands();
-			Collections.sort(data, new BestandByProduktAlpha());
-			deoOut = new WarehouseReturnDEO(data, "Liste der Prdoukte mit Lagerinfo alphabetisch", Status.OK);
-			break;
-		case TOP:
-			data = store.getLagerBestands();
-			Collections.sort(data, new BestandByLagerBestand());
-			Collections.reverse(data);
-			List<LagerBestand> relevantData = data.stream().limit(10).collect(Collectors.toList());
-			deoOut = new WarehouseReturnDEO(relevantData, "Liste der TOP 10 Prdoukte nach Lagerbestand", Status.OK);
-			break;
-		case LOW:
-			data = store.getLagerBestands();
-			Collections.sort(data, new BestandByLagerBestand());
-			relevantData = data.stream().limit(10).collect(Collectors.toList());
-			deoOut = new WarehouseReturnDEO(relevantData, "Liste der TOP 10 Prdoukte nach Lagerbestand", Status.OK);
-			break;
-		default:
-			deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando", Status.ERROR);
-			break;
+			case ADD:
+			case DELETE:
+			case INIT:
+			case LIST:
+			case UPDATE:
+				deoOut = new WarehouseReturnDEO(null, "Für die Zone nicht unterstütztes Kommando", Status.INFO);
+				break;
+			case BESTAND:
+				data = store.getLagerBestands();
+				data.sort(new BestandByProduktAlpha());
+				deoOut = new WarehouseReturnDEO(data, "Liste der Prdoukte mit Lagerinfo alphabetisch", Status.OK);
+				break;
+			case TOP:
+				data = store.getLagerBestands();
+				data.sort(new BestandByLagerBestand());
+				Collections.reverse(data);
+				relevantData = data.stream().limit(10).collect(Collectors.toList());
+				deoOut = new WarehouseReturnDEO(relevantData, "Liste der TOP 10 Prdoukte nach Lagerbestand", Status.OK);
+				break;
+			case LOW:
+				data = store.getLagerBestands();
+				data.sort(new BestandByLagerBestand());
+				relevantData = data.stream().limit(10).collect(Collectors.toList());
+				deoOut = new WarehouseReturnDEO(relevantData, "Liste der LOW 10 Prdoukte nach Lagerbestand", Status.OK);
+				break;
+			default:
+				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando", Status.ERROR);
+				break;
 		}
 		return deoOut;
 	}
 
-	private WarehouseReturnDEO handleZoneInit(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneInit(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
 		switch (deoIn.getCommand()) {
 		case ADD:
 		case DELETE:
@@ -356,7 +348,8 @@ public class Service extends Thread {
 		return deoOut;
 	}
 
-	private WarehouseReturnDEO handleZoneGeneral(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneGeneral(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
 		switch (deoIn.getCommand()) {
 		case ADD:
 		case DELETE:
@@ -381,7 +374,8 @@ public class Service extends Thread {
 		return deoOut;
 	}
 
-	private WarehouseReturnDEO handleZoneKasse(WarehouseDEO deoIn, WarehouseReturnDEO deoOut) {
+	private WarehouseReturnDEO handleZoneKasse(WarehouseDEO deoIn) {
+		WarehouseReturnDEO deoOut;
 		switch (deoIn.getCommand()) {
 			case LOGIN:
 				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {

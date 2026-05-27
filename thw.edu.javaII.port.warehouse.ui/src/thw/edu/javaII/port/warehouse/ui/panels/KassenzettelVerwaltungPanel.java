@@ -12,8 +12,9 @@ import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class KassenzettelVerwaltungPanel extends JPanel {
-    private DefaultTableModel model;
-    private TableRowSorter<DefaultTableModel> sorter;
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(KassenzettelVerwaltungPanel.class.getName());
+    private final DefaultTableModel model;
+    private final TableRowSorter<DefaultTableModel> sorter;
 
     public KassenzettelVerwaltungPanel() {
         setLayout(new BorderLayout(10, 10));
@@ -43,7 +44,7 @@ public class KassenzettelVerwaltungPanel extends JPanel {
             @Override
             public void keyReleased(KeyEvent e) {
                 String text = searchField.getText();
-                if (text.trim().length() == 0) {
+                if (text.trim().isEmpty()) {
                     sorter.setRowFilter(null);
                 } else {
                     sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text)); // (?i) macht es Case-Insensitive
@@ -71,7 +72,7 @@ public class KassenzettelVerwaltungPanel extends JPanel {
             }
             client.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(java.util.logging.Level.SEVERE, "Ein Fehler ist beim Laden der Daten aufgetreten", e);
             JOptionPane.showMessageDialog(this, "Fehler beim Laden der Kassenzettel.");
         }
     }

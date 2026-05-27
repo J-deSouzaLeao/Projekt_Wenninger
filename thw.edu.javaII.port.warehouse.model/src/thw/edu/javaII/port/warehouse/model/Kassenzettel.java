@@ -11,7 +11,7 @@ public class Kassenzettel implements Serializable {
     private String zahlart;
     private Kassierer kassierer;
     private double gesamtpreis;
-    private List<KassenzettelPosition> positionen = new ArrayList<>();
+    private final List<KassenzettelPosition> positionen = new ArrayList<>();
 
     public Kassenzettel() {}
 
@@ -28,5 +28,4 @@ public class Kassenzettel implements Serializable {
     public double getGesamtpreis() { return gesamtpreis; }
     public void setGesamtpreis(double gesamtpreis) { this.gesamtpreis = gesamtpreis; }
     public List<KassenzettelPosition> getPositionen() { return positionen; }
-    public void setPositionen(List<KassenzettelPosition> positionen) { this.positionen = positionen; }
 }

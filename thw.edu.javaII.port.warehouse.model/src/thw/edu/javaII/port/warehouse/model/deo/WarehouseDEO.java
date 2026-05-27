@@ -1,9 +1,11 @@
 package thw.edu.javaII.port.warehouse.model.deo;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class WarehouseDEO implements Serializable{
-	private static final long serialVersionUID = 4403645819092074274L;
+	@Serial
+    private static final long serialVersionUID = 4403645819092074274L;
 	private Object data;
 	private Zone zone;
 	private Command command;
@@ -32,13 +34,6 @@ public class WarehouseDEO implements Serializable{
 		this.command = command;
 	}
 
-	public WarehouseDEO(Object data, Zone zone, Command command) {
-		super();
-		this.data = data;
-		this.zone = zone;
-		this.command = command;
-	}
-	
 	public WarehouseDEO() {
 		
 	}

@@ -2,8 +2,8 @@ package thw.edu.javaII.port.warehouse.ui.common;
 
 public class Session {
 	private boolean login;
-	private Communicator comm;
-	private UserService userService;
+	private final Communicator comm;
+	private final UserService userService;
 
 	public Session() {
 		login = false;

@@ -6,6 +6,7 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
+import java.io.Serial;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,30 +21,27 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
 import thw.edu.javaII.port.warehouse.ui.panels.WelcomePage;
 
 public class LagerUI extends JFrame {
+	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(LagerUI.class.getName());
 
-	private static final long serialVersionUID = -5670441158631808726L;
-	private JPanel contentPane, pnCopyright;
-	private Session ses;
-	private JFrame parent;
+	@Serial
+    private static final long serialVersionUID = -5670441158631808726L;
+	private final JPanel contentPane;
+    private final Session ses;
+	private final JFrame parent;
 	private JMenuBar menuBar;
-	private JMenu menuDatei;
-	private JMenuItem miBeenden, miStartseite, miServerBeenden, miBestand, miStatistik, miSuchen, miInfo;
-	private JLabel lblCopyright;
 
-	/**
+    /**
 	 * Launch the application.
 	 */
 	public static void run(Session ses) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					LagerUI frame = new LagerUI(ses);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		EventQueue.invokeLater(() -> {
+            try {
+                LagerUI frame = new LagerUI(ses);
+                frame.setVisible(true);
+            } catch (Exception e) {
+				LOGGER.log(java.util.logging.Level.SEVERE, "Ein Fehler ist beim Laden der Oberfläche aufgetreten", e);
+            }
+        });
 	}
 
 	/**
@@ -70,11 +68,11 @@ public class LagerUI extends JFrame {
 	}
 
 	private void generateFooter() {
-		pnCopyright = new JPanel();
+        JPanel pnCopyright = new JPanel();
 		FlowLayout fl_pnCopyright = (FlowLayout) pnCopyright.getLayout();
 		fl_pnCopyright.setVgap(1);
 		fl_pnCopyright.setAlignment(FlowLayout.RIGHT);
-		lblCopyright = new JLabel("Copyright Tobias Wenninger");
+        JLabel lblCopyright = new JLabel("Copyright Tobias Wenninger");
 		lblCopyright.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblCopyright.setFont(new Font("Lucida Grande", Font.ITALIC, 12));
 		contentPane.add(pnCopyright, BorderLayout.SOUTH);
@@ -83,32 +81,32 @@ public class LagerUI extends JFrame {
 
 	private void generateMenu() {
 		menuBar = new JMenuBar();
-		menuDatei = new JMenu("Datei");
+        JMenu menuDatei = new JMenu("Datei");
 		menuDatei.setPreferredSize(new Dimension(160, menuDatei.getPreferredSize().height));
-		miBeenden = new JMenuItem("Beenden");
+        JMenuItem miBeenden = new JMenuItem("Beenden");
 		miBeenden.setPreferredSize(new Dimension(160, miBeenden.getPreferredSize().height));
 		miBeenden.setActionCommand(MenuActionCommands.BEENDEN.toString());
 		miBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
-		miStartseite = new JMenuItem("Startseite");
+        JMenuItem miStartseite = new JMenuItem("Startseite");
 		miStartseite.setPreferredSize(new Dimension(160, miStartseite.getPreferredSize().height));
 		miStartseite.setActionCommand(MenuActionCommands.STARTSEITE.toString());
 		miStartseite.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
-		miServerBeenden = new JMenuItem("Server Beenden");
+        JMenuItem miServerBeenden = new JMenuItem("Server Beenden");
 		miServerBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miServerBeenden.setActionCommand(MenuActionCommands.SERVERBEENDEN.toString());
-		miBestand = new JMenuItem("Bestand");
+        JMenuItem miBestand = new JMenuItem("Bestand");
 		miBestand.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miBestand.setActionCommand(MenuActionCommands.BESTAND.toString());
 		miBestand.setPreferredSize(new Dimension(160, miBestand.getPreferredSize().height));
-		miStatistik = new JMenuItem("Statistik");
+        JMenuItem miStatistik = new JMenuItem("Statistik");
 		miStatistik.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miStatistik.setActionCommand(MenuActionCommands.STATISTIK.toString());
 		miStatistik.setPreferredSize(new Dimension(160, miStatistik.getPreferredSize().height));
-		miSuchen = new JMenuItem("Suchen");
+        JMenuItem miSuchen = new JMenuItem("Suchen");
 		miSuchen.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miSuchen.setActionCommand(MenuActionCommands.SUCHEN.toString());
 		miSuchen.setPreferredSize(new Dimension(160, miSuchen.getPreferredSize().height));
-		miInfo = new JMenuItem("Info");
+        JMenuItem miInfo = new JMenuItem("Info");
 		miInfo.setPreferredSize(new Dimension(160, miInfo.getPreferredSize().height));
 		miInfo.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miInfo.setActionCommand(MenuActionCommands.INFO.toString());
