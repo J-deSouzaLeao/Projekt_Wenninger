@@ -5,10 +5,10 @@ import javax.swing.*;
 import java.awt.*;
 
 public class KassenLoginScreen extends JFrame {
-    private JTextField nrField;
-    private JPasswordField pinField;
-    private JTextField bestandField;
-    private BackendClient client;
+    private final JTextField nrField;
+    private final JPasswordField pinField;
+    private final JTextField bestandField;
+    private final BackendClient client;
 
     public KassenLoginScreen(BackendClient client) {
         this.client = client;
@@ -62,8 +62,7 @@ public class KassenLoginScreen extends JFrame {
         btn.setFont(new Font("Arial", Font.BOLD, 24));
         btn.addActionListener(e -> {
             Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-            if (focusOwner instanceof JTextField) {
-                JTextField field = (JTextField) focusOwner;
+            if (focusOwner instanceof JTextField field) {
                 if (text.equals("C")) {
                     field.setText("");
                 } else {
@@ -87,14 +86,13 @@ public class KassenLoginScreen extends JFrame {
                 dispose(); // Schließt das Login-Fenster
 
                 // Neue Kassen-UI öffnen
-                new KassenUI(client, k, bestand).setVisible(true);
+                new KassenUI(client, k).setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Login fehlgeschlagen. Nummer oder PIN falsch.", "Fehler", JOptionPane.ERROR_MESSAGE);
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Bitte gültige Zahlen eingeben.", "Eingabefehler", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
-            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Verbindungsfehler zum Server.", "Fehler", JOptionPane.ERROR_MESSAGE);
         }
     }

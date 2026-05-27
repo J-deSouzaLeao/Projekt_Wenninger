@@ -5,6 +5,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
 
+import thw.edu.javaII.port.warehouse.model.*;
 import thw.edu.javaII.port.warehouse.model.common.Cast;
 import thw.edu.javaII.port.warehouse.model.common.Info;
 import thw.edu.javaII.port.warehouse.model.deo.Command;
@@ -12,15 +13,12 @@ import thw.edu.javaII.port.warehouse.model.deo.Status;
 import thw.edu.javaII.port.warehouse.model.deo.WarehouseDEO;
 import thw.edu.javaII.port.warehouse.model.deo.WarehouseReturnDEO;
 import thw.edu.javaII.port.warehouse.model.deo.Zone;
-import thw.edu.javaII.port.warehouse.model.Produkt;
-import thw.edu.javaII.port.warehouse.model.Lager;
-import thw.edu.javaII.port.warehouse.model.LagerPlatz;
-import thw.edu.javaII.port.warehouse.model.LagerBestand;
 
 public class BackendClient {
-    private ObjectInputStream fromServer;
-    private ObjectOutputStream toServer;
-    private Socket sock;
+    private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(BackendClient.class.getName());
+    private final ObjectInputStream fromServer;
+    private final ObjectOutputStream toServer;
+    private final Socket sock;
 
     public BackendClient() throws Exception {
         sock = new Socket(Info.NAME_SERVER, Info.PORT_SERVER);
@@ -221,7 +219,7 @@ public class BackendClient {
             if (toServer != null) toServer.close();
             if (sock != null) sock.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(java.util.logging.Level.SEVERE, "Fehler beim Schließen der Serververbindung", e);
         }
     }
 
@@ -263,17 +261,16 @@ public class BackendClient {
         return null;
     }
 
-    public boolean initDemoData() throws Exception {
+    public void initDemoData() throws Exception {
         var deo = new thw.edu.javaII.port.warehouse.model.deo.WarehouseDEO();
         deo.setZone(thw.edu.javaII.port.warehouse.model.deo.Zone.INIT);
         deo.setCommand(thw.edu.javaII.port.warehouse.model.deo.Command.INIT);
 
         var ret = sendRequest(deo);
         System.out.println("Server-Nachricht nach Init: " + ret.getMessage());
-        return ret.getStatus() == thw.edu.javaII.port.warehouse.model.deo.Status.OK;
     }
 
-    public String kassenzettelBuchen(thw.edu.javaII.port.warehouse.model.Kassenzettel zettel) throws Exception {
+    public void kassenzettelBuchen(Kassenzettel zettel) throws Exception {
         var deo = new WarehouseDEO();
         deo.setZone(Zone.KASSE);
         deo.setCommand(Command.KAUFEN);
@@ -284,7 +281,6 @@ public class BackendClient {
         if (ret.getStatus() != Status.OK) {
             throw new Exception(ret.getMessage());
         }
-        return ret.getMessage();
     }
 
     public double[] getAbschlussDaten() throws Exception {
@@ -322,31 +318,4 @@ public class BackendClient {
         }
         return List.of();
     }
-//
-//    public static void main(String[] args) {
-//        try {
-//            System.out.println("Verbinde mit Server...");
-//            var client = new BackendClient();
-//
-//            // 1. ZUERST DIE DATENBANK BEFÜLLEN
-//            System.out.println("Initialisiere Testdaten...");
-//            client.initDemoData();
-//
-//            // 2. DANN PRODUKTE ABRUFEN
-//            System.out.println("Rufe Produkte ab...");
-//            var produkte = client.getAllProdukte();
-//
-//            System.out.println("Erfolgreich! Gefundene Produkte: " + produkte.size());
-//            for (var p : produkte) {
-//                System.out.println("- ID: " + p.getId() + " | Name: " + p.getName() + " | Preis: " + p.getPreis());
-//            }
-//
-//            client.close();
-//            System.out.println("Verbindung geschlossen.");
-//
-//        } catch (Exception e) {
-//            System.err.println("Fehler beim Testen:");
-//            e.printStackTrace();
-//        }
-//    }
 }

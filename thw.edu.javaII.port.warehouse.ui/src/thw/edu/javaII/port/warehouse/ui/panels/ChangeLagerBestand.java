@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serial;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -22,9 +23,9 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
 
 public class ChangeLagerBestand extends JDialog {
 
-	private static final long serialVersionUID = -836302868167902266L;
-	private final JPanel contentPanel = new JPanel();
-	private JTextField textField;
+	@Serial
+    private static final long serialVersionUID = -836302868167902266L;
+    private final JTextField textField;
 
 	/**
 	 * Create the dialog.
@@ -39,7 +40,8 @@ public class ChangeLagerBestand extends JDialog {
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 14));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		getContentPane().add(lblNewLabel, BorderLayout.NORTH);
-		contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
@@ -125,11 +127,7 @@ public class ChangeLagerBestand extends JDialog {
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 		JButton okButton = new JButton("Schließen");
-		okButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}
-		});
+		okButton.addActionListener(e -> dispose());
 		okButton.setActionCommand("OK");
 		buttonPane.add(okButton);
 	}

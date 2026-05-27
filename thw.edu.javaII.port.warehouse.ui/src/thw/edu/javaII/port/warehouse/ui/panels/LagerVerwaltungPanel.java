@@ -8,8 +8,8 @@ import thw.edu.javaII.port.warehouse.model.Lager;
 import thw.edu.javaII.port.warehouse.ui.BackendClient;
 
 public class LagerVerwaltungPanel extends JPanel {
-    private JTable table;
-    private DefaultTableModel tableModel;
+    private final JTable table;
+    private final DefaultTableModel tableModel;
 
     public LagerVerwaltungPanel() {
         setLayout(new BorderLayout());

@@ -1,15 +1,16 @@
 package thw.edu.javaII.port.warehouse.server.data;
 
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import thw.edu.javaII.port.warehouse.init.Initizilaizer;
 import thw.edu.javaII.port.warehouse.model.DemoModel;
@@ -17,8 +18,6 @@ import thw.edu.javaII.port.warehouse.model.Lager;
 import thw.edu.javaII.port.warehouse.model.LagerBestand;
 import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.model.Produkt;
-import thw.edu.javaII.port.warehouse.model.common.Info;
-
 import thw.edu.javaII.port.warehouse.model.Kassierer;
 import thw.edu.javaII.port.warehouse.model.Kassenzettel;
 import thw.edu.javaII.port.warehouse.model.Kassenabschluss;
@@ -26,16 +25,16 @@ import thw.edu.javaII.port.warehouse.model.KassenzettelPosition;
 import thw.edu.javaII.port.warehouse.model.exception.NegativeStockException;
 
 public class Database implements IStorage {
+
+	private static final Logger LOGGER = Logger.getLogger(Database.class.getName());
 	private static final String driverClass = "org.sqlite.JDBC";
 	private static final String dbUrl = "jdbc:sqlite:warehouse.sqlite";
-	private Initizilaizer init;
-	private Logger logger;
+	private final Initizilaizer init;
 
 	public Database() throws Exception {
 		try {
 			Class.forName(driverClass);
 			init = new Initizilaizer();
-			logger = System.getLogger(Info.LOG_NAME);
 		} catch (ClassNotFoundException e) {
 			throw new Exception(e);
 		}
@@ -43,267 +42,118 @@ public class Database implements IStorage {
 
 	@Override
 	public void initLager(List<Lager> list) {
-		if (!tableExists("LAGER")) {
-			Connection con = null;
-			Statement st = null;
-			try {
-				con = DriverManager.getConnection(dbUrl);
-				st = con.createStatement();
-				String sql = "CREATE TABLE IF NOT EXISTS LAGER (id integer PRIMARY KEY,	name text NOT NULL, ort text, art text)";
+		if (tableDoesNotExist("LAGER")) {
+			try (Connection con = DriverManager.getConnection(dbUrl);
+			     Statement st = con.createStatement()) {
+				String sql = "CREATE TABLE IF NOT EXISTS LAGER (id integer PRIMARY KEY, name text NOT NULL, ort text, art text)";
 				st.executeUpdate(sql);
 				for (Lager mod : init.getLager()) {
 					addLager(mod);
 				}
 			} catch (SQLException e) {
-				logger.log(Level.ERROR, e);
-				e.printStackTrace();
-			} finally {
-				if (st != null) {
-					try {
-						st.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				if (con != null) {
-					try {
-						con.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
+				LOGGER.log(Level.SEVERE, "Fehler bei LAGER Init", e);
 			}
 		} else {
-			turncateTable("LAGER");
+			truncateTable("LAGER");
 			for (Lager mod : init.getLager()) {
 				addLager(mod);
 			}
 		}
-
 	}
 
 	@Override
 	public void addLager(Lager model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "INSERT INTO LAGER (id,name,ort,art) VALUES (" + model.getId() + ", '" + model.getName()
-					+ "', '" + model.getOrt() + "', '" + model.getArt() + "')";
-			st.executeUpdate(sql);
+		String sql = "INSERT INTO LAGER (id,name,ort,art) VALUES (?, ?, ?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.setString(2, model.getName());
+			pstmt.setString(3, model.getOrt());
+			pstmt.setString(4, model.getArt());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void updateLager(Lager model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "UPDATE LAGER SET name='" + model.getName() + "', ort='" + model.getOrt() + "', art='"
-					+ model.getArt() + "' WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "UPDATE LAGER SET name=?, ort=?, art=? WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, model.getName());
+			pstmt.setString(2, model.getOrt());
+			pstmt.setString(3, model.getArt());
+			pstmt.setInt(4, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void deleteLager(Lager model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "DELETE FROM LAGER WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "DELETE FROM LAGER WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public List<Lager> getLagers() {
-		List<Lager> l = new ArrayList<Lager>();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM LAGER";
-			rs = st.executeQuery(sql);
-
+		List<Lager> l = new ArrayList<>();
+		String sql = "SELECT * FROM LAGER";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				int id = rs.getInt("ID");
-				String name = rs.getString("NAME");
-				String ort = rs.getString("ORT");
-				String art = rs.getString("ART");
-				l.add(new Lager(id, name, ort, art));
+				l.add(new Lager(rs.getInt("id"), rs.getString("name"), rs.getString("ort"), rs.getString("art")));
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return l;
 	}
 
 	public Lager getLagerById(int id) {
 		Lager model = new Lager();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM LAGER WHERE id=" + id;
-			rs = st.executeQuery(sql);
-
-			rs.next();
-			model.setId(id);
-			String name = rs.getString("NAME");
-			String ort = rs.getString("ORT");
-			String art = rs.getString("ART");
-			model.setName(name);
-			model.setOrt(ort);
-			model.setArt(art);
+		String sql = "SELECT * FROM LAGER WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, id);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				model.setId(id);
+				model.setName(rs.getString("name"));
+				model.setOrt(rs.getString("ort"));
+				model.setArt(rs.getString("art"));
+			}
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return model;
 	}
 
 	@Override
 	public void initLagerPlatz(List<LagerPlatz> list) {
-		if (!tableExists("LAGERPLATZ")) {
-			Connection con = null;
-			Statement st = null;
-			try {
-				con = DriverManager.getConnection(dbUrl);
-				st = con.createStatement();
+		if (tableDoesNotExist("LAGERPLATZ")) {
+			try (Connection con = DriverManager.getConnection(dbUrl);
+			     Statement st = con.createStatement()) {
 				String sql = "CREATE TABLE IF NOT EXISTS LAGERPLATZ (id integer PRIMARY KEY, name text NOT NULL, kapazitaet integer NOT NULL, lager_id integer NOT NULL)";
 				st.executeUpdate(sql);
 				for (LagerPlatz mod : init.getLagerplatz()) {
 					addLagerPlatz(mod);
 				}
 			} catch (SQLException e) {
-				logger.log(Level.ERROR, e);
-				e.printStackTrace();
-			} finally {
-				if (st != null) {
-					try {
-						st.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				if (con != null) {
-					try {
-						con.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
+				LOGGER.log(Level.SEVERE, "Fehler", e);
 			}
 		} else {
-			turncateTable("LAGERPLATZ");
+			truncateTable("LAGERPLATZ");
 			for (LagerPlatz mod : init.getLagerplatz()) {
 				addLagerPlatz(mod);
 			}
@@ -312,829 +162,341 @@ public class Database implements IStorage {
 
 	@Override
 	public void addLagerPlatz(LagerPlatz model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "INSERT INTO LAGERPLATZ (id,name,kapazitaet,lager_id) VALUES (" + model.getId() + ", '"
-					+ model.getName() + "', " + model.getKapazitaet() + ", " + model.getLager_id().getId() + ")";
-			st.executeUpdate(sql);
+		String sql = "INSERT INTO LAGERPLATZ (id,name,kapazitaet,lager_id) VALUES (?, ?, ?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.setString(2, model.getName());
+			pstmt.setInt(3, model.getKapazitaet());
+			pstmt.setInt(4, model.getLager_id().getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void updateLagerPlatz(LagerPlatz model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "UPDATE LAGERPLATZ SET name='" + model.getName() + "', kapazitaet=" + model.getKapazitaet()
-					+ ", lager_id=" + model.getLager_id().getId() + " WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "UPDATE LAGERPLATZ SET name=?, kapazitaet=?, lager_id=? WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, model.getName());
+			pstmt.setInt(2, model.getKapazitaet());
+			pstmt.setInt(3, model.getLager_id().getId());
+			pstmt.setInt(4, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void deleteLagerPlatz(LagerPlatz model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "DELETE FROM LAGERPLATZ WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "DELETE FROM LAGERPLATZ WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public List<LagerPlatz> getLagerPlatzs() {
 		List<LagerPlatz> l = new ArrayList<>();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM LAGERPLATZ";
-			rs = st.executeQuery(sql);
-
+		String sql = "SELECT * FROM LAGERPLATZ";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				int id = rs.getInt("ID");
-				String name = rs.getString("NAME");
-				int kapazitaet = rs.getInt("KAPAZITAET");
-				Lager lager_id = getLagerById(rs.getInt("LAGER_ID"));
-				l.add(new LagerPlatz(id, name, kapazitaet, lager_id));
+				Lager lager_id = getLagerById(rs.getInt("lager_id"));
+				l.add(new LagerPlatz(rs.getInt("id"), rs.getString("name"), rs.getInt("kapazitaet"), lager_id));
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return l;
 	}
 
 	public LagerPlatz getLagerPlatzById(int id) {
 		LagerPlatz model = new LagerPlatz();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM LAGERPLATZ WHERE id=" + id;
-			rs = st.executeQuery(sql);
-
-			rs.next();
-			model.setId(id);
-			String name = rs.getString("NAME");
-			int kapazitaet = rs.getInt("KAPAZITAET");
-			Lager lager_id = getLagerById(rs.getInt("LAGER_ID"));
-			model.setName(name);
-			model.setKapazitaet(kapazitaet);
-			model.setLager_id(lager_id);
+		String sql = "SELECT * FROM LAGERPLATZ WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, id);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				model.setId(id);
+				model.setName(rs.getString("name"));
+				model.setKapazitaet(rs.getInt("kapazitaet"));
+				model.setLager_id(getLagerById(rs.getInt("lager_id")));
+			}
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return model;
 	}
 
 	@Override
 	public void initLagerBestand(List<LagerBestand> list) {
-		if (!tableExists("LAGERBESTAND")) {
-			Connection con = null;
-			Statement st = null;
-			try {
-				con = DriverManager.getConnection(dbUrl);
-				st = con.createStatement();
+		if (tableDoesNotExist("LAGERBESTAND")) {
+			try (Connection con = DriverManager.getConnection(dbUrl);
+			     Statement st = con.createStatement()) {
 				String sql = "CREATE TABLE IF NOT EXISTS LAGERBESTAND (id integer PRIMARY KEY, anzahl integer NOT NULL, produkt_id integer NOT NULL, lagerplatz_id integer NOT NULL)";
 				st.executeUpdate(sql);
 				for (LagerBestand mod : init.getLagerbestand()) {
 					addLagerBestand(mod);
 				}
 			} catch (SQLException e) {
-				logger.log(Level.ERROR, e);
-				e.printStackTrace();
-			} finally {
-				if (st != null) {
-					try {
-						st.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				if (con != null) {
-					try {
-						con.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
+				LOGGER.log(Level.SEVERE, "Fehler", e);
 			}
 		} else {
-			turncateTable("LAGERBESTAND");
+			truncateTable("LAGERBESTAND");
 			for (LagerBestand mod : init.getLagerbestand()) {
 				addLagerBestand(mod);
 			}
 		}
-
 	}
 
 	@Override
 	public void addLagerBestand(LagerBestand model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "INSERT INTO LAGERBESTAND (id,anzahl,produkt_id,lagerplatz_id) VALUES (" + model.getId() + ", "
-					+ model.getAnzahl() + ", " + model.getProdukt_id().getId() + ", " + model.getLagerplatz_id().getId()
-					+ ")";
-			st.executeUpdate(sql);
+		String sql = "INSERT INTO LAGERBESTAND (id,anzahl,produkt_id,lagerplatz_id) VALUES (?, ?, ?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.setInt(2, model.getAnzahl());
+			pstmt.setInt(3, model.getProdukt_id().getId());
+			pstmt.setInt(4, model.getLagerplatz_id().getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void updateLagerBestand(LagerBestand model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "UPDATE LAGERBESTAND SET anzahl=" + model.getAnzahl() + ", produkt_id="
-					+ model.getProdukt_id().getId() + ", lagerplatz_id=" + model.getLagerplatz_id().getId()
-					+ " WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "UPDATE LAGERBESTAND SET anzahl=?, produkt_id=?, lagerplatz_id=? WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getAnzahl());
+			pstmt.setInt(2, model.getProdukt_id().getId());
+			pstmt.setInt(3, model.getLagerplatz_id().getId());
+			pstmt.setInt(4, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void deleteLagerBestand(LagerBestand model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "DELETE FROM LAGERBESTAND WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "DELETE FROM LAGERBESTAND WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public List<LagerBestand> getLagerBestands() {
 		List<LagerBestand> l = new ArrayList<>();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM LAGERBESTAND";
-			rs = st.executeQuery(sql);
-
+		String sql = "SELECT * FROM LAGERBESTAND";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				int id = rs.getInt("ID");
-				int anzahl = rs.getInt("ANZAHL");
-				LagerPlatz lagerplatz_id = getLagerPlatzById(rs.getInt("LAGERPLATZ_ID"));
-				Produkt produkt_id = getProduktById(rs.getInt("PRODUKT_ID"));
-				l.add(new LagerBestand(id, anzahl, produkt_id, lagerplatz_id));
+				LagerPlatz lagerplatz_id = getLagerPlatzById(rs.getInt("lagerplatz_id"));
+				Produkt produkt_id = getProduktById(rs.getInt("produkt_id"));
+				l.add(new LagerBestand(rs.getInt("id"), rs.getInt("anzahl"), produkt_id, lagerplatz_id));
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return l;
 	}
 
 	@Override
 	public void initProdukt(List<Produkt> list) {
-		if (!tableExists("PRODUKT")) {
-			Connection con = null;
-			Statement st = null;
-			try {
-				con = DriverManager.getConnection(dbUrl);
-				st = con.createStatement();
+		if (tableDoesNotExist("PRODUKT")) {
+			try (Connection con = DriverManager.getConnection(dbUrl);
+			     Statement st = con.createStatement()) {
 				String sql = "CREATE TABLE IF NOT EXISTS PRODUKT (id integer PRIMARY KEY, name text NOT NULL, hersteller text, preis real)";
 				st.executeUpdate(sql);
 				for (Produkt mod : init.getProdukt()) {
 					addProdukt(mod);
 				}
 			} catch (SQLException e) {
-				logger.log(Level.ERROR, e);
-				e.printStackTrace();
-			} finally {
-				if (st != null) {
-					try {
-						st.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				if (con != null) {
-					try {
-						con.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
+				LOGGER.log(Level.SEVERE, "Fehler", e);
 			}
 		} else {
-			turncateTable("PRODUKT");
+			truncateTable("PRODUKT");
 			for (Produkt mod : init.getProdukt()) {
 				addProdukt(mod);
 			}
 		}
-
 	}
 
 	@Override
 	public void addProdukt(Produkt model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "INSERT INTO PRODUKT (id,name,hersteller,preis) VALUES (" + model.getId() + ", '"
-					+ model.getName() + "', '" + model.getHersteller() + "', " + model.getPreis() + ")";
-			st.executeUpdate(sql);
+		String sql = "INSERT INTO PRODUKT (id,name,hersteller,preis) VALUES (?, ?, ?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.setString(2, model.getName());
+			pstmt.setString(3, model.getHersteller());
+			pstmt.setDouble(4, model.getPreis());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public Produkt getProduktByModel(Produkt mod) {
-		Produkt model = new Produkt();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM PRODUKT WHERE id=" + mod.getId();
-			rs = st.executeQuery(sql);
-
-			rs.next();
-			model.setId(mod.getId());
-			String name = rs.getString("NAME");
-			String hersteller = rs.getString("HERSTELLER");
-			double preis = rs.getDouble("PREIS");
-			model.setName(name);
-			model.setHersteller(hersteller);
-			model.setPreis(preis);
-		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return model;
+		return getProduktById(mod.getId());
 	}
 
 	public Produkt getProduktById(int id) {
 		Produkt model = new Produkt();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM PRODUKT WHERE id=" + id;
-			rs = st.executeQuery(sql);
-
-			rs.next();
-			model.setId(id);
-			String name = rs.getString("NAME");
-			String hersteller = rs.getString("HERSTELLER");
-			double preis = rs.getDouble("PREIS");
-			model.setName(name);
-			model.setHersteller(hersteller);
-			model.setPreis(preis);
+		String sql = "SELECT * FROM PRODUKT WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, id);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				model.setId(id);
+				model.setName(rs.getString("name"));
+				model.setHersteller(rs.getString("hersteller"));
+				model.setPreis(rs.getDouble("preis"));
+			}
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return model;
 	}
 
 	@Override
 	public void updateProdukt(Produkt model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "UPDATE PRODUKT SET name='" + model.getName() + "', hersteller='" + model.getHersteller()
-					+ "', preis=" + model.getPreis() + " WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "UPDATE PRODUKT SET name=?, hersteller=?, preis=? WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, model.getName());
+			pstmt.setString(2, model.getHersteller());
+			pstmt.setDouble(3, model.getPreis());
+			pstmt.setInt(4, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void deleteProdukt(Produkt model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "DELETE FROM PRODUKT WHERE id=" + model.getId();
-			st.executeUpdate(sql);
+		String sql = "DELETE FROM PRODUKT WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public List<Produkt> getProdukts() {
 		List<Produkt> l = new ArrayList<>();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM PRODUKT";
-			rs = st.executeQuery(sql);
-
+		String sql = "SELECT * FROM PRODUKT";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				int id = rs.getInt("ID");
-				String name = rs.getString("NAME");
-				String hersteller = rs.getString("HERSTELLER");
-				double preis = rs.getDouble("PREIS");
-				l.add(new Produkt(id, name, hersteller, preis));
+				l.add(new Produkt(rs.getInt("id"), rs.getString("name"), rs.getString("hersteller"), rs.getDouble("preis")));
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return l;
 	}
 
 	@Override
 	public List<DemoModel> getDemos() {
-		List<DemoModel> l = new ArrayList<DemoModel>();
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "SELECT * FROM DEMOS";
-			rs = st.executeQuery(sql);
-
+		List<DemoModel> l = new ArrayList<>();
+		String sql = "SELECT * FROM DEMOS";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				int id = rs.getInt("ID");
-				String name = rs.getString("NAME");
-				l.add(new DemoModel(id, name));
+				l.add(new DemoModel(rs.getInt("id"), rs.getString("name")));
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return l;
 	}
 
 	@Override
 	public void initDemo(List<DemoModel> list) {
-		if (!tableExists("DEMOS")) {
-			Connection con = null;
-			Statement st = null;
-			try {
-				con = DriverManager.getConnection(dbUrl);
-				st = con.createStatement();
-				String sql = "CREATE TABLE IF NOT EXISTS DEMOS (id integer PRIMARY KEY,	name text NOT NULL)";
+		if (tableDoesNotExist("DEMOS")) {
+			try (Connection con = DriverManager.getConnection(dbUrl);
+			     Statement st = con.createStatement()) {
+				String sql = "CREATE TABLE IF NOT EXISTS DEMOS (id integer PRIMARY KEY, name text NOT NULL)";
 				st.executeUpdate(sql);
 				for (DemoModel mod : init.getDemo()) {
 					addDemo(mod);
 				}
 			} catch (SQLException e) {
-				logger.log(Level.ERROR, e);
-				e.printStackTrace();
-			} finally {
-				if (st != null) {
-					try {
-						st.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
-				if (con != null) {
-					try {
-						con.close();
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				}
+				LOGGER.log(Level.SEVERE, "Fehler", e);
 			}
 		} else {
-			turncateTable("DEMOS");
+			truncateTable("DEMOS");
 			for (DemoModel mod : init.getDemo()) {
 				addDemo(mod);
 			}
 		}
-
 	}
 
 	@Override
 	public void addDemo(DemoModel model) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "INSERT INTO DEMOS (id,name) VALUES (" + model.getId() + ", '" + model.getName() + "')";
-			st.executeUpdate(sql);
+		String sql = "INSERT INTO DEMOS (id,name) VALUES (?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.setString(2, model.getName());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
-	private void turncateTable(String tableName) {
-		Connection con = null;
-		Statement st = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			st = con.createStatement();
-			String sql = "DELETE FROM " + tableName;
+
+	private void truncateTable(String tableName) {
+		//noinspection all
+		String sql = "DELETE FROM " + tableName;
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     Statement st = con.createStatement()) {
 			st.executeUpdate(sql);
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (st != null) {
-				try {
-					st.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
-	private boolean tableExists(String tableName) {
-		Connection con = null;
-		ResultSet rs = null;
-		DatabaseMetaData md = null;
-		try {
-			con = DriverManager.getConnection(dbUrl);
-			md = con.getMetaData();
-			rs = md.getTables(null, null, tableName, null);
-			rs.next();
-			return rs.getRow() > 0;
+	private boolean tableDoesNotExist(String tableName) {
+		boolean exists = true;
+		try (Connection con = DriverManager.getConnection(dbUrl)) {
+			DatabaseMetaData md = con.getMetaData();
+			ResultSet rs = md.getTables(null, null, tableName, null);
+			exists = rs.next();
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (con != null) {
-				try {
-					con.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
-		return false;
+		return !exists;
 	}
 
 	@Override
@@ -1144,149 +506,193 @@ public class Database implements IStorage {
 		String sqlPositionen = "CREATE TABLE IF NOT EXISTS KASSENZETTEL_POSITION (id integer PRIMARY KEY AUTOINCREMENT, kassenzettel_id integer NOT NULL, produkt_id integer NOT NULL, anzahl integer NOT NULL, gesamtpreis real NOT NULL)";
 		String sqlAbschluss = "CREATE TABLE IF NOT EXISTS KASSENABSCHLUSS (id integer PRIMARY KEY AUTOINCREMENT, datum text NOT NULL, uhrzeit text NOT NULL, kassierer_id integer NOT NULL, soll real NOT NULL, ist real NOT NULL)";
 
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     Statement st = con.createStatement()) {
 			st.executeUpdate(sqlKassierer);
 			st.executeUpdate(sqlKassenzettel);
 			st.executeUpdate(sqlPositionen);
 			st.executeUpdate(sqlAbschluss);
 
-			// Dummy Kassierer anlegen falls Tabelle leer
 			ResultSet rs = st.executeQuery("SELECT count(*) FROM KASSIERER");
 			if (rs.next() && rs.getInt(1) == 0) {
 				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name) VALUES (1001, '1234', 'Max Muster')");
 			}
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
-			e.printStackTrace();
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public Kassierer getKassiererByNummer(int nummer) {
-		String sql = "SELECT * FROM KASSIERER WHERE nummer=" + nummer;
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+		Kassierer k = null;
+		String sql = "SELECT * FROM KASSIERER WHERE nummer=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, nummer);
+			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
-				return new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
+				k = new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
 			}
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
-		return null;
+		return k;
 	}
 
 	@Override
 	public void saveKassenzettel(Kassenzettel kassenzettel) {
-		String sqlInsertZettel = "INSERT INTO KASSENZETTEL (datum, uhrzeit, zahlart, kassierer_id, gesamtpreis) VALUES ('" +
-				kassenzettel.getDatum() + "', '" + kassenzettel.getUhrzeit() + "', '" + kassenzettel.getZahlart() + "', " +
-				kassenzettel.getKassierer().getId() + ", " + kassenzettel.getGesamtpreis() + ")";
+		String sqlInsertZettel = "INSERT INTO KASSENZETTEL (datum, uhrzeit, zahlart, kassierer_id, gesamtpreis) VALUES (?, ?, ?, ?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sqlInsertZettel)) {
 
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
-			st.executeUpdate(sqlInsertZettel);
-			ResultSet rs = st.executeQuery("SELECT last_insert_rowid()");
+			pstmt.setString(1, kassenzettel.getDatum());
+			pstmt.setString(2, kassenzettel.getUhrzeit());
+			pstmt.setString(3, kassenzettel.getZahlart());
+			pstmt.setInt(4, kassenzettel.getKassierer().getId());
+			pstmt.setDouble(5, kassenzettel.getGesamtpreis());
+			pstmt.executeUpdate();
+
 			int lastId = 0;
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery("SELECT last_insert_rowid()");
 			if (rs.next()) {
 				lastId = rs.getInt(1);
 			}
+			rs.close();
+			st.close();
 
+			String sqlInsertPos = "INSERT INTO KASSENZETTEL_POSITION (kassenzettel_id, produkt_id, anzahl, gesamtpreis) VALUES (?, ?, ?, ?)";
+			PreparedStatement posStmt = con.prepareStatement(sqlInsertPos);
 			for (KassenzettelPosition pos : kassenzettel.getPositionen()) {
-				String sqlInsertPos = "INSERT INTO KASSENZETTEL_POSITION (kassenzettel_id, produkt_id, anzahl, gesamtpreis) VALUES (" +
-						lastId + ", " + pos.getProdukt().getId() + ", " + pos.getAnzahl() + ", " + pos.getGesamtpreis() + ")";
-				st.executeUpdate(sqlInsertPos);
+				posStmt.setInt(1, lastId);
+				posStmt.setInt(2, pos.getProdukt().getId());
+				posStmt.setInt(3, pos.getAnzahl());
+				posStmt.setDouble(4, pos.getGesamtpreis());
+				posStmt.executeUpdate();
 			}
+			posStmt.close();
+
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public void saveKassenabschluss(Kassenabschluss abschluss) {
-		String sql = "INSERT INTO KASSENABSCHLUSS (datum, uhrzeit, kassierer_id, soll, ist) VALUES ('" +
-				abschluss.getDatum() + "', '" + abschluss.getUhrzeit() + "', " + abschluss.getKassierer().getId() + ", " +
-				abschluss.getSollBestand() + ", " + abschluss.getIstBestand() + ")";
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
-			st.executeUpdate(sql);
+		String sql = "INSERT INTO KASSENABSCHLUSS (datum, uhrzeit, kassierer_id, soll, ist) VALUES (?, ?, ?, ?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, abschluss.getDatum());
+			pstmt.setString(2, abschluss.getUhrzeit());
+			pstmt.setInt(3, abschluss.getKassierer().getId());
+			pstmt.setDouble(4, abschluss.getSollBestand());
+			pstmt.setDouble(5, abschluss.getIstBestand());
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public Kassenabschluss getLastKassenabschluss() {
+		Kassenabschluss abschluss = null;
 		String sql = "SELECT * FROM KASSENABSCHLUSS ORDER BY id DESC LIMIT 1";
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			if (rs.next()) {
-				Kassenabschluss abschluss = new Kassenabschluss();
+				abschluss = new Kassenabschluss();
 				abschluss.setId(rs.getInt("id"));
 				abschluss.setDatum(rs.getString("datum"));
 				abschluss.setUhrzeit(rs.getString("uhrzeit"));
 				abschluss.setSollBestand(rs.getDouble("soll"));
 				abschluss.setIstBestand(rs.getDouble("ist"));
-				return abschluss;
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
-		return null; // Kein vorheriger Abschluss vorhanden
+		return abschluss;
 	}
 
 	@Override
 	public void reduceLagerbestand(int produktId, int anzahl) throws NegativeStockException {
-		String selectSql = "SELECT id, anzahl FROM LAGERBESTAND WHERE produkt_id=" + produktId + " ORDER BY id ASC LIMIT 1";
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement()) {
-			ResultSet rs = st.executeQuery(selectSql);
+		String selectSql = "SELECT id, anzahl FROM LAGERBESTAND WHERE produkt_id=? ORDER BY id LIMIT 1";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement selectStmt = con.prepareStatement(selectSql)) {
+
+			selectStmt.setInt(1, produktId);
+			ResultSet rs = selectStmt.executeQuery();
+
 			if (rs.next()) {
 				int bestandId = rs.getInt("id");
 				int aktuellerBestand = rs.getInt("anzahl");
 
 				if (aktuellerBestand - anzahl < 0) {
-					// Hier jetzt nur noch NegativeStockException statt dem langen Pfad
+					rs.close();
 					throw new NegativeStockException("Lagerbestand für Produkt ID " + produktId + " darf nicht negativ werden.");
 				}
 
-				String updateSql = "UPDATE LAGERBESTAND SET anzahl=" + (aktuellerBestand - anzahl) + " WHERE id=" + bestandId;
-				st.executeUpdate(updateSql);
+				String updateSql = "UPDATE LAGERBESTAND SET anzahl=? WHERE id=?";
+				PreparedStatement updateStmt = con.prepareStatement(updateSql);
+				updateStmt.setInt(1, aktuellerBestand - anzahl);
+				updateStmt.setInt(2, bestandId);
+				updateStmt.executeUpdate();
+				updateStmt.close();
+
 			} else {
-				// Hier ebenfalls
+				rs.close();
 				throw new NegativeStockException("Kein Lagerbestand für Produkt ID " + produktId + " gefunden.");
 			}
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 	}
 
 	@Override
 	public double getBargeldEinnahmenSeitLetztemAbschluss() {
-		// Berechnet die Summe aller Bar-Kassenzettel, die neuer sind als der letzte Kassenabschluss
+		double einnahmen = 0.0;
 		String sql = "SELECT SUM(gesamtpreis) FROM KASSENZETTEL WHERE zahlart='Bar' AND id > COALESCE((SELECT MAX(id) FROM KASSENABSCHLUSS), 0)";
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			if (rs.next()) {
-				return rs.getDouble(1);
+				einnahmen = rs.getDouble(1);
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
-		return 0.0;
+		return einnahmen;
 	}
 
-	public thw.edu.javaII.port.warehouse.model.Kassierer getKassiererById(int id) {
-		String sql = "SELECT * FROM KASSIERER WHERE id=" + id;
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+	public Kassierer getKassiererById(int id) {
+		Kassierer k = null;
+		String sql = "SELECT * FROM KASSIERER WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, id);
+			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
-				return new thw.edu.javaII.port.warehouse.model.Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
+				k = new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
 			}
+			rs.close();
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
-		return null;
+		return k;
 	}
 
 	@Override
-	public List<thw.edu.javaII.port.warehouse.model.Kassenzettel> getAllKassenzettel() {
-		List<thw.edu.javaII.port.warehouse.model.Kassenzettel> list = new ArrayList<>();
+	public List<Kassenzettel> getAllKassenzettel() {
+		List<Kassenzettel> list = new ArrayList<>();
 		String sql = "SELECT * FROM KASSENZETTEL";
-		try (Connection con = DriverManager.getConnection(dbUrl); Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
-				thw.edu.javaII.port.warehouse.model.Kassenzettel z = new thw.edu.javaII.port.warehouse.model.Kassenzettel();
+				Kassenzettel z = new Kassenzettel();
 				z.setId(rs.getInt("id"));
 				z.setDatum(rs.getString("datum"));
 				z.setUhrzeit(rs.getString("uhrzeit"));
@@ -1296,10 +702,8 @@ public class Database implements IStorage {
 				list.add(z);
 			}
 		} catch (SQLException e) {
-			logger.log(Level.ERROR, e);
+			LOGGER.log(Level.SEVERE, "Fehler", e);
 		}
 		return list;
 	}
-
-
 }

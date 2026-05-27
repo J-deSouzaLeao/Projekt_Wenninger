@@ -1,10 +1,11 @@
 package thw.edu.javaII.port.warehouse.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Lager implements Serializable{
-	private static final long serialVersionUID = 8230932661185246836L;
-	private static final String PRINT_FORMAT = "[%-20s - %-50s - %-30s - %-40s]";
+	@Serial
+    private static final long serialVersionUID = 8230932661185246836L;
 	private int id;
 	private String name;
 	private String ort;
@@ -52,10 +53,6 @@ public class Lager implements Serializable{
 		this.name = name;
 		this.ort = ort;
 		this.art = art;
-	}
-	
-	public String toListString() {
-		return String.format(PRINT_FORMAT, id, name, ort, art);
 	}
 
 }

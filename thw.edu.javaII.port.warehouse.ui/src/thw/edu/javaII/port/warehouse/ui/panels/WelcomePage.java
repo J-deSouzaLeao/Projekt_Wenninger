@@ -2,10 +2,12 @@ package thw.edu.javaII.port.warehouse.ui.panels;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import java.io.Serial;
 
 public class WelcomePage extends JPanel {
 
-	private static final long serialVersionUID = -2132296457167691423L;
+	@Serial
+    private static final long serialVersionUID = -2132296457167691423L;
 
 	/**
 	 * Create the panel.

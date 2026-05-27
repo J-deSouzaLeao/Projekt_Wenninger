@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.io.Serial;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -21,14 +22,11 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
 
 public class LoginScreen extends JFrame {
 
-	private static final long serialVersionUID = 5093248500031405219L;
-	private JPanel contentPane, pnContent;
-	private JTextField txtUser;
-	private JPasswordField txtPassword;
-	private JLabel lblUser, lblPassword, lblPlacer, lblHint, lblHeader, lblCopyright;
-	private final JPanel pnFooter = new JPanel();
-	private JButton btnLogin;
-	private Session ses;
+	@Serial
+    private static final long serialVersionUID = 5093248500031405219L;
+	private final JPanel contentPane;
+    private final JPanel pnFooter = new JPanel();
+    private final Session ses;
 	
 	public LoginScreen(Session ses) {
 		this.ses = ses;
@@ -48,7 +46,7 @@ public class LoginScreen extends JFrame {
 	}
 
 	private void generateFooter() {
-		lblCopyright = new JLabel("Copyright by Tobias Wenninger");
+        JLabel lblCopyright = new JLabel("Copyright by Tobias Wenninger");
 		FlowLayout fl_pnFooter = (FlowLayout) pnFooter.getLayout();
 		fl_pnFooter.setVgap(1);
 		fl_pnFooter.setAlignment(FlowLayout.RIGHT);
@@ -60,26 +58,26 @@ public class LoginScreen extends JFrame {
 	}
 
 	private void generateHeader() {
-		lblHeader = new JLabel("Lagerverwaltung - Login");
+        JLabel lblHeader = new JLabel("Lagerverwaltung - Login");
 		lblHeader.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHeader.setFont(new Font("Lucida Grande", Font.BOLD, 18));
 		contentPane.add(lblHeader, BorderLayout.NORTH);
 	}
 
 	private void generateContent() {
-		pnContent = new JPanel();
+        JPanel pnContent = new JPanel();
 		contentPane.add(pnContent, BorderLayout.CENTER);
 		pnContent.setLayout(new GridLayout(4, 2, 10, 0));
-		lblUser = new JLabel("Benutzer:");
-		txtUser = new JTextField();
-		lblPassword = new JLabel("Passwort:");
-		txtPassword = new JPasswordField();
+        JLabel lblUser = new JLabel("Benutzer:");
+        JTextField txtUser = new JTextField();
+        JLabel lblPassword = new JLabel("Passwort:");
+        JPasswordField txtPassword = new JPasswordField();
 		txtPassword.setSize(200, 10);
-		lblPlacer = new JLabel("");
-		lblHint = new JLabel("");
+        JLabel lblPlacer = new JLabel("");
+        JLabel lblHint = new JLabel("");
 		lblHint.setFont(new Font("Lucida Grande", Font.ITALIC, 12));
 		lblHint.setForeground(Color.RED);
-		btnLogin = new JButton("Login");
+        JButton btnLogin = new JButton("Login");
 		txtUser.addKeyListener(new LoginScreenHandler(ses, this, txtUser, txtPassword, lblHint));
 		txtPassword.addKeyListener(new LoginScreenHandler(ses, this, txtUser, txtPassword, lblHint));
 		btnLogin.addActionListener(new LoginScreenHandler(ses, this, txtUser, txtPassword, lblHint));

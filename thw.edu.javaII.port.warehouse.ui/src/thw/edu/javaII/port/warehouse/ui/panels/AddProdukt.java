@@ -5,8 +5,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.Serial;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -28,12 +27,12 @@ import javax.swing.JComboBox;
 
 public class AddProdukt extends JDialog {
 
-	private static final long serialVersionUID = -8118048952794691740L;
-	private final JPanel contentPanel = new JPanel();
-	private JTextField txtName;
-	private JTextField txtHersteller;
-	private JTextField txtPreis;
-	private JTextField txtBestand;
+	@Serial
+    private static final long serialVersionUID = -8118048952794691740L;
+    private final JTextField txtName;
+	private final JTextField txtHersteller;
+	private final JTextField txtPreis;
+	private final JTextField txtBestand;
 
 	/**
 	 * Create the dialog.
@@ -47,7 +46,8 @@ public class AddProdukt extends JDialog {
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 14));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		getContentPane().add(lblNewLabel, BorderLayout.NORTH);
-		contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 
@@ -87,22 +87,20 @@ public class AddProdukt extends JDialog {
 		contentPanel.add(cbLagerPlatz, "cell 1 4,growx");
 
 		JButton btnSpeichern = new JButton("speichern");
-		btnSpeichern.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				Produkt p = new Produkt(0, txtName.getText(), txtHersteller.getText(),
-						Double.parseDouble(txtPreis.getText()));
-				LagerBestand l = new LagerBestand(0, Integer.parseInt(txtBestand.getText()), p,
-						cbLagerPlatz.getModel().getElementAt(cbLagerPlatz.getSelectedIndex()));
-				boolean okay = ses.getCommunicator().addProdukt(p,l);
-				if(okay) {
-					dispose();
-				} else {
-					/// FIXME ggf. ein ICON einfügen das ein Die Info entsprechend darstellt.
-					JOptionPane.showMessageDialog(null, "Fehler beim Speichern. Der Datensatz konnte nicht gespeichert werden",
-							"Fehler: Speichern", JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
+		btnSpeichern.addActionListener(e -> {
+            Produkt p = new Produkt(0, txtName.getText(), txtHersteller.getText(),
+                    Double.parseDouble(txtPreis.getText()));
+            LagerBestand l = new LagerBestand(0, Integer.parseInt(txtBestand.getText()), p,
+                    cbLagerPlatz.getModel().getElementAt(cbLagerPlatz.getSelectedIndex()));
+            boolean okay = ses.getCommunicator().addProdukt(p,l);
+            if(okay) {
+                dispose();
+            } else {
+                /// FIXME ggf. ein ICON einfügen das ein Die Info entsprechend darstellt.
+                JOptionPane.showMessageDialog(null, "Fehler beim Speichern. Der Datensatz konnte nicht gespeichert werden",
+                        "Fehler: Speichern", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
 		contentPanel.add(btnSpeichern, "cell 2 8");
 
@@ -110,11 +108,7 @@ public class AddProdukt extends JDialog {
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 		JButton btnClose = new JButton("Schließen");
-		btnClose.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				dispose();
-			}
-		});
+		btnClose.addActionListener(e -> dispose());
 		btnClose.setActionCommand("OK");
 		buttonPane.add(btnClose);
 	}

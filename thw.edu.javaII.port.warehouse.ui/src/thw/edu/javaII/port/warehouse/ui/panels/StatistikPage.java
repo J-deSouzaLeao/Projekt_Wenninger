@@ -17,12 +17,15 @@ import thw.edu.javaII.port.warehouse.ui.model.BestandTableModel;
 import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.Serial;
 
 public class StatistikPage extends JPanel {
 
-	private static final long serialVersionUID = 6991507120124679776L;
+	@Serial
+    private static final long serialVersionUID = 6991507120124679776L;
 	private JTable table;
-	private JToggleButton tglbtnNewToggleButton, tglbtnNewToggleButton_1;
+	private final JToggleButton tglbtnNewToggleButton;
+    private final JToggleButton tglbtnNewToggleButton_1;
 
 	/**
 	 * Create the panel.
@@ -79,31 +82,29 @@ public class StatistikPage extends JPanel {
 	
 		
 		tglbtnNewToggleButton_1 = new JToggleButton("LOW 10");
-		tglbtnNewToggleButton_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(tglbtnNewToggleButton.isSelected()) {
-					tglbtnNewToggleButton_1.setSelected(true);
-					tglbtnNewToggleButton.setSelected(false);
-					BestandTableModel model = new BestandTableModel(ses.getCommunicator().getLOW10Bestand());
-					table = new JTable(model);
-					model.setJTableColumnsWidth(table, 800, 10, 20, 20, 10, 20, 20);
-					table.setShowGrid(true);
-					table.setShowVerticalLines(true);
-					table.setShowHorizontalLines(true);
-					table.setGridColor(Color.DARK_GRAY);
-					JScrollPane js = new JScrollPane(table);
-					js.setVisible(true);
-					BorderLayout layout = (BorderLayout) getLayout();
-					remove(layout.getLayoutComponent(BorderLayout.CENTER));
-					add(js, BorderLayout.CENTER);
-					setVisible(true);
-					parent.setVisible(true);
-				}
-				else {
-					tglbtnNewToggleButton_1.setSelected(true);
-				}
-			}
-		});
+		tglbtnNewToggleButton_1.addActionListener(e -> {
+            if(tglbtnNewToggleButton.isSelected()) {
+                tglbtnNewToggleButton_1.setSelected(true);
+                tglbtnNewToggleButton.setSelected(false);
+                BestandTableModel model1 = new BestandTableModel(ses.getCommunicator().getLOW10Bestand());
+                table = new JTable(model1);
+                model1.setJTableColumnsWidth(table, 800, 10, 20, 20, 10, 20, 20);
+                table.setShowGrid(true);
+                table.setShowVerticalLines(true);
+                table.setShowHorizontalLines(true);
+                table.setGridColor(Color.DARK_GRAY);
+                JScrollPane js1 = new JScrollPane(table);
+                js1.setVisible(true);
+                BorderLayout layout = (BorderLayout) getLayout();
+                remove(layout.getLayoutComponent(BorderLayout.CENTER));
+                add(js1, BorderLayout.CENTER);
+                setVisible(true);
+                parent.setVisible(true);
+            }
+            else {
+                tglbtnNewToggleButton_1.setSelected(true);
+            }
+        });
 		tglbtnNewToggleButton_1.setSelected(false);
 		panel.add(tglbtnNewToggleButton_1);
 

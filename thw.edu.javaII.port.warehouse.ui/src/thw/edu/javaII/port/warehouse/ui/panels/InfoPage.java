@@ -5,13 +5,15 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.Serial;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class InfoPage extends JPanel {
 
-	private static final long serialVersionUID = -1391118887757509587L;
+	@Serial
+    private static final long serialVersionUID = -1391118887757509587L;
 
 	/**
 	 * Create the panel.

@@ -19,6 +19,7 @@ import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.model.Produkt;
 
 public class Communicator {
+	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Communicator.class.getName());
 	private ObjectInputStream fromServer;
 	private ObjectOutputStream toServer;
 	private Socket sock;
@@ -30,7 +31,7 @@ public class Communicator {
 			toServer = new ObjectOutputStream(sock.getOutputStream());
 			fromServer = new ObjectInputStream(sock.getInputStream());
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
 	}
 
@@ -42,7 +43,7 @@ public class Communicator {
 			toServer.writeObject(deo);
 			return Cast.safeListCast(((WarehouseReturnDEO) fromServer.readObject()).getData(), LagerBestand.class);
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
 		return null;
 	}
@@ -55,7 +56,7 @@ public class Communicator {
 			toServer.writeObject(deo);
 			return Cast.safeListCast(((WarehouseReturnDEO) fromServer.readObject()).getData(), LagerBestand.class);
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
 		return null;
 	}
@@ -68,7 +69,7 @@ public class Communicator {
 			toServer.writeObject(deo);
 			return Cast.safeListCast(((WarehouseReturnDEO) fromServer.readObject()).getData(), LagerBestand.class);
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
 		return null;
 	}
@@ -83,24 +84,22 @@ public class Communicator {
 			WarehouseReturnDEO d = ((WarehouseReturnDEO) fromServer.readObject());
 			return Cast.safeListCast(d.getData(), LagerBestand.class);
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
 		return null;
 	}
 
-	public WarehouseReturnDEO updateLagerBestand(LagerBestand mod) {
+	public void updateLagerBestand(LagerBestand mod) {
 		try {
 			WarehouseDEO deo = new WarehouseDEO();
 			deo.setZone(Zone.LAGERBESTAND);
 			deo.setCommand(Command.UPDATE);
 			deo.setData(mod);
 			toServer.writeObject(deo);
-			WarehouseReturnDEO d = ((WarehouseReturnDEO) fromServer.readObject());
-			return d;
+			fromServer.readObject();
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
-		return null;
 	}
 
 	public LagerPlatz[] getFreeLagerPlatz() {
@@ -117,7 +116,7 @@ public class Communicator {
 			toServer.writeObject(deo);
 			d = ((WarehouseReturnDEO) fromServer.readObject());
 			List<LagerBestand> bestand = Cast.safeListCast(d.getData(), LagerBestand.class);
-			List<LagerPlatz> removeCandidates = new ArrayList<LagerPlatz>();
+			List<LagerPlatz> removeCandidates = new ArrayList<>();
 			for (LagerPlatz p : lager) {
 				for (LagerBestand b : bestand) {
 					if (b.getLagerplatz_id().getId() == p.getId()) {
@@ -129,7 +128,7 @@ public class Communicator {
 			lager.removeAll(removeCandidates);
 			return lager.toArray(new LagerPlatz[0]);
 		} catch (IOException | ClassNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
 		return null;
 	}
@@ -142,9 +141,8 @@ public class Communicator {
 				toServer.close();
 			if (sock != null)
 				sock.close();
-		} catch (IOException e) {
-			;
-		}
+		} catch (IOException ignored) {
+        }
 	}
 
 	public boolean addProdukt(Produkt p, LagerBestand l) {
@@ -154,7 +152,8 @@ public class Communicator {
 			deo.setCommand(Command.ADD);
 			deo.setData(p);
 			toServer.writeObject(deo);
-			WarehouseReturnDEO d = ((WarehouseReturnDEO) fromServer.readObject());
+			fromServer.readObject();
+			WarehouseReturnDEO d;
 			deo = new WarehouseDEO();
 			deo.setZone(Zone.PRODUKT);
 			deo.setCommand(Command.GETBYMODEL);
@@ -169,12 +168,9 @@ public class Communicator {
 			deo.setData(l);
 			toServer.writeObject(deo);
 			d = ((WarehouseReturnDEO) fromServer.readObject());
-			if (d.getStatus().equals(Status.OK)) {
-				return true;
-			}
-			return false;
-		} catch (Exception e) {
-			e.printStackTrace();
+            return d.getStatus().equals(Status.OK);
+        } catch (Exception e) {
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 			return false;
 		}
 
@@ -196,10 +192,10 @@ public class Communicator {
 				deo.setZone(Zone.GENERAL);
 				deo.setCommand(Command.END);
 				toServer.writeObject(deo);
-				d = ((WarehouseReturnDEO) fromServer.readObject());
+				fromServer.readObject();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}
 	}
 

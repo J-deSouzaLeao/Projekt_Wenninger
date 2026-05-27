@@ -3,7 +3,6 @@ package thw.edu.javaII.port.warehouse.ui.panels;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -15,8 +14,8 @@ import thw.edu.javaII.port.warehouse.ui.BackendClient;
 
 public class ProduktVerwaltungPanel extends JPanel {
 
-    private JTable table;
-    private DefaultTableModel tableModel;
+    private final JTable table;
+    private final DefaultTableModel tableModel;
 
     public ProduktVerwaltungPanel() {
         setLayout(new BorderLayout());

@@ -8,22 +8,20 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class KassenUI extends JFrame {
-    private BackendClient client;
-    private Kassierer kassierer;
-    private double startBestand;
+    private final BackendClient client;
+    private final Kassierer kassierer;
     private double gesamtSumme = 0.0;
 
-    private DefaultTableModel tableModel;
-    private JTable artikelTabelle;
-    private JTextField eingabeFeld;
-    private JLabel summenLabel;
+    private final DefaultTableModel tableModel;
+    private final JTable artikelTabelle;
+    private final JTextField eingabeFeld;
+    private final JLabel summenLabel;
 
     private int stornoZaehler = 0;
 
-    public KassenUI(BackendClient client, Kassierer kassierer, double startBestand) {
+    public KassenUI(BackendClient client, Kassierer kassierer) {
         this.client = client;
         this.kassierer = kassierer;
-        this.startBestand = startBestand;
 
         setTitle("Kasse - Kassierer: " + kassierer.getName() + " (Nr. " + kassierer.getNummer() + ")");
         setSize(1024, 768);
@@ -162,7 +160,6 @@ public class KassenUI extends JFrame {
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Bitte eine gültige Artikelnummer eingeben.", "Hinweis", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
-            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Verbindungsfehler zum Server.", "Fehler", JOptionPane.ERROR_MESSAGE);
         }
     }
