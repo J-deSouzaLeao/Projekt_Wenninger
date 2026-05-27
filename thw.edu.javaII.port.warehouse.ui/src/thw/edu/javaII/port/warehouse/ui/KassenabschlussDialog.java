@@ -10,6 +10,13 @@ import java.awt.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Diese Klasse repräsentiert den Dialog zur Durchführung eines Kassenabschlusses (Tagesabschluss).
+ * Sie stellt eine Benutzeroberfläche bereit, in der der Kassierer das vorhandene Bargeld
+ * anhand einer Stückelung (Anzahl der jeweiligen Münzen und Scheine) zählen kann.
+ * Der ermittelte Ist-Bestand wird live mit dem vom System berechneten Soll-Bestand verglichen.
+ * Der Abschluss lässt sich nur speichern, wenn die Differenz exakt 0,00 € beträgt.
+ */
 public class KassenabschlussDialog extends JDialog {
     private final BackendClient client;
     private final Kassierer kassierer;
@@ -20,9 +27,17 @@ public class KassenabschlussDialog extends JDialog {
     private final JLabel differenzLabel;
     private final JButton abschlussBtn;
 
-    // Stückelungen: Wert in Euro -> Eingabefeld
+    // Stückelungen: Wert in Euro -> Eingabefeld (z. B. 50.0 -> Textfeld für die Anzahl der 50€-Scheine)
     private final Map<Double, JTextField> stueckelungFields = new LinkedHashMap<>();
 
+    /**
+     * Erstellt den Dialog für den Kassenabschluss.
+     * Lädt den aktuellen Soll-Bestand vom Server, baut die Benutzeroberfläche
+     * für die Zählung der Stückelungen auf und richtet die Live-Berechnung ein.
+     * * @param parent    Das aufrufende Hauptfenster (für die modale Blockierung).
+     * @param client    Die Netzwerkverbindung für den Datenabruf und das Speichern.
+     * @param kassierer Der Kassierer, der diesen Abschluss durchführt.
+     */
     public KassenabschlussDialog(JFrame parent, BackendClient client, Kassierer kassierer) {
         super(parent, "Kassenabschluss durchführen", true);
         this.client = client;
@@ -34,7 +49,7 @@ public class KassenabschlussDialog extends JDialog {
 
         ladeSollBestand();
 
-        // Header
+        // Header: Anzeige von Soll, Ist und Differenz
         JPanel headerPanel = new JPanel(new GridLayout(3, 1));
         headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JLabel sollLabel = new JLabel(String.format("Sollbestand: %.2f €", sollBestand), SwingConstants.CENTER);
@@ -64,7 +79,7 @@ public class KassenabschlussDialog extends JDialog {
         }
         add(new JScrollPane(zaehlPanel), BorderLayout.CENTER);
 
-        // Button
+        // Button: Speichern
         abschlussBtn = new JButton("ABSCHLUSS SPEICHERN");
         abschlussBtn.setBackground(new Color(60, 179, 113));
         abschlussBtn.setForeground(Color.WHITE);
@@ -76,6 +91,11 @@ public class KassenabschlussDialog extends JDialog {
         berechneIst(); // Initial kalkulieren
     }
 
+    /**
+     * Ruft die für den Soll-Bestand nötigen Daten vom Server ab.
+     * Die Berechnung ergibt sich aus dem Bargeldbestand des letzten Abschlusses
+     * zuzüglich aller neuen Bareinnahmen seitdem.
+     */
     private void ladeSollBestand() {
         try {
             double[] daten = client.getAbschlussDaten();
@@ -88,6 +108,11 @@ public class KassenabschlussDialog extends JDialog {
         }
     }
 
+    /**
+     * Rechnet die Eingaben aus allen Stückelungs-Textfeldern zusammen,
+     * aktualisiert den angezeigten Ist-Bestand sowie die Differenz.
+     * Schaltet zudem den Speichern-Button frei, sobald die Differenz 0 beträgt.
+     */
     private void berechneIst() {
         ermittelterIstBestand = 0.0;
         for (Map.Entry<Double, JTextField> entry : stueckelungFields.entrySet()) {
@@ -102,6 +127,7 @@ public class KassenabschlussDialog extends JDialog {
         double differenz = ermittelterIstBestand - sollBestand;
         differenzLabel.setText(String.format("Differenz: %.2f €", differenz));
 
+        // Abgleich auf den Cent genau (umgehung von Fließkomma-Ungenauigkeiten)
         if (Math.abs(differenz) < 0.01) {
             differenzLabel.setForeground(new Color(60, 179, 113));
             abschlussBtn.setEnabled(true);
@@ -111,6 +137,11 @@ public class KassenabschlussDialog extends JDialog {
         }
     }
 
+    /**
+     * Erstellt ein Kassenabschluss-Objekt aus den berechneten Daten,
+     * versieht es mit dem aktuellen Zeitstempel und sendet es an den Server.
+     * Bei Erfolg wird das Programmfenster komplett geschlossen (Ende der Schicht).
+     */
     private void abschlussSpeichern() {
         try {
             Kassenabschluss a = new Kassenabschluss();
@@ -131,6 +162,11 @@ public class KassenabschlussDialog extends JDialog {
         }
     }
 
+    /**
+     * Eine interne Hilfsklasse (Listener), die sofort reagiert, wenn der Benutzer
+     * etwas in eines der Zähl-Textfelder eintippt oder löscht. Sie löst daraufhin
+     * direkt eine Neuberechnung des Ist-Bestandes aus.
+     */
     private class InputBerechner implements DocumentListener {
         public void insertUpdate(DocumentEvent e) { berechneIst(); }
         public void removeUpdate(DocumentEvent e) { berechneIst(); }

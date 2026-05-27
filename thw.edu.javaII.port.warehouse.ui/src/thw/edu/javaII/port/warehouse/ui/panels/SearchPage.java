@@ -23,6 +23,13 @@ import thw.edu.javaII.port.warehouse.model.LagerBestand;
 import thw.edu.javaII.port.warehouse.ui.common.Session;
 import thw.edu.javaII.port.warehouse.ui.model.BestandTableModel;
 
+/**
+ * Diese Klasse repräsentiert die Such- und Verwaltungsansicht der grafischen Benutzeroberfläche.
+ * Hier kann der Benutzer gezielt nach Lagerbeständen suchen, die angezeigten Ergebnisse
+ * in einer Tabelle einsehen, bestehende Bestände bearbeiten (z. B. Mengen korrigieren)
+ * oder den Dialog für die Einlagerung eines komplett neuen Produkts aufrufen.
+ * * @author juan.de.souza.leao
+ */
 public class SearchPage extends JPanel {
 
 	@Serial
@@ -32,7 +39,11 @@ public class SearchPage extends JPanel {
 	private final BestandTableModel model;
 
 	/**
-	 * Create the panel.
+	 * Erstellt das Such-Panel und baut die komplette Benutzeroberfläche auf.
+	 * Dazu gehören die Suchleiste im oberen Bereich, die große Ergebnistabelle in der Mitte
+	 * und die Aktions-Buttons (Verändern / Neues Produkt) am unteren Rand.
+	 * Beim Start wird die Tabelle standardmäßig mit dem kompletten Lagerbestand gefüllt.
+	 * * @param ses Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
 	 */
 	public SearchPage(Session ses) {
 		setLayout(new BorderLayout(0, 0));
@@ -93,6 +104,13 @@ public class SearchPage extends JPanel {
 		panel.add(js, gbc_table);
 	}
 
+	/**
+	 * Erstellt den unteren Bereich (Panel) mit den Haupt-Aktionsschaltflächen.
+	 * Hier werden die Buttons zum Bearbeiten eines Bestands und zum Anlegen
+	 * eines neuen Produkts eingebunden.
+	 * * @param ses Die aktuelle Benutzersitzung.
+	 * @return Das fertig konfigurierte Panel für den unteren Rand.
+	 */
 	private JPanel getJPanel(Session ses) {
 		JPanel pannel_2 = new JPanel();
 
@@ -105,6 +123,8 @@ public class SearchPage extends JPanel {
 			ap.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			ap.setModalityType(ModalityType.APPLICATION_MODAL);
 			ap.setVisible(true);
+
+			// Nach dem Schließen des "Neues Produkt"-Dialogs wird die Tabelle aktualisiert
 			model.setData(ses.getCommunicator().getBestand());
 			model.fireTableDataChanged();
 		});
@@ -113,6 +133,13 @@ public class SearchPage extends JPanel {
 		return pannel_2;
 	}
 
+	/**
+	 * Erstellt den "Suchen"-Button, inklusive der Logik für die Validierung der Eingabe.
+	 * Stellt sicher, dass der Benutzer mindestens 3 Zeichen in das Suchfeld eingibt,
+	 * bevor eine Anfrage an den Server geschickt wird.
+	 * * @param ses Die aktuelle Benutzersitzung.
+	 * @return Der fertig konfigurierte Such-Button.
+	 */
 	private JButton createBtnSearch(Session ses) {
 		JButton btnSearch = new JButton("Suchen");
 		btnSearch.addActionListener(e -> {
@@ -131,6 +158,13 @@ public class SearchPage extends JPanel {
 		return btnSearch;
 	}
 
+	/**
+	 * Erstellt den "Verändern"-Button.
+	 * Dieser öffnet einen Dialog, in dem der ausgewählte Eintrag aus der Tabelle bearbeitet werden kann.
+	 * Nach der Bearbeitung wird die Anzeige der Tabelle automatisch aktualisiert.
+	 * * @param ses Die aktuelle Benutzersitzung.
+	 * @return Der fertig konfigurierte "Verändern"-Button.
+	 */
 	private JButton createBtnNewButton(Session ses) {
 		JButton btnNewButton = new JButton("Verändern");
 		btnNewButton.addActionListener(e -> {
@@ -139,6 +173,8 @@ public class SearchPage extends JPanel {
 			clb.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			clb.setModalityType(ModalityType.APPLICATION_MODAL);
 			clb.setVisible(true);
+
+			// Aktualisiert die Tabelle nach dem Schließen des Bearbeitungs-Dialogs
 			if (textField.getText().length() < 3) {
 				model.setData(ses.getCommunicator().getBestand());
 				model.fireTableDataChanged();

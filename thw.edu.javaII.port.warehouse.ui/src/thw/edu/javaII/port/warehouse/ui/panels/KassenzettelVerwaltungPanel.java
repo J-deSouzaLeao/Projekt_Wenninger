@@ -11,11 +11,26 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.List;
 
+/**
+ * Diese Klasse bildet die grafische Benutzeroberfläche zur Ansicht der Kassen-Historie.
+ * Sie zeigt eine tabellarische Übersicht aller gespeicherten Kassenzettel (Bons) an.
+ * Das Besondere an diesem Panel ist die integrierte Echtzeit-Suchfunktion:
+ * Der Benutzer kann direkt nach Datum, Zahlart oder Kassierer filtern,
+ * ohne extra auf einen "Suchen"-Button klicken zu müssen.
+ * * @author juan.de.souza.leao
+ */
 public class KassenzettelVerwaltungPanel extends JPanel {
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(KassenzettelVerwaltungPanel.class.getName());
     private final DefaultTableModel model;
     private final TableRowSorter<DefaultTableModel> sorter;
 
+    /**
+     * Standard-Konstruktor.
+     * Baut das Panel auf: Oben ein Suchfeld, in der Mitte die Tabelle.
+     * Hier wird außerdem der sogenannte "TableRowSorter" verknüpft, der dafür sorgt,
+     * dass die Tabelle bei jedem Tastendruck im Suchfeld sofort live gefiltert wird.
+     * Abschließend werden die Daten direkt vom Server geladen.
+     */
     public KassenzettelVerwaltungPanel() {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -31,7 +46,9 @@ public class KassenzettelVerwaltungPanel extends JPanel {
         String[] columns = {"ID", "Datum", "Uhrzeit", "Zahlart", "Kassierer", "Gesamtpreis (€)"};
         model = new DefaultTableModel(columns, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false; // Manuelles Ändern der Bons in der Tabelle ist verboten
+            }
         };
 
         JTable table = new JTable(model);
@@ -45,9 +62,9 @@ public class KassenzettelVerwaltungPanel extends JPanel {
             public void keyReleased(KeyEvent e) {
                 String text = searchField.getText();
                 if (text.trim().isEmpty()) {
-                    sorter.setRowFilter(null);
+                    sorter.setRowFilter(null); // Filter aufheben, wenn Suchfeld leer ist
                 } else {
-                    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text)); // (?i) macht es Case-Insensitive
+                    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text)); // (?i) macht es Case-Insensitive (Groß-/Kleinschreibung wird ignoriert)
                 }
             }
         });
@@ -55,6 +72,11 @@ public class KassenzettelVerwaltungPanel extends JPanel {
         loadData();
     }
 
+    /**
+     * Lädt die komplette Historie aller Kassenzettel vom Server herunter
+     * und fügt sie Zeile für Zeile in das Tabellenmodell ein.
+     * Gleichzeitig wird der Preis hier sauber auf zwei Nachkommastellen (z. B. 12,50 €) formatiert.
+     */
     private void loadData() {
         try {
             BackendClient client = new BackendClient();
@@ -67,7 +89,7 @@ public class KassenzettelVerwaltungPanel extends JPanel {
                         z.getUhrzeit(),
                         z.getZahlart(),
                         kassiererName,
-                        String.format("%.2f", z.getGesamtpreis())
+                        String.format("%.2f", z.getGesamtpreis()) // Preis wird für die Ansicht formatiert
                 });
             }
             client.close();

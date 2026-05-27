@@ -25,29 +25,40 @@ import thw.edu.javaII.port.warehouse.ui.model.LagerPlatzComboboxModel;
 
 import javax.swing.JComboBox;
 
+/**
+ * Diese Klasse repräsentiert einen Dialog (Pop-up-Fenster) zum Anlegen eines komplett neuen Produkts.
+ * Der Benutzer kann hier die Stammdaten (Name, Hersteller, Preis) sowie die erste Einlagerung
+ * (Stückzahl und Zuweisung auf einen aktuell noch freien Lagerplatz) komfortabel in einem Schritt vornehmen.
+ * * @author juan.de.souza.leao
+ */
 public class AddProdukt extends JDialog {
 
 	@Serial
-    private static final long serialVersionUID = -8118048952794691740L;
-    private final JTextField txtName;
+	private static final long serialVersionUID = -8118048952794691740L;
+	private final JTextField txtName;
 	private final JTextField txtHersteller;
 	private final JTextField txtPreis;
 	private final JTextField txtBestand;
 
 	/**
-	 * Create the dialog.
+	 * Erstellt den Dialog zum Hinzufügen eines Produkts.
+	 * Baut das Formular auf, fragt beim Server alle derzeit komplett leeren Lagerplätze
+	 * für das Dropdown-Menü ab und konfiguriert den Speichervorgang.
+	 * * @param ses Die aktuelle Benutzersitzung für die Netzwerkkommunikation.
 	 */
 	public AddProdukt(Session ses) {
 		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = new Dimension(450, 300);
 		setBounds(ss.width / 2 - frameSize.width / 2, ss.height / 2 - frameSize.height / 2, 450, 365);
 		getContentPane().setLayout(new BorderLayout());
+
 		JLabel lblNewLabel = new JLabel("Produkt - hinzufügen");
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 14));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		getContentPane().add(lblNewLabel, BorderLayout.NORTH);
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
+
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 
@@ -82,31 +93,35 @@ public class AddProdukt extends JDialog {
 		JLabel lblNewLabel_9 = new JLabel("Lagerplatz:");
 		contentPanel.add(lblNewLabel_9, "cell 0 4,alignx trailing");
 
+		// Holt sich die freien Plätze und füllt damit das Dropdown-Menü
 		LagerPlatzComboboxModel model = new LagerPlatzComboboxModel(ses.getCommunicator().getFreeLagerPlatz());
 		JComboBox<LagerPlatz> cbLagerPlatz = new JComboBox<>(model);
 		contentPanel.add(cbLagerPlatz, "cell 1 4,growx");
 
+		// Speichern-Button inkl. Verarbeitung der Eingaben
 		JButton btnSpeichern = new JButton("speichern");
 		btnSpeichern.addActionListener(e -> {
-            Produkt p = new Produkt(0, txtName.getText(), txtHersteller.getText(),
-                    Double.parseDouble(txtPreis.getText()));
-            LagerBestand l = new LagerBestand(0, Integer.parseInt(txtBestand.getText()), p,
-                    cbLagerPlatz.getModel().getElementAt(cbLagerPlatz.getSelectedIndex()));
-            boolean okay = ses.getCommunicator().addProdukt(p,l);
-            if(okay) {
-                dispose();
-            } else {
-                /// FIXME ggf. ein ICON einfügen das ein Die Info entsprechend darstellt.
-                JOptionPane.showMessageDialog(null, "Fehler beim Speichern. Der Datensatz konnte nicht gespeichert werden",
-                        "Fehler: Speichern", JOptionPane.ERROR_MESSAGE);
-            }
-        });
+			Produkt p = new Produkt(0, txtName.getText(), txtHersteller.getText(),
+					Double.parseDouble(txtPreis.getText()));
+			LagerBestand l = new LagerBestand(0, Integer.parseInt(txtBestand.getText()), p,
+					cbLagerPlatz.getModel().getElementAt(cbLagerPlatz.getSelectedIndex()));
+
+			boolean okay = ses.getCommunicator().addProdukt(p,l);
+			if(okay) {
+				dispose(); // Schließt den Dialog bei Erfolg
+			} else {
+				// FIXME ggf. ein ICON einfügen das die Info entsprechend darstellt.
+				JOptionPane.showMessageDialog(null, "Fehler beim Speichern. Der Datensatz konnte nicht gespeichert werden",
+						"Fehler: Speichern", JOptionPane.ERROR_MESSAGE);
+			}
+		});
 
 		contentPanel.add(btnSpeichern, "cell 2 8");
 
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
+
 		JButton btnClose = new JButton("Schließen");
 		btnClose.addActionListener(e -> dispose());
 		btnClose.setActionCommand("OK");

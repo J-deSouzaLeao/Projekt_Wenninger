@@ -20,32 +20,42 @@ import javax.swing.border.EmptyBorder;
 import thw.edu.javaII.port.warehouse.ui.common.Session;
 import thw.edu.javaII.port.warehouse.ui.panels.WelcomePage;
 
+/**
+ * Diese Klasse repräsentiert das Hauptfenster (Main Frame) der grafischen Benutzeroberfläche.
+ * Sie dient als Rahmen für die gesamte Anwendung und enthält das Hauptmenü (oben),
+ * eine Fußzeile (unten) und einen dynamischen Mittelbereich, in dem die verschiedenen
+ * Ansichten (Panels) je nach Menüauswahl ausgetauscht werden.
+ */
 public class LagerUI extends JFrame {
 	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(LagerUI.class.getName());
 
 	@Serial
-    private static final long serialVersionUID = -5670441158631808726L;
+	private static final long serialVersionUID = -5670441158631808726L;
 	private final JPanel contentPane;
-    private final Session ses;
+	private final Session ses;
 	private final JFrame parent;
 	private JMenuBar menuBar;
 
-    /**
-	 * Launch the application.
+	/**
+	 * Startet die grafische Benutzeroberfläche sicher im Java Swing Event Dispatch Thread (EDT).
+	 * * @param ses Die aktuelle Benutzersitzung, die für die Kommunikation mit dem Server benötigt wird.
 	 */
 	public static void run(Session ses) {
 		EventQueue.invokeLater(() -> {
-            try {
-                LagerUI frame = new LagerUI(ses);
-                frame.setVisible(true);
-            } catch (Exception e) {
+			try {
+				LagerUI frame = new LagerUI(ses);
+				frame.setVisible(true);
+			} catch (Exception e) {
 				LOGGER.log(java.util.logging.Level.SEVERE, "Ein Fehler ist beim Laden der Oberfläche aufgetreten", e);
-            }
-        });
+			}
+		});
 	}
 
 	/**
-	 * Create the frame.
+	 * Konstruktor für das Hauptfenster.
+	 * Richtet die Fenstergröße ein, zentriert es auf dem Bildschirm und
+	 * initialisiert die Menüleiste, die Fußzeile sowie die Startseite (WelcomePage).
+	 * * @param ses Die aktuelle Benutzersitzung.
 	 */
 	public LagerUI(Session ses) {
 		this.ses = ses;
@@ -67,46 +77,55 @@ public class LagerUI extends JFrame {
 
 	}
 
+	/**
+	 * Erstellt die Fußzeile (Footer) am unteren Rand des Fensters.
+	 * Enthält in der Regel rechtliche Hinweise oder Copyright-Informationen.
+	 */
 	private void generateFooter() {
-        JPanel pnCopyright = new JPanel();
+		JPanel pnCopyright = new JPanel();
 		FlowLayout fl_pnCopyright = (FlowLayout) pnCopyright.getLayout();
 		fl_pnCopyright.setVgap(1);
 		fl_pnCopyright.setAlignment(FlowLayout.RIGHT);
-        JLabel lblCopyright = new JLabel("Copyright Tobias Wenninger");
+		JLabel lblCopyright = new JLabel("Copyright Tobias Wenninger");
 		lblCopyright.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblCopyright.setFont(new Font("Lucida Grande", Font.ITALIC, 12));
 		contentPane.add(pnCopyright, BorderLayout.SOUTH);
 		pnCopyright.add(lblCopyright);
 	}
 
+	/**
+	 * Erstellt die primären Menüeinträge der oberen Menüleiste.
+	 * Verbindet Basis-Aktionen (wie Startseite, Suchen, Statistik, Beenden)
+	 * mit dem zentralen Action-Handler (LagerUIHandler).
+	 */
 	private void generateMenu() {
 		menuBar = new JMenuBar();
-        JMenu menuDatei = new JMenu("Datei");
+		JMenu menuDatei = new JMenu("Datei");
 		menuDatei.setPreferredSize(new Dimension(160, menuDatei.getPreferredSize().height));
-        JMenuItem miBeenden = new JMenuItem("Beenden");
+		JMenuItem miBeenden = new JMenuItem("Beenden");
 		miBeenden.setPreferredSize(new Dimension(160, miBeenden.getPreferredSize().height));
 		miBeenden.setActionCommand(MenuActionCommands.BEENDEN.toString());
 		miBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
-        JMenuItem miStartseite = new JMenuItem("Startseite");
+		JMenuItem miStartseite = new JMenuItem("Startseite");
 		miStartseite.setPreferredSize(new Dimension(160, miStartseite.getPreferredSize().height));
 		miStartseite.setActionCommand(MenuActionCommands.STARTSEITE.toString());
 		miStartseite.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
-        JMenuItem miServerBeenden = new JMenuItem("Server Beenden");
+		JMenuItem miServerBeenden = new JMenuItem("Server Beenden");
 		miServerBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miServerBeenden.setActionCommand(MenuActionCommands.SERVERBEENDEN.toString());
-        JMenuItem miBestand = new JMenuItem("Bestand");
+		JMenuItem miBestand = new JMenuItem("Bestand");
 		miBestand.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miBestand.setActionCommand(MenuActionCommands.BESTAND.toString());
 		miBestand.setPreferredSize(new Dimension(160, miBestand.getPreferredSize().height));
-        JMenuItem miStatistik = new JMenuItem("Statistik");
+		JMenuItem miStatistik = new JMenuItem("Statistik");
 		miStatistik.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miStatistik.setActionCommand(MenuActionCommands.STATISTIK.toString());
 		miStatistik.setPreferredSize(new Dimension(160, miStatistik.getPreferredSize().height));
-        JMenuItem miSuchen = new JMenuItem("Suchen");
+		JMenuItem miSuchen = new JMenuItem("Suchen");
 		miSuchen.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miSuchen.setActionCommand(MenuActionCommands.SUCHEN.toString());
 		miSuchen.setPreferredSize(new Dimension(160, miSuchen.getPreferredSize().height));
-        JMenuItem miInfo = new JMenuItem("Info");
+		JMenuItem miInfo = new JMenuItem("Info");
 		miInfo.setPreferredSize(new Dimension(160, miInfo.getPreferredSize().height));
 		miInfo.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miInfo.setActionCommand(MenuActionCommands.INFO.toString());
@@ -121,6 +140,11 @@ public class LagerUI extends JFrame {
 		menuBar.add(miInfo);
 	}
 
+	/**
+	 * Erweitert die Menüleiste um zusätzliche, verwaltungsspezifische Menüs (Stammdaten, Lagerbetrieb, Kasse).
+	 * Diese Menüeinträge nutzen direkte Lambda-Ausdrücke, um die jeweiligen
+	 * Unter-Ansichten (Panels) in den zentralen Bereich des Fensters zu laden.
+	 */
 	private void createMenuBar() {
 		// Menü Stammdaten
 		JMenu menuStammdaten = new JMenu("Stammdaten");
@@ -158,6 +182,12 @@ public class LagerUI extends JFrame {
 		// this.setJMenuBar() entfällt, da die Leiste bereits im Fenster hängt
 	}
 
+	/**
+	 * Tauscht das aktuell in der Mitte des Fensters angezeigte Panel gegen ein neues aus.
+	 * Wird verwendet, um bei Klicks im Menü nahtlos zwischen den verschiedenen
+	 * Ansichten (z. B. Startseite zu Produktverwaltung) zu wechseln, ohne das Fenster neu laden zu müssen.
+	 * * @param panel Das neu anzuzeigende JPanel (die neue Ansicht).
+	 */
 	public void showPanel(JPanel panel) {
 		// Entfernt das aktuelle Panel in der Mitte (z.B. WelcomePage oder andere)
 		java.awt.Component centerComponent = ((BorderLayout) contentPane.getLayout()).getLayoutComponent(BorderLayout.CENTER);
