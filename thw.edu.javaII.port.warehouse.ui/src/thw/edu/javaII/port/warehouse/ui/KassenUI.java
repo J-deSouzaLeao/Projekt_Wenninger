@@ -7,6 +7,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
+/**
+ * Stellt die grafische Benutzeroberfläche für die Kasse dar.
+ * Beinhaltet die Artikelanzeige (Kassenzettel), ein Numpad zur Eingabe
+ * von Artikelnummern sowie Funktionen für Bezahlung, Storno und Kassenabschluss.
+ */
 public class KassenUI extends JFrame {
     private final BackendClient client;
     private final Kassierer kassierer;
@@ -19,6 +24,12 @@ public class KassenUI extends JFrame {
 
     private int stornoZaehler = 0;
 
+    /**
+     * Initialisiert das Kassenfenster für den angemeldeten Kassierer.
+     * Baut das Layout auf (Tabelle links, Numpad und Aktionen rechts).
+     * * @param client    Der BackendClient für die Serverkommunikation.
+     * @param kassierer Der aktuell angemeldete Kassierer.
+     */
     public KassenUI(BackendClient client, Kassierer kassierer) {
         this.client = client;
         this.kassierer = kassierer;
@@ -119,6 +130,11 @@ public class KassenUI extends JFrame {
         aktionPanel.add(abschlussBtn); // NEU
     }
 
+    /**
+     * Erstellt einen Button für das Numpad.
+     * * @param text Die Beschriftung des Buttons (Zahl oder "C").
+     * @return Der konfigurierte JButton.
+     */
     private JButton createNumButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Arial", Font.BOLD, 28));
@@ -132,6 +148,10 @@ public class KassenUI extends JFrame {
         return btn;
     }
 
+    /**
+     * Liest die Artikelnummer aus dem Eingabefeld, ruft das Produkt vom Server ab
+     * und fügt es dem aktuellen Kassenzettel (Tabelle) hinzu.
+     */
     private void artikelHinzufuegen() {
         try {
             int artNr = Integer.parseInt(eingabeFeld.getText().trim());
@@ -164,6 +184,10 @@ public class KassenUI extends JFrame {
         }
     }
 
+    /**
+     * Entfernt den in der Tabelle ausgewählten Artikel vom Kassenzettel.
+     * Nach zwei Stornovorgängen wird die Autorisierung durch einen anderen Kassierer erzwungen.
+     */
     private void stornoVorgang() {
         int selectedRow = artikelTabelle.getSelectedRow();
         if (selectedRow == -1) {
@@ -211,6 +235,10 @@ public class KassenUI extends JFrame {
         stornoZaehler++;
     }
 
+    /**
+     * Öffnet einen Dialog zur sicheren PIN-Eingabe.
+     * * @return Die eingegebene PIN als String oder null bei Abbruch.
+     */
     private String showPasswordDialog() {
         JPasswordField pf = new JPasswordField();
         int okCxl = JOptionPane.showConfirmDialog(null, pf, "Bitte PIN eingeben:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
@@ -220,6 +248,11 @@ public class KassenUI extends JFrame {
         return null;
     }
 
+    /**
+     * Startet den Bezahlvorgang.
+     * Öffnet den Zahlungsdialog, erstellt bei Erfolg das Kassenzettel-Objekt
+     * und sendet dieses zur Verbuchung an den Backend-Server. Setzt danach die Kasse zurück.
+     */
     private void bezahlenVorgang() {
         if (tableModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Der Kassenzettel ist leer!", "Hinweis", JOptionPane.WARNING_MESSAGE);

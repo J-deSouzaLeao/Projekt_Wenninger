@@ -9,10 +9,23 @@ import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.model.Produkt;
 import thw.edu.javaII.port.warehouse.ui.BackendClient;
 
+/**
+ * Diese Klasse bildet die grafische Verwaltungsoberfläche für die Lagerbestände.
+ * Hier wird das Kerngeschäft des Lagers verwaltet: Welches Produkt liegt in welcher
+ * Stückzahl (Anzahl) auf welchem konkreten Lagerplatz. Die Ansicht bietet eine Übersichtstabelle
+ * sowie die nötigen Dialoge, um diese Bestandsdaten anzulegen, zu ändern oder zu löschen.
+ * * @author juan.de.souza.leao
+ */
 public class LagerBestandVerwaltungPanel extends JPanel {
     private final JTable table;
     private final DefaultTableModel tableModel;
 
+    /**
+     * Standard-Konstruktor.
+     * Baut das Panel mit der zentralen Datentabelle und den darunterliegenden
+     * Aktions-Schaltflächen (Neu, Bearbeiten, Löschen, Aktualisieren) auf.
+     * Lädt zudem initial die aktuellen Bestandsdaten vom Server.
+     */
     public LagerBestandVerwaltungPanel() {
         setLayout(new BorderLayout());
 
@@ -20,7 +33,9 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         String[] columnNames = {"Bestands-ID", "Anzahl", "Lagerplatz-ID"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false; // Direkte Bearbeitung in der Zelle deaktivieren
+            }
         };
         table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
@@ -45,6 +60,10 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         loadData();
     }
 
+    /**
+     * Ruft alle aktuellen Lagerbestände vom Server ab und füllt damit die Tabelle.
+     * Die Tabelle wird vor dem Befüllen komplett geleert, um doppelte Zeilen zu vermeiden.
+     */
     private void loadData() {
         tableModel.setRowCount(0);
         try {
@@ -60,6 +79,10 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Öffnet einen Eingabedialog zum Anlegen eines neuen Lagerbestands.
+     * Der Benutzer gibt die IDs für den Bestand, das Produkt und den Lagerplatz sowie die Menge ein.
+     */
     private void addLagerBestand() {
         var txtId = new JTextField();
         var txtAnzahl = new JTextField();
@@ -77,9 +100,16 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Öffnet einen Dialog zur Bearbeitung eines zuvor in der Tabelle markierten Bestands.
+     * Lädt die bestehenden Werte aus der Tabelle in die Eingabefelder vor.
+     */
     private void editLagerBestand() {
         int row = table.getSelectedRow();
-        if (row == -1) { showError("Bitte einen Bestand auswählen."); return; }
+        if (row == -1) {
+            showError("Bitte einen Bestand auswählen.");
+            return;
+        }
 
         int id = (int) tableModel.getValueAt(row, 0);
         var txtAnzahl = new JTextField(tableModel.getValueAt(row, 1).toString());
@@ -92,6 +122,16 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Zentrale Hilfsmethode, um einen neuen oder bearbeiteten Lagerbestand auf dem Server zu speichern.
+     * Prüft zunächst, ob die angegebenen IDs für das Produkt und den Lagerplatz tatsächlich existieren,
+     * bevor das Bestandsobjekt erstellt und via Client verschickt wird.
+     * * @param id Die ID des Datensatzes.
+     * @param anzahlText Die gelagerte Stückzahl als Text.
+     * @param prodIdText Die ID des verknüpften Produkts als Text.
+     * @param platzIdText Die ID des verknüpften Lagerplatzes als Text.
+     * @param isUpdate Gibt an, ob es ein bestehender Eintrag ist (true) oder ein neuer (false).
+     */
     private void saveLagerBestand(int id, String anzahlText, String prodIdText, String platzIdText, boolean isUpdate) {
         try {
             var client = new BackendClient();
@@ -113,6 +153,10 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Löscht den aktuell markierten Lagerbestand aus dem System.
+     * Fordert zuvor eine Bestätigung vom Benutzer an, um versehentliches Löschen zu verhindern.
+     */
     private void deleteLagerBestand() {
         int row = table.getSelectedRow();
         if (row == -1) return;
@@ -123,17 +167,39 @@ public class LagerBestandVerwaltungPanel extends JPanel {
                 var client = new BackendClient();
                 if (client.deleteLagerBestand(id)) loadData();
                 client.close();
-            } catch (Exception e) { showError("Serverfehler."); }
+            } catch (Exception e) {
+                showError("Serverfehler.");
+            }
         }
     }
 
+    /**
+     * Sucht ein Produkt-Objekt anhand seiner ID auf dem Server.
+     * * @param client Die aktive Backend-Verbindung.
+     * @param id Die ID des gesuchten Produkts.
+     * @return Das Produkt oder null, falls es nicht existiert.
+     * @throws Exception Wenn ein Kommunikationsfehler auftritt.
+     */
     private Produkt getProduktById(BackendClient client, int id) throws Exception {
         return client.getAllProdukte().stream().filter(p -> p.getId() == id).findFirst().orElse(null);
     }
 
+    /**
+     * Sucht ein Lagerplatz-Objekt anhand seiner ID auf dem Server.
+     * * @param client Die aktive Backend-Verbindung.
+     * @param id Die ID des gesuchten Lagerplatzes.
+     * @return Der Lagerplatz oder null, falls er nicht existiert.
+     * @throws Exception Wenn ein Kommunikationsfehler auftritt.
+     */
     private LagerPlatz getLagerPlatzById(BackendClient client, int id) throws Exception {
         return client.getAllLagerPlaetze().stream().filter(lp -> lp.getId() == id).findFirst().orElse(null);
     }
 
-    private void showError(String msg) { JOptionPane.showMessageDialog(this, msg, "Fehler", JOptionPane.ERROR_MESSAGE); }
+    /**
+     * Hilfsmethode, um Fehlermeldungen standardisiert als Pop-up-Dialog anzuzeigen.
+     * * @param msg Die anzuzeigende Fehlermeldung.
+     */
+    private void showError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Fehler", JOptionPane.ERROR_MESSAGE);
+    }
 }

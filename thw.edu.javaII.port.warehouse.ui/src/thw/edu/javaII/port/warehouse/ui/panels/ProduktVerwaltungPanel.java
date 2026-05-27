@@ -12,11 +12,24 @@ import javax.swing.table.DefaultTableModel;
 import thw.edu.javaII.port.warehouse.model.Produkt;
 import thw.edu.javaII.port.warehouse.ui.BackendClient;
 
+/**
+ * Diese Klasse repräsentiert die Verwaltungsoberfläche für die Stammdaten der Produkte.
+ * Sie zeigt eine Tabelle mit allen im System hinterlegten Artikeln an und bietet über
+ * Schaltflächen die Möglichkeit, neue Produkte anzulegen, bestehende Eigenschaften (z. B. Preise)
+ * zu bearbeiten oder Artikel komplett aus der Datenbank zu entfernen.
+ * * @author juan.de.souza.leao
+ */
 public class ProduktVerwaltungPanel extends JPanel {
 
     private final JTable table;
     private final DefaultTableModel tableModel;
 
+    /**
+     * Standard-Konstruktor.
+     * Baut das grundlegende Layout (Tabelle in der Mitte, Buttons unten) auf.
+     * Verknüpft zudem die Schaltflächen mit ihren jeweiligen Aktionen und
+     * ruft abschließend die Daten vom Server ab, um die Tabelle initial zu füllen.
+     */
     public ProduktVerwaltungPanel() {
         setLayout(new BorderLayout());
 
@@ -25,7 +38,7 @@ public class ProduktVerwaltungPanel extends JPanel {
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Direkte Bearbeitung in der Zelle deaktivieren
+                return false; // Direkte Bearbeitung in der Zelle deaktivieren, Bearbeitung nur über Dialog
             }
         };
         table = new JTable(tableModel);
@@ -54,6 +67,10 @@ public class ProduktVerwaltungPanel extends JPanel {
         loadData();
     }
 
+    /**
+     * Lädt die aktuelle Produktliste vom Server und aktualisiert die Anzeige in der Tabelle.
+     * Leert vorher die Tabelle, damit es keine doppelten Einträge gibt.
+     */
     private void loadData() {
         tableModel.setRowCount(0); // Tabelle leeren
         try {
@@ -68,6 +85,11 @@ public class ProduktVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Öffnet einen Eingabedialog zum Anlegen eines komplett neuen Produkts.
+     * Nach erfolgreicher Eingabe und Speicherung auf dem Server wird die Tabellenansicht
+     * automatisch aktualisiert.
+     */
     private void addProdukt() {
         var txtId = new JTextField();
         var txtName = new JTextField();
@@ -99,6 +121,12 @@ public class ProduktVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Öffnet einen Eingabedialog zum Bearbeiten eines bestehenden Produkts.
+     * Das Produkt muss dafür vorher in der Tabelle per Mausklick markiert worden sein.
+     * Die aktuelle ID bleibt fest (kann nicht geändert werden), die anderen Werte
+     * werden in die Felder vorgeladen.
+     */
     private void editProdukt() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
@@ -131,6 +159,10 @@ public class ProduktVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Löscht das aktuell in der Tabelle markierte Produkt, nachdem der Nutzer
+     * eine kurze Sicherheitsabfrage ("Wirklich löschen?") bestätigt hat.
+     */
     private void deleteProdukt() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow == -1) {
@@ -156,6 +188,10 @@ public class ProduktVerwaltungPanel extends JPanel {
         }
     }
 
+    /**
+     * Hilfsmethode, um standardisierte Fehlermeldungen als Pop-up (Dialog-Fenster) anzuzeigen.
+     * @param msg Die Nachricht, die dem Benutzer angezeigt werden soll.
+     */
     private void showError(String msg) {
         JOptionPane.showMessageDialog(this, msg, "Fehler", JOptionPane.ERROR_MESSAGE);
     }

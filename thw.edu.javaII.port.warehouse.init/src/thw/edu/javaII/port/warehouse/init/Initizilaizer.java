@@ -9,14 +9,24 @@ import thw.edu.javaII.port.warehouse.model.LagerBestand;
 import thw.edu.javaII.port.warehouse.model.LagerPlatz;
 import thw.edu.javaII.port.warehouse.model.Produkt;
 
+/**
+ * Diese Klasse dient zur Initialisierung von Testdaten für das Lagerverwaltungssystem.
+ * Sie erstellt und verknüpft vordefinierte Objekte für Lager, Lagerplätze, Produkte und Bestände,
+ * damit die Datenbank beim ersten Start direkt mit Beispieldaten gefüllt werden kann.
+ * * @author juan.de.souza.leao
+ */
 public class Initizilaizer {
 	private final List<Lager> lager;
 	private final List<LagerPlatz> lagerplatz;
 	private final List<LagerBestand> lagerbestand;
 	private final List<Produkt> produkt;
 	private final List<DemoModel> demo;
-	
-	
+
+	/**
+	 * Konstruktor der Klasse.
+	 * Erstellt leere Listen für alle Datenmodelle und ruft direkt die interne Methode auf,
+	 * um diese Listen mit den fest kodierten Beispieldaten zu füllen.
+	 */
 	public Initizilaizer() {
 		lager = new ArrayList<>();
 		lagerplatz = new ArrayList<>();
@@ -26,37 +36,58 @@ public class Initizilaizer {
 		init();
 	}
 
-
+	/**
+	 * Gibt die Liste aller initialisierten Lager zurück.
+	 * * @return Eine Liste von Lager-Objekten.
+	 */
 	public List<Lager> getLager() {
 		return lager;
 	}
 
-
+	/**
+	 * Gibt die Liste aller initialisierten Lagerplätze zurück.
+	 * * @return Eine Liste von LagerPlatz-Objekten.
+	 */
 	public List<LagerPlatz> getLagerplatz() {
 		return lagerplatz;
 	}
 
-
+	/**
+	 * Gibt die Liste aller initialisierten Lagerbestände zurück.
+	 * * @return Eine Liste von LagerBestand-Objekten.
+	 */
 	public List<LagerBestand> getLagerbestand() {
 		return lagerbestand;
 	}
 
-
+	/**
+	 * Gibt die Liste aller initialisierten Produkte zurück.
+	 * * @return Eine Liste von Produkt-Objekten.
+	 */
 	public List<Produkt> getProdukt() {
 		return produkt;
 	}
-	
+
+	/**
+	 * Gibt die Liste der initialisierten Demo-Modelle zurück.
+	 * * @return Eine Liste von DemoModel-Objekten.
+	 */
 	public List<DemoModel> getDemo(){
 		return demo;
 	}
-	
+
+	/**
+	 * Erstellt die fest kodierten Testdaten.
+	 * Hier werden konkrete Lager, Produkte, Lagerplätze und Bestände angelegt
+	 * und logisch miteinander verknüpft (z. B. welches Produkt liegt auf welchem Platz).
+	 */
 	private void init() {
 		lager.add(new Lager(1000,"Hauptlager","Heilbronn","Hochregallager"));
 		lager.add(new Lager(1100,"Verkauflager","Stuttgart","Halle"));
 		lager.add(new Lager(1200,"Garage","Heilbronn","Halle"));
 		lager.add(new Lager(1300,"Sperrgut","Ludwigsburg","Freigelände"));
 		lager.add(new Lager(1400,"Hafenlager","Hamburg","Halle"));
-		
+
 		produkt.add(new Produkt(1000, "Kombi-Limousine", "Mercedes-Benz", 80000.0d));
 		produkt.add(new Produkt(1010, "Mars-Schokoriegel", "Nestle", 0.8d));
 		produkt.add(new Produkt(1020, "DIN-A4 Ordner", "Leitz", 1.5d));
@@ -87,7 +118,7 @@ public class Initizilaizer {
 		produkt.add(new Produkt(1270, "Schweißgerät", "Ansamann", 799.0d));
 		produkt.add(new Produkt(1280, "Batterie AA", "Varta", 0.87d));
 		produkt.add(new Produkt(1290, "Hohlraumdübel 8x120", "Fischer", 1.23d));
-		
+
 		lagerplatz.add(new LagerPlatz(1010, "A1", 200, getLagerByID(1000)));
 		lagerplatz.add(new LagerPlatz(1020, "A2", 400, getLagerByID(1000)));
 		lagerplatz.add(new LagerPlatz(1030, "A3", 1000, getLagerByID(1000)));
@@ -109,7 +140,7 @@ public class Initizilaizer {
 		lagerplatz.add(new LagerPlatz(1200, "E3", 1000, getLagerByID(1000)));
 		lagerplatz.add(new LagerPlatz(1210, "E4", 1000, getLagerByID(1000)));
 		lagerplatz.add(new LagerPlatz(1220, "E5", 1000, getLagerByID(1000)));
-		
+
 		lagerplatz.add(new LagerPlatz(2110, "V1", 2000, getLagerByID(1100)));
 		lagerplatz.add(new LagerPlatz(2120, "V2", 1000, getLagerByID(1100)));
 		lagerplatz.add(new LagerPlatz(2130, "V3", 200, getLagerByID(1100)));
@@ -118,19 +149,19 @@ public class Initizilaizer {
 		lagerplatz.add(new LagerPlatz(2160, "V6", 400, getLagerByID(1100)));
 		lagerplatz.add(new LagerPlatz(2170, "V7", 3000, getLagerByID(1100)));
 		lagerplatz.add(new LagerPlatz(2180, "V8", 5000, getLagerByID(1100)));
-		
+
 		lagerplatz.add(new LagerPlatz(3210, "10", 200, getLagerByID(1200)));
 		lagerplatz.add(new LagerPlatz(3220, "11", 200, getLagerByID(1200)));
 		lagerplatz.add(new LagerPlatz(3230, "12", 200, getLagerByID(1200)));
 		lagerplatz.add(new LagerPlatz(3240, "13", 200, getLagerByID(1200)));
 		lagerplatz.add(new LagerPlatz(3250, "14", 200, getLagerByID(1200)));
-		
+
 		lagerplatz.add(new LagerPlatz(4310, "Zone 1", 10, getLagerByID(1300)));
 		lagerplatz.add(new LagerPlatz(4320, "Zone 2", 30, getLagerByID(1300)));
 		lagerplatz.add(new LagerPlatz(4330, "Zone 3", 10, getLagerByID(1300)));
 		lagerplatz.add(new LagerPlatz(4340, "Zone 4", 20, getLagerByID(1300)));
 		lagerplatz.add(new LagerPlatz(4350, "Zone 5", 20, getLagerByID(1300)));
-		
+
 		lagerplatz.add(new LagerPlatz(5410, "Terminal1-1", 5000, getLagerByID(1400)));
 		lagerplatz.add(new LagerPlatz(5420, "Terminal1-2", 5000, getLagerByID(1400)));
 		lagerplatz.add(new LagerPlatz(5430, "Terminal1-3", 5000, getLagerByID(1400)));
@@ -138,7 +169,7 @@ public class Initizilaizer {
 		lagerplatz.add(new LagerPlatz(5450, "Terminal1-5", 5000, getLagerByID(1400)));
 		lagerplatz.add(new LagerPlatz(5460, "Terminal1-6", 5000, getLagerByID(1400)));
 		lagerplatz.add(new LagerPlatz(5470, "Terminal1-7", 5000, getLagerByID(1400)));
-		
+
 		lagerbestand.add(new LagerBestand(1000, 10, getProduktByID(1000), getLagerPlatzByID(3210)));
 		lagerbestand.add(new LagerBestand(1010, 100, getProduktByID(1010), getLagerPlatzByID(2130)));
 		lagerbestand.add(new LagerBestand(1020, 334, getProduktByID(1020), getLagerPlatzByID(1020)));
@@ -147,14 +178,14 @@ public class Initizilaizer {
 		lagerbestand.add(new LagerBestand(1050, 1000, getProduktByID(1050), getLagerPlatzByID(1070)));
 		lagerbestand.add(new LagerBestand(1060, 2, getProduktByID(1060), getLagerPlatzByID(4310)));
 		lagerbestand.add(new LagerBestand(1070, 100, getProduktByID(1070), getLagerPlatzByID(1040)));
-		lagerbestand.add(new LagerBestand(1080, 500, getProduktByID(1080), getLagerPlatzByID(1050)));		
+		lagerbestand.add(new LagerBestand(1080, 500, getProduktByID(1080), getLagerPlatzByID(1050)));
 		lagerbestand.add(new LagerBestand(1090, 1000, getProduktByID(1090), getLagerPlatzByID(1030)));
 		lagerbestand.add(new LagerBestand(1100, 76, getProduktByID(1100), getLagerPlatzByID(2120)));
-		lagerbestand.add(new LagerBestand(1110, 120, getProduktByID(1110), getLagerPlatzByID(2110)));	
+		lagerbestand.add(new LagerBestand(1110, 120, getProduktByID(1110), getLagerPlatzByID(2110)));
 		lagerbestand.add(new LagerBestand(1120, 100, getProduktByID(1120), getLagerPlatzByID(5410)));
 		lagerbestand.add(new LagerBestand(1130, 33, getProduktByID(1130), getLagerPlatzByID(5420)));
 		lagerbestand.add(new LagerBestand(1140, 24, getProduktByID(1140), getLagerPlatzByID(4320)));
-		lagerbestand.add(new LagerBestand(1150, 5, getProduktByID(1150), getLagerPlatzByID(4330)));	
+		lagerbestand.add(new LagerBestand(1150, 5, getProduktByID(1150), getLagerPlatzByID(4330)));
 		lagerbestand.add(new LagerBestand(1160, 365, getProduktByID(1160), getLagerPlatzByID(5430)));
 		lagerbestand.add(new LagerBestand(1170, 578, getProduktByID(1170), getLagerPlatzByID(1060)));
 		lagerbestand.add(new LagerBestand(1180, 10543, getProduktByID(1180), getLagerPlatzByID(1080)));
@@ -164,17 +195,23 @@ public class Initizilaizer {
 		lagerbestand.add(new LagerBestand(1220, 765, getProduktByID(1220), getLagerPlatzByID(2150)));
 		lagerbestand.add(new LagerBestand(1230, 239, getProduktByID(1230), getLagerPlatzByID(1130)));
 		lagerbestand.add(new LagerBestand(1240, 209, getProduktByID(1240), getLagerPlatzByID(1140)));
-		lagerbestand.add(new LagerBestand(1250, 398, getProduktByID(1250), getLagerPlatzByID(2160)));		
+		lagerbestand.add(new LagerBestand(1250, 398, getProduktByID(1250), getLagerPlatzByID(2160)));
 		lagerbestand.add(new LagerBestand(1260, 30547, getProduktByID(1260), getLagerPlatzByID(1120)));
 		lagerbestand.add(new LagerBestand(1270, 10, getProduktByID(1270), getLagerPlatzByID(3230)));
 		lagerbestand.add(new LagerBestand(1280, 300, getProduktByID(1280), getLagerPlatzByID(1150)));
 		lagerbestand.add(new LagerBestand(1290, 678, getProduktByID(1290), getLagerPlatzByID(1160)));
-		
+
 		demo.add(new DemoModel(1,"Hallo"));
 		demo.add(new DemoModel(2,"Welt"));
 		demo.add(new DemoModel(3,"Erde"));
 	}
-	
+
+	/**
+	 * Sucht ein bereits angelegtes Lager anhand seiner ID.
+	 * Wird während der Initialisierung benötigt, um Lagerplätze den Lagern zuzuordnen.
+	 * * @param id Die ID des gesuchten Lagers.
+	 * @return Das passende Lager oder null, falls es nicht gefunden wurde.
+	 */
 	private Lager getLagerByID(int id) {
 		for(Lager l : lager) {
 			if(l.getId() == id)
@@ -182,7 +219,13 @@ public class Initizilaizer {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Sucht ein bereits angelegtes Produkt anhand seiner ID.
+	 * Wird während der Initialisierung benötigt, um Lagerbestände zu erstellen.
+	 * * @param id Die ID des gesuchten Produkts.
+	 * @return Das passende Produkt oder null, falls es nicht gefunden wurde.
+	 */
 	private Produkt getProduktByID(int id) {
 		for(Produkt l : produkt) {
 			if(l.getId() == id)
@@ -190,7 +233,13 @@ public class Initizilaizer {
 		}
 		return null;
 	}
-	
+
+	/**
+	 * Sucht einen bereits angelegten Lagerplatz anhand seiner ID.
+	 * Wird während der Initialisierung benötigt, um Lagerbestände einem Ort zuzuweisen.
+	 * * @param id Die ID des gesuchten Lagerplatzes.
+	 * @return Der passende Lagerplatz oder null, falls er nicht gefunden wurde.
+	 */
 	private LagerPlatz getLagerPlatzByID(int id) {
 		for(LagerPlatz l : lagerplatz) {
 			if(l.getId() == id)

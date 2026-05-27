@@ -3,6 +3,13 @@ package thw.edu.javaII.port.warehouse.ui;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Diese Klasse repräsentiert den Dialog (Pop-up-Fenster) für den Bezahlvorgang an der Kasse.
+ * Sie zeigt den zu zahlenden Gesamtbetrag an und bietet Eingabefelder zur Berechnung des
+ * Rückgeldes bei Barzahlung. Alternativ kann eine EC-Kartenzahlung (als Simulation)
+ * durchgeführt werden. Nach erfolgreicher Zahlung übergibt der Dialog die gewählte
+ * Zahlart zurück an die Hauptkasse.
+ */
 public class ZahlungDialog extends JDialog {
     private final double zuZahlen;
     private boolean erfolgreich = false;
@@ -10,6 +17,12 @@ public class ZahlungDialog extends JDialog {
     private final JTextField gegebenFeld;
     private final JLabel rueckgeldLabel;
 
+    /**
+     * Erstellt den Zahlungsdialog und baut die Benutzeroberfläche auf.
+     * Blockiert die Hauptansicht (modal = true), bis die Zahlung abgeschlossen oder abgebrochen wurde.
+     * * @param parent         Das aufrufende Hauptfenster (die KassenUI).
+     * @param zuZahlenSumme  Der Gesamtbetrag des aktuellen Kassenzettels, der bezahlt werden muss.
+     */
     public ZahlungDialog(JFrame parent, double zuZahlenSumme) {
         super(parent, "Bezahlvorgang", true);
         this.zuZahlen = zuZahlenSumme;
@@ -66,6 +79,11 @@ public class ZahlungDialog extends JDialog {
         add(actionPanel, BorderLayout.SOUTH);
     }
 
+    /**
+     * Liest den eingegebenen Betrag aus dem "Gegeben"-Feld aus und berechnet das Rückgeld.
+     * Ist der gegebene Betrag kleiner als die zu zahlende Summe, wird eine Warnung in Rot angezeigt.
+     * Andernfalls wird das Rückgeld grün dargestellt.
+     */
     private void berechneRueckgeld() {
         try {
             double gegeben = Double.parseDouble(gegebenFeld.getText().replace(",", "."));
@@ -82,6 +100,12 @@ public class ZahlungDialog extends JDialog {
         }
     }
 
+    /**
+     * Schließt den Dialog nach einer erfolgreichen Bezahlung ab.
+     * Bei Barzahlung wird vorher geprüft, ob der gegebene Betrag überhaupt ausreicht.
+     * Setzt den Status auf erfolgreich und speichert die gewählte Zahlart.
+     * * @param zahlart Die verwendete Zahlungsart (z. B. "Bar" oder "EC-Karte").
+     */
     private void schliesseErfolgreich(String zahlart) {
         if (zahlart.equals("Bar")) {
             try {
@@ -100,6 +124,19 @@ public class ZahlungDialog extends JDialog {
         dispose();
     }
 
-    public boolean isErfolgreich() { return erfolgreich; }
-    public String getGewaehlteZahlart() { return gewaehlteZahlart; }
+    /**
+     * Gibt an, ob der Bezahlvorgang erfolgreich abgeschlossen wurde.
+     * * @return true, wenn die Zahlung erfolgreich war, andernfalls false (z.B. bei Abbruch).
+     */
+    public boolean isErfolgreich() {
+        return erfolgreich;
+    }
+
+    /**
+     * Gibt die Bezeichnung der beim Bezahlvorgang verwendeten Zahlart zurück.
+     * * @return Ein String mit der Zahlart (z.B. "Bar" oder "EC-Karte").
+     */
+    public String getGewaehlteZahlart() {
+        return gewaehlteZahlart;
+    }
 }

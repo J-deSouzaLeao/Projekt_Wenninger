@@ -6,6 +6,11 @@ import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
+/**
+ * Diese Klasse repräsentiert den Login-Bildschirm für das Kassen-Terminal (Point of Sale).
+ * Sie ist speziell für die Touchscreen-Bedienung optimiert und enthält ein eigenes Numpad
+ * (Ziffernblock) zur Eingabe der Kassierer-Nummer, der PIN und des anfänglichen Kassenbestands.
+ */
 public class KassenLoginScreen extends JFrame {
     private final JTextField nrField;
     private final JPasswordField pinField;
@@ -15,6 +20,13 @@ public class KassenLoginScreen extends JFrame {
     // NEU: Speichert, welches Feld gerade vom Benutzer ausgewählt ist
     private JTextField aktivesFeld;
 
+    /**
+     * Erstellt das Login-Fenster und initialisiert die Benutzeroberfläche.
+     * Baut die Eingabefelder auf und richtet einen Focus-Listener ein, der stets
+     * überwacht, welches Textfeld gerade aktiv (angetippt) ist, damit das Numpad
+     * die Zahlen in das richtige Feld schreibt.
+     * * @param client Der BackendClient für die Serverkommunikation (Authentifizierung).
+     */
     public KassenLoginScreen(BackendClient client) {
         this.client = client;
         setTitle("Kassen-Terminal Login");
@@ -75,6 +87,13 @@ public class KassenLoginScreen extends JFrame {
         add(numpad, BorderLayout.CENTER);
     }
 
+    /**
+     * Hilfsmethode zur Erstellung der einzelnen Ziffern-Buttons für das Numpad.
+     * Stellt sicher, dass die Buttons nicht den Fokus stehlen (setFocusable(false)),
+     * damit der Cursor im anvisierten Textfeld bleibt.
+     * * @param text Die Ziffer oder "C" (Clear) für den Button.
+     * @return Der fertig konfigurierte Numpad-Button.
+     */
     private JButton createNumButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Arial", Font.BOLD, 24));
@@ -95,6 +114,12 @@ public class KassenLoginScreen extends JFrame {
         return btn;
     }
 
+    /**
+     * Führt den eigentlichen Anmeldevorgang durch.
+     * Liest die Werte aus den Textfeldern aus und sendet sie zur Überprüfung an den Server.
+     * Bei Erfolg wird dieses Login-Fenster geschlossen und die eigentliche Kassen-Oberfläche
+     * (KassenUI) gestartet.
+     */
     private void performLogin() {
         try {
             int nr = Integer.parseInt(nrField.getText().trim());

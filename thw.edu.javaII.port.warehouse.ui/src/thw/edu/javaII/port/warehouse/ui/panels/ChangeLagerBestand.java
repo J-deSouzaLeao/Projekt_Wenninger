@@ -21,14 +21,26 @@ import net.miginfocom.swing.MigLayout;
 import thw.edu.javaII.port.warehouse.model.LagerBestand;
 import thw.edu.javaII.port.warehouse.ui.common.Session;
 
+/**
+ * Diese Klasse repräsentiert einen Dialog (Pop-up-Fenster) zur schnellen Anpassung von Lagerbeständen.
+ * Sie zeigt alle relevanten Informationen zu einem ausgewählten Produkt an (z. B. Name, Lagerplatz, aktueller Bestand)
+ * und ermöglicht es dem Benutzer, über einfache Plus- und Minus-Schaltflächen die Stückzahl
+ * direkt zu erhöhen oder zu verringern (Ein- und Ausbuchen).
+ * * @author juan.de.souza.leao
+ */
 public class ChangeLagerBestand extends JDialog {
 
 	@Serial
-    private static final long serialVersionUID = -836302868167902266L;
-    private final JTextField textField;
+	private static final long serialVersionUID = -836302868167902266L;
+	private final JTextField textField;
 
 	/**
-	 * Create the dialog.
+	 * Erstellt den Dialog zur Bestandsänderung.
+	 * Baut die Benutzeroberfläche auf, füllt sie mit den Daten des übergebenen Lagerbestands
+	 * und konfiguriert die Logik für das Hinzufügen (+) und Entfernen (-) von Artikeln.
+	 * Änderungen werden sofort über die Session an den Server gesendet.
+	 * * @param l   Der Lagerbestand, der verändert werden soll.
+	 * @param ses Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
 	 */
 	public ChangeLagerBestand(LagerBestand l, Session ses) {
 		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
@@ -40,50 +52,51 @@ public class ChangeLagerBestand extends JDialog {
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 14));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		getContentPane().add(lblNewLabel, BorderLayout.NORTH);
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new MigLayout("", "[99.00][grow][][]", "[][][][][][][][][][]"));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		
+
 		JLabel lblNewLabel_1 = new JLabel("Produkt-ID:");
 		contentPanel.add(lblNewLabel_1, "cell 0 0");
-		
+
 		JLabel lblNewLabel_2 = new JLabel(l.getProdukt_id().getId() +  "");
 		contentPanel.add(lblNewLabel_2, "cell 1 0");
-		
+
 		JLabel lblNewLabel_3 = new JLabel("Name:");
 		contentPanel.add(lblNewLabel_3, "cell 0 1");
-		
+
 		JLabel lblNewLabel_5 = new JLabel(l.getProdukt_id().getName());
 		contentPanel.add(lblNewLabel_5, "cell 1 1");
-		
+
 		JLabel lblNewLabel_4 = new JLabel("Hersteller:");
 		contentPanel.add(lblNewLabel_4, "cell 0 2");
-		
+
 		JLabel lblNewLabel_6 = new JLabel(l.getProdukt_id().getHersteller());
 		contentPanel.add(lblNewLabel_6, "cell 1 2");
-		
+
 		JLabel lblNewLabel_7 = new JLabel("Lager:");
 		contentPanel.add(lblNewLabel_7, "cell 0 3");
-		
+
 		JLabel lblNewLabel_8 = new JLabel(l.getLagerplatz_id().getLager_id().getName());
 		contentPanel.add(lblNewLabel_8, "cell 1 3");
-		
+
 		JLabel lblNewLabel_9 = new JLabel("Lagerplatz:");
 		contentPanel.add(lblNewLabel_9, "cell 0 4");
-		
+
 		JLabel lblNewLabel_11 = new JLabel(l.getLagerplatz_id().getName());
 		contentPanel.add(lblNewLabel_11, "cell 1 4");
-		
+
 		JLabel lblNewLabel_10 = new JLabel("Bestand:");
 		contentPanel.add(lblNewLabel_10, "cell 0 5");
-		
+
 		JLabel lblNewLabel_12 = new JLabel(l.getAnzahl() + "");
 		contentPanel.add(lblNewLabel_12, "cell 1 5");
-		
+
 		JLabel lblNewLabel_14 = new JLabel("");
 		contentPanel.add(lblNewLabel_14, "cell 0 9 4 1");
-		
+
+		// Minus-Button: Bucht die eingegebene Menge aus dem Bestand aus
 		JButton btnNewButton_1 = new JButton("-");
 		btnNewButton_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -95,7 +108,8 @@ public class ChangeLagerBestand extends JDialog {
 				lblNewLabel_14.setText("Es wurden Waren im Wert von " + change * l.getProdukt_id().getPreis() + "€ aus dem Lager entnommen.");
 			}
 		});
-		
+
+		// Plus-Button: Bucht die eingegebene Menge in den Bestand ein
 		JButton btnNewButton = new JButton("+");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -107,22 +121,22 @@ public class ChangeLagerBestand extends JDialog {
 				lblNewLabel_14.setText("Es wurden Waren im Wert von " + change * l.getProdukt_id().getPreis() + "€ ins Lager gebucht.");
 			}
 		});
-		
+
 		JLabel lblNewLabel_15 = new JLabel("Einzelpreis:");
 		contentPanel.add(lblNewLabel_15, "cell 0 6");
-		
+
 		JLabel lblNewLabel_16 = new JLabel(l.getProdukt_id().getPreis() + "€");
 		contentPanel.add(lblNewLabel_16, "cell 1 6");
-		
+
 		JLabel lblNewLabel_13 = new JLabel("Verändern");
 		contentPanel.add(lblNewLabel_13, "cell 0 8,alignx trailing");
-		
+
 		textField = new JTextField();
 		contentPanel.add(textField, "cell 1 8,growx");
 		textField.setColumns(10);
 		contentPanel.add(btnNewButton, "cell 2 8");
 		contentPanel.add(btnNewButton_1, "cell 3 8");
-	
+
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
