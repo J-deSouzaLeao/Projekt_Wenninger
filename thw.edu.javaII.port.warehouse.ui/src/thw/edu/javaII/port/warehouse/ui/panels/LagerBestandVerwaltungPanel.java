@@ -16,7 +16,8 @@ public class LagerBestandVerwaltungPanel extends JPanel {
     public LagerBestandVerwaltungPanel() {
         setLayout(new BorderLayout());
 
-        String[] columnNames = {"ID", "Anzahl", "Produkt (ID)", "Lagerplatz (ID)"};
+        // EINDEUTIGE BENENNUNG: Bestands-ID vs. Produkt-ID
+        String[] columnNames = {"Bestands-ID", "Anzahl", "Lagerplatz-ID"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -64,20 +65,15 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         var txtAnzahl = new JTextField();
         var txtProdId = new JTextField();
         var txtPlatzId = new JTextField();
-        Object[] msg = {"ID:", txtId, "Anzahl:", txtAnzahl, "Produkt-ID:", txtProdId, "Lagerplatz-ID:", txtPlatzId};
+        Object[] msg = {"Bestands-ID:", txtId, "Anzahl:", txtAnzahl, "Lagerplatz-ID:", txtPlatzId};
 
         if (JOptionPane.showConfirmDialog(this, msg, "Neuer Bestand", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             try {
-                var client = new BackendClient();
-                Produkt p = getProduktById(client, Integer.parseInt(txtProdId.getText().trim()));
-                LagerPlatz lp = getLagerPlatzById(client, Integer.parseInt(txtPlatzId.getText().trim()));
-
-                if (p == null || lp == null) { showError("Produkt oder Lagerplatz nicht gefunden."); client.close(); return; }
-
-                var lb = new LagerBestand(Integer.parseInt(txtId.getText().trim()), Integer.parseInt(txtAnzahl.getText().trim()), p, lp);
-                if (client.addLagerBestand(lb)) loadData();
-                client.close();
-            } catch (Exception ex) { showError("Ungültige Eingabe."); }
+                int id = Integer.parseInt(txtId.getText().trim());
+                saveLagerBestand(id, txtAnzahl.getText(), txtProdId.getText(), txtPlatzId.getText(), false);
+            } catch (NumberFormatException ex) {
+                showError("Ungültige Eingabe für IDs oder Anzahl.");
+            }
         }
     }
 
@@ -89,20 +85,31 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         var txtAnzahl = new JTextField(tableModel.getValueAt(row, 1).toString());
         var txtProdId = new JTextField(tableModel.getValueAt(row, 2).toString());
         var txtPlatzId = new JTextField(tableModel.getValueAt(row, 3).toString());
-        Object[] msg = {"ID: " + id, "Anzahl:", txtAnzahl, "Produkt-ID:", txtProdId, "Lagerplatz-ID:", txtPlatzId};
+        Object[] msg = {"Bestands-ID: " + id, "Anzahl:", txtAnzahl, "Lagerplatz-ID:", txtPlatzId};
 
         if (JOptionPane.showConfirmDialog(this, msg, "Bestand bearbeiten", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-            try {
-                var client = new BackendClient();
-                Produkt p = getProduktById(client, Integer.parseInt(txtProdId.getText().trim()));
-                LagerPlatz lp = getLagerPlatzById(client, Integer.parseInt(txtPlatzId.getText().trim()));
+            saveLagerBestand(id, txtAnzahl.getText(), txtProdId.getText(), txtPlatzId.getText(), true);
+        }
+    }
 
-                if (p == null || lp == null) { showError("Produkt oder Lagerplatz nicht gefunden."); client.close(); return; }
+    private void saveLagerBestand(int id, String anzahlText, String prodIdText, String platzIdText, boolean isUpdate) {
+        try {
+            var client = new BackendClient();
+            Produkt p = getProduktById(client, Integer.parseInt(prodIdText.trim()));
+            LagerPlatz lp = getLagerPlatzById(client, Integer.parseInt(platzIdText.trim()));
 
-                var lb = new LagerBestand(id, Integer.parseInt(txtAnzahl.getText().trim()), p, lp);
-                if (client.updateLagerBestand(lb)) loadData();
+            if (p == null || lp == null) {
+                showError("Produkt oder Lagerplatz nicht gefunden.");
                 client.close();
-            } catch (Exception ex) { showError("Ungültige Eingabe."); }
+                return;
+            }
+
+            var lb = new LagerBestand(id, Integer.parseInt(anzahlText.trim()), p, lp);
+            boolean success = isUpdate ? client.updateLagerBestand(lb) : client.addLagerBestand(lb);
+            if (success) loadData();
+            client.close();
+        } catch (Exception ex) {
+            showError("Ungültige Eingabe.");
         }
     }
 

@@ -3,12 +3,17 @@ package thw.edu.javaII.port.warehouse.ui;
 import thw.edu.javaII.port.warehouse.model.Kassierer;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class KassenLoginScreen extends JFrame {
     private final JTextField nrField;
     private final JPasswordField pinField;
     private final JTextField bestandField;
     private final BackendClient client;
+
+    // NEU: Speichert, welches Feld gerade vom Benutzer ausgewählt ist
+    private JTextField aktivesFeld;
 
     public KassenLoginScreen(BackendClient client) {
         this.client = client;
@@ -39,6 +44,18 @@ public class KassenLoginScreen extends JFrame {
 
         add(inputPanel, BorderLayout.NORTH);
 
+        // NEU: Wir merken uns immer, welches Feld zuletzt angetippt wurde
+        aktivesFeld = nrField; // Standard beim Start: Das oberste Feld
+        FocusAdapter focusTracker = new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                aktivesFeld = (JTextField) e.getComponent();
+            }
+        };
+        nrField.addFocusListener(focusTracker);
+        pinField.addFocusListener(focusTracker);
+        bestandField.addFocusListener(focusTracker);
+
         // Touch Numpad (vereinfacht für Login)
         JPanel numpad = new JPanel(new GridLayout(4, 3, 5, 5));
         for (int i = 1; i <= 9; i++) {
@@ -51,6 +68,7 @@ public class KassenLoginScreen extends JFrame {
         loginBtn.setBackground(new Color(60, 179, 113));
         loginBtn.setForeground(Color.WHITE);
         loginBtn.setFont(new Font("Arial", Font.BOLD, 20));
+        loginBtn.setFocusable(false); // Verhindert Fokus-Klau beim Login-Button
         loginBtn.addActionListener(e -> performLogin());
         numpad.add(loginBtn);
 
@@ -60,13 +78,17 @@ public class KassenLoginScreen extends JFrame {
     private JButton createNumButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Arial", Font.BOLD, 24));
+
+        // WICHTIG: Das Numpad darf den Textfeldern nicht den Fokus stehlen!
+        btn.setFocusable(false);
+
         btn.addActionListener(e -> {
-            Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-            if (focusOwner instanceof JTextField field) {
+            if (aktivesFeld != null) {
                 if (text.equals("C")) {
-                    field.setText("");
+                    aktivesFeld.setText("");
                 } else {
-                    field.setText(field.getText() + text);
+                    // Schreibt die Zahl an das Ende des aktuell gemerkten Feldes
+                    aktivesFeld.setText(aktivesFeld.getText() + text);
                 }
             }
         });

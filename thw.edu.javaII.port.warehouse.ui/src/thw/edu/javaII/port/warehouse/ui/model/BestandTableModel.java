@@ -10,15 +10,15 @@ import javax.swing.table.TableColumn;
 import thw.edu.javaII.port.warehouse.model.LagerBestand;
 
 public class BestandTableModel extends AbstractTableModel {
-	
+
 	@Serial
-    private static final long serialVersionUID = -6145988449443265248L;
+	private static final long serialVersionUID = -6145988449443265248L;
 	private List<LagerBestand> data;
 
 	public BestandTableModel(List<LagerBestand> data) {
 		this.data = data;
 	}
-	
+
 	public void setData(List<LagerBestand> data) {
 		this.data = data;
 	}
@@ -30,41 +30,51 @@ public class BestandTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return LagerBestand.columnCount;
+		return 6; // Fest auf 6 Spalten setzen, passend zu getColumnName
 	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
-		return data.get(rowIndex).getValueAtColumn(columnIndex);
+		LagerBestand bestand = data.get(rowIndex);
+
+        return switch (columnIndex) {
+            case 0 -> bestand.getId();
+            case 1 -> bestand.getProdukt_id() != null ? bestand.getProdukt_id().getName() : "-";
+            case 2 -> bestand.getProdukt_id() != null ? bestand.getProdukt_id().getHersteller() : "-";
+            case 3 -> bestand.getAnzahl();
+            case 4 -> bestand.getLagerplatz_id() != null ? bestand.getLagerplatz_id().getName() : "-";
+            case 5 -> (bestand.getLagerplatz_id() != null && bestand.getLagerplatz_id().getLager_id() != null)
+                    ? bestand.getLagerplatz_id().getLager_id().getName() : "-";
+            default -> null;
+        };
 	}
-	
+
 	@Override
-    public String getColumnName(int arg0) {    
-        if (arg0==0) return "ID";
-        if (arg0==1) return "Produkt";
-        if (arg0==2) return "Hersteller";
-        if (arg0==3) return "Lagerbestand";
-        if (arg0==4) return "Lagerplatz";
-        if (arg0==5) return "Lager";
-        return null;
-    }
-	
-	public void setJTableColumnsWidth(JTable table, int tablePreferredWidth,
-	        double... percentages) {
-	    double total = 0;
-	    for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
-	        total += percentages[i];
-	    }
-	 
-	    for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
-	        TableColumn column = table.getColumnModel().getColumn(i);
-	        column.setPreferredWidth((int)
-	                (tablePreferredWidth * (percentages[i] / total)));
-	    }
+	public String getColumnName(int arg0) {
+        return switch (arg0) {
+            case 0 -> "ID";
+            case 1 -> "Produkt";
+            case 2 -> "Hersteller";
+            case 3 -> "Lagerbestand";
+            case 4 -> "Lagerplatz";
+            case 5 -> "Lager";
+            default -> null;
+        };
+	}
+
+	public void setJTableColumnsWidth(JTable table, int tablePreferredWidth, double... percentages) {
+		double total = 0;
+		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+			total += percentages[i];
+		}
+
+		for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+			TableColumn column = table.getColumnModel().getColumn(i);
+			column.setPreferredWidth((int) (tablePreferredWidth * (percentages[i] / total)));
+		}
 	}
 
 	public LagerBestand getObjectAt(int selectedRow) {
 		return data.get(selectedRow);
 	}
-	
 }
