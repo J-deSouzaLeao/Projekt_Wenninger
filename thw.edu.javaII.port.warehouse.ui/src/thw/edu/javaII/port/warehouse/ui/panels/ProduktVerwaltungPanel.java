@@ -88,7 +88,8 @@ public class ProduktVerwaltungPanel extends JPanel {
     /**
      * Öffnet einen Eingabedialog zum Anlegen eines komplett neuen Produkts.
      * Nach erfolgreicher Eingabe und Speicherung auf dem Server wird die Tabellenansicht
-     * automatisch aktualisiert.
+     * automatisch aktualisiert. Schlägt das Speichern fehl (z.B. doppelte ID),
+     * wird eine entsprechende Fehlermeldung angezeigt.
      */
     private void addProdukt() {
         var txtId = new JTextField();
@@ -104,17 +105,20 @@ public class ProduktVerwaltungPanel extends JPanel {
                         Integer.parseInt(txtId.getText().trim()),
                         txtName.getText().trim(),
                         txtHersteller.getText().trim(),
-                        Double.parseDouble(txtPreis.getText().trim())
+                        Double.parseDouble(txtPreis.getText().trim().replace(",", ".")) // Komma durch Punkt ersetzen für Robustheit
                 );
                 var client = new BackendClient();
-                if (client.addProdukt(p)) {
+                boolean erfolgreich = client.addProdukt(p);
+                client.close();
+
+                if (erfolgreich) {
                     loadData();
                 } else {
-                    showError("Fehler beim Speichern auf dem Server.");
+                    // ANGEPASST: Konkrete Fehlermeldung bei abgelehnter Speicherung
+                    showError("Das Produkt konnte nicht angelegt werden.\nMöglicherweise wird diese Produkt-ID bereits verwendet.");
                 }
-                client.close();
             } catch (NumberFormatException ex) {
-                showError("Ungültige Eingabe bei ID oder Preis.");
+                showError("Ungültige Eingabe bei ID oder Preis. Bitte nur Zahlen verwenden.");
             } catch (Exception ex) {
                 showError("Serverfehler: " + ex.getMessage());
             }
@@ -143,7 +147,7 @@ public class ProduktVerwaltungPanel extends JPanel {
         int option = JOptionPane.showConfirmDialog(this, message, "Produkt bearbeiten", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             try {
-                var p = new Produkt(id, txtName.getText().trim(), txtHersteller.getText().trim(), Double.parseDouble(txtPreis.getText().trim()));
+                var p = new Produkt(id, txtName.getText().trim(), txtHersteller.getText().trim(), Double.parseDouble(txtPreis.getText().trim().replace(",", ".")));
                 var client = new BackendClient();
                 if (client.updateProdukt(p)) {
                     loadData();
@@ -152,7 +156,7 @@ public class ProduktVerwaltungPanel extends JPanel {
                 }
                 client.close();
             } catch (NumberFormatException ex) {
-                showError("Ungültiger Preis.");
+                showError("Ungültiger Preis. Bitte nur Zahlen verwenden.");
             } catch (Exception ex) {
                 showError("Serverfehler: " + ex.getMessage());
             }

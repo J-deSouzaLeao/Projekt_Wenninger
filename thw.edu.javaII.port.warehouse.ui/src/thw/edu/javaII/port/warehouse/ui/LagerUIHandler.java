@@ -63,7 +63,7 @@ public class LagerUIHandler implements ActionListener {
 				switchPage(new WelcomePage());
 				break;
 			case BESTAND:
-				switchPage(new BestandPage(ses));
+				switchPage(new BestandPage());
 				break;
 			case STATISTIK:
 				switchPage(new StatistikPage(ses, parent));

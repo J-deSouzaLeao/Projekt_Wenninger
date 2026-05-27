@@ -28,12 +28,23 @@ import thw.edu.javaII.port.warehouse.server.init.Loading;
  * für genau einen verbundenen Client (z. B. das Kassenterminal oder die Verwaltungsoberfläche).
  * Sie nimmt die Anfragen (DEOs) des Clients entgegen, leitet sie an den richtigen Bereich
  * der Datenbank weiter und sendet die passenden Antworten zurück.
+ * * Da die Client-Verbindungen zustandslos sind (pro Request ein neuer Socket/Service),
+ * verwaltet diese Klasse den Schicht-Startbestand der Kasse in einer statischen Variablen.
  * * @author juan.de.souza.leao
  */
 public class Service extends Thread {
 	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Service.class.getName());
 	static int count = 0;
+
+	// --- NEU: Statischer Zwischenspeicher für die aktuelle Kassenschicht ---
+	// Da für jeden Request ein neuer Service-Thread erstellt wird, hält diese
+	// statische Variable den Startbestand über die einzelnen Requests hinweg im Speicher.
+	private static double aktuellerStartBestand = 0.0;
+
+	private static double aktuellerSchichtUmsatz = 0.0;
+
 	private int currentNumber = 0;
+
 	private Socket sock;
 	private ObjectInputStream fromClient;
 	private ObjectOutputStream toClient;
@@ -272,7 +283,10 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet alle Anfragen rund um die Anlage, Änderung und Löschung von Produkten.
-	 * * @param deoIn Das empfangene Datenpaket des Clients.
+	 * Prüft beim Anlegen (ADD) explizit, ob die Produkt-ID bereits vergeben ist,
+	 * um Duplikate zu vermeiden und dem Client einen korrekten Fehlerstatus zurückzumelden.
+	 *
+	 * @param deoIn Das empfangene Datenpaket des Clients.
 	 * @return Die Antwort, die an den Client zurückgesendet wird.
 	 */
 	private WarehouseReturnDEO handleZoneProdukt(WarehouseDEO deoIn) {
@@ -280,13 +294,30 @@ public class Service extends Thread {
 		switch (deoIn.getCommand()) {
 			case ADD:
 				if (deoIn.getData() != null && deoIn.getData() instanceof Produkt) {
-					Produkt l = Cast.safeCast(deoIn.getData(), Produkt.class);
-					store.addProdukt(l);
-					deoOut = new WarehouseReturnDEO(null, "Produkt erfolgreich angelegt", Status.OK);
+					Produkt neuesProdukt = Cast.safeCast(deoIn.getData(), Produkt.class);
+
+					// --- NEU: Manuelle Prüfung, ob die ID bereits existiert ---
+					boolean idExistiert = false;
+					for (Produkt p : store.getProdukts()) {
+						if (p.getId() == neuesProdukt.getId()) {
+							idExistiert = true;
+							break;
+						}
+					}
+
+					if (idExistiert) {
+						// ID ist schon vergeben -> Sende ERROR an den Client
+						deoOut = new WarehouseReturnDEO(null, "Fehler: Produkt-ID existiert bereits!", Status.ERROR);
+					} else {
+						// ID ist frei -> Speichern und OK senden
+						store.addProdukt(neuesProdukt);
+						deoOut = new WarehouseReturnDEO(null, "Produkt erfolgreich angelegt", Status.OK);
+					}
 				} else {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
+
 			case DELETE:
 				if (deoIn.getData() != null && deoIn.getData() instanceof Produkt) {
 					Produkt l = Cast.safeCast(deoIn.getData(), Produkt.class);
@@ -296,12 +327,15 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
+
 			case INIT:
 				deoOut = new WarehouseReturnDEO(null, "Für die Zone nicht unterstütztes Kommando", Status.INFO);
 				break;
+
 			case LIST:
 				deoOut = new WarehouseReturnDEO(store.getProdukts(), "Liste aller Produkte", Status.OK);
 				break;
+
 			case UPDATE:
 				if (deoIn.getData() != null && deoIn.getData() instanceof Produkt) {
 					Produkt l = Cast.safeCast(deoIn.getData(), Produkt.class);
@@ -311,6 +345,7 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
+
 			case GETBYMODEL:
 				if (deoIn.getData() != null && deoIn.getData() instanceof Produkt) {
 					Produkt l = Cast.safeCast(deoIn.getData(), Produkt.class);
@@ -320,6 +355,7 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
+
 			default:
 				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando", Status.ERROR);
 				break;
@@ -430,6 +466,7 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet alle Anfragen, die direkt vom Kassenterminal kommen (Verkauf, Login, Abschluss).
+	 * Speichert den Schicht-Startbestand, berechnet den korrekten Soll-Bestand und führt den Abschluss durch.
 	 * * @param deoIn Das empfangene Datenpaket des Kassen-Clients.
 	 * @return Die Antwort (z. B. Erfolg bei Verkauf oder Kassenstand beim Abschluss).
 	 */
@@ -442,6 +479,9 @@ public class Service extends Thread {
 					thw.edu.javaII.port.warehouse.model.Kassierer k = store.getKassiererByNummer(req.getNummer());
 
 					if (k != null && k.getPin().equals(req.getPin())) {
+						// --- NEU: Den Startbestand beim Login serverseitig abspeichern ---
+						aktuellerStartBestand = req.getStartBestand();
+
 						deoOut = new WarehouseReturnDEO(k, "Login erfolgreich", Status.OK);
 					} else {
 						deoOut = new WarehouseReturnDEO(null, "Ungültige Nummer oder PIN", Status.ERROR);
@@ -455,12 +495,18 @@ public class Service extends Thread {
 					thw.edu.javaII.port.warehouse.model.Kassenzettel zettel = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassenzettel.class);
 
 					try {
-						// 1. Zettel und Positionen speichern
+						// 1. Zettel und Positionen in DB speichern (für die Historie)
 						store.saveKassenzettel(zettel);
 
 						// 2. Lagerbestand reduzieren
 						for (thw.edu.javaII.port.warehouse.model.KassenzettelPosition pos : zettel.getPositionen()) {
 							store.reduceLagerbestand(pos.getProdukt().getId(), pos.getAnzahl());
+						}
+
+						// --- NEU: Umsatz der aktuellen Schicht berechnen ---
+						// Wir addieren den Umsatz NUR, wenn der Kunde in Bar gezahlt hat!
+						if ("Bar".equalsIgnoreCase(zettel.getZahlart())) {
+							aktuellerSchichtUmsatz += zettel.getGesamtpreis();
 						}
 
 						deoOut = new WarehouseReturnDEO(null, "Bezahlung erfolgreich verbucht", Status.OK);
@@ -473,17 +519,25 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
-			case ABSCHLUSS_LADEN:
-				thw.edu.javaII.port.warehouse.model.Kassenabschluss last = store.getLastKassenabschluss();
-				double barEinnahmen = store.getBargeldEinnahmenSeitLetztemAbschluss();
-				double letzterIstBestand = (last != null) ? last.getIstBestand() : 0.0;
 
-				deoOut = new WarehouseReturnDEO(new double[]{letzterIstBestand, barEinnahmen}, "Abschlussdaten geladen", Status.OK);
+			case ABSCHLUSS_LADEN:
+				// --- NEU: Wir fragen nicht mehr die fehleranfällige Datenbank ab! ---
+				// Stattdessen nutzen wir unseren exakten, internen Schicht-Zähler.
+				deoOut = new WarehouseReturnDEO(new double[]{aktuellerStartBestand, aktuellerSchichtUmsatz}, "Abschlussdaten geladen", Status.OK);
 				break;
+
 			case ABSCHLUSS_SPEICHERN:
 				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassenabschluss) {
 					thw.edu.javaII.port.warehouse.model.Kassenabschluss abschluss = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassenabschluss.class);
+
+					// Für die Historie/Statistik in der DB speichern
 					store.saveKassenabschluss(abschluss);
+
+					// --- NEU: Kasse "leeren" nach dem Abschluss (Simulation der Geldabgabe an die Bank/Tresor) ---
+					// Sowohl der Startbestand als auch die gezählten Einnahmen werden genullt!
+					aktuellerStartBestand = 0.0;
+					aktuellerSchichtUmsatz = 0.0;
+
 					deoOut = new WarehouseReturnDEO(null, "Kassenabschluss gespeichert", Status.OK);
 				} else {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);

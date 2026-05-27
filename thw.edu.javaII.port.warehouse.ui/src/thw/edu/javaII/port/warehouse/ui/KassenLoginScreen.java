@@ -116,23 +116,24 @@ public class KassenLoginScreen extends JFrame {
 
     /**
      * Führt den eigentlichen Anmeldevorgang durch.
-     * Liest die Werte aus den Textfeldern aus und sendet sie zur Überprüfung an den Server.
-     * Bei Erfolg wird dieses Login-Fenster geschlossen und die eigentliche Kassen-Oberfläche
-     * (KassenUI) gestartet.
+     * Liest Kassierer-Nummer, PIN und den deklarierten Startbestand aus.
+     * Sendet diese Daten zur Überprüfung und Schichteröffnung an den Server.
      */
     private void performLogin() {
         try {
             int nr = Integer.parseInt(nrField.getText().trim());
             String pin = new String(pinField.getPassword());
+
+            // Startbestand aus dem Textfeld auslesen
             double bestand = Double.parseDouble(bestandField.getText().trim().replace(",", "."));
 
-            Kassierer k = client.loginKassierer(nr, pin);
+            // NEU: Übergabe des 'bestand' an die aktualisierte Client-Methode
+            Kassierer k = client.loginKassierer(nr, pin, bestand);
 
             if (k != null) {
                 JOptionPane.showMessageDialog(this, "Willkommen, " + k.getName() + "\nBargeldbestand: " + bestand + "€ bestätigt.");
-                dispose(); // Schließt das Login-Fenster
+                dispose();
 
-                // Neue Kassen-UI öffnen
                 new KassenUI(client, k).setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(this, "Login fehlgeschlagen. Nummer oder PIN falsch.", "Fehler", JOptionPane.ERROR_MESSAGE);

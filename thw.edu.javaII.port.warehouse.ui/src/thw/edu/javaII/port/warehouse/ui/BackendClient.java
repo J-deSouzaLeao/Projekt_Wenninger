@@ -419,4 +419,33 @@ public class BackendClient {
         }
         return List.of();
     }
+
+    /**
+     * Authentifiziert einen Kassierer am System und übermittelt gleichzeitig den
+     * physischen Startbestand (Wechselgeld) der Kasse für die neue Schicht.
+     *
+     * @param nummer Die Identifikationsnummer des Kassierers.
+     * @param pin Die geheime PIN.
+     * @param startBestand Das gezählte Wechselgeld in der Kasse vor dem ersten Verkauf.
+     * @return Das Kassierer-Objekt bei erfolgreichem Login, andernfalls null.
+     * @throws Exception Bei Kommunikationsfehlern.
+     */
+    public thw.edu.javaII.port.warehouse.model.Kassierer loginKassierer(int nummer, String pin, double startBestand) throws Exception {
+        var k = new thw.edu.javaII.port.warehouse.model.Kassierer();
+        k.setNummer(nummer);
+        k.setPin(pin);
+        k.setStartBestand(startBestand); // <-- NEU: Übergabe an den Server
+
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.LOGIN);
+        deo.setData(k);
+
+        var ret = sendRequest(deo);
+
+        if (ret.getStatus() == Status.OK && ret.getData() != null) {
+            return Cast.safeCast(ret.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
+        }
+        return null;
+    }
 }
