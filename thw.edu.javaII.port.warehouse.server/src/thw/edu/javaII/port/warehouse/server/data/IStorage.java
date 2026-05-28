@@ -190,13 +190,6 @@ public interface IStorage {
 	void saveKassenabschluss(Kassenabschluss abschluss);
 
 	/**
-	 * Holt den zeitlich letzten Kassenabschluss aus der Datenbank.
-	 * Wird benötigt, um zu wissen, ab wann neue Einnahmen gezählt werden müssen.
-	 * @return Der letzte Abschluss oder null, falls es noch keinen gibt.
-	 */
-	Kassenabschluss getLastKassenabschluss();
-
-	/**
 	 * Zieht verkaufte Ware direkt vom Lagerbestand ab.
 	 * Verhindert automatisch, dass mehr verkauft wird, als physisch im Lager liegt (Überverkauf).
 	 * @param produktId Die ID des verkauften Produkts.
@@ -206,16 +199,36 @@ public interface IStorage {
 	void reduceLagerbestand(int produktId, int anzahl) throws NegativeStockException;
 
 	/**
-	 * Berechnet, wie viel Bargeld seit dem letzten Kassenabschluss eingenommen wurde.
-	 * Dient als Vorlage (Soll-Bestand) für den nächsten anstehenden Kassenabschluss.
-	 * @return Die Summe der Bar-Einnahmen.
-	 */
-	double getBargeldEinnahmenSeitLetztemAbschluss();
-
-	/**
 	 * Holt eine Historie aller jemals gespeicherten Kassenzettel aus der Datenbank.
 	 * @return Eine Liste aller Kassenbons.
 	 */
 	List<Kassenzettel> getAllKassenzettel();
 
+	// ==========================================
+	// BEREICH: KASSIERER / PERSONAL
+	// ==========================================
+
+	/**
+	 * Ruft eine Liste aller im System hinterlegten Kassierer ab.
+	 * @return Eine Liste von Kassierer-Objekten.
+	 */
+	List<Kassierer> getAllKassierer();
+
+	/**
+	 * Speichert einen neuen Kassierer in der Datenbank.
+	 * @param k Das Kassierer-Objekt, das gespeichert werden soll.
+	 */
+	void addKassierer(Kassierer k);
+
+	/**
+	 * Aktualisiert die Daten eines bestehenden Kassierers (z. B. PIN-Änderung oder Manager-Status).
+	 * @param k Das Kassierer-Objekt mit den aktualisierten Daten.
+	 */
+	void updateKassierer(Kassierer k);
+
+	/**
+	 * Löscht einen Kassierer anhand seiner eindeutigen Mitarbeiternummer.
+	 * @param nummer Die Identifikationsnummer des Kassierers.
+	 */
+	void deleteKassierer(int nummer);
 }

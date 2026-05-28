@@ -546,6 +546,40 @@ public class Service extends Thread {
 			case KASSENZETTEL_LISTE:
 				deoOut = new WarehouseReturnDEO(store.getAllKassenzettel(), "Kassenzettel geladen", Status.OK);
 				break;
+
+			case KASSIERER_LISTE:
+				deoOut = new WarehouseReturnDEO(store.getAllKassierer(), "Kassierer-Liste geladen", Status.OK);
+				break;
+
+			case KASSIERER_ADD:
+				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
+					thw.edu.javaII.port.warehouse.model.Kassierer k = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
+					store.addKassierer(k); // Setzt voraus, dass diese Methode im IStorage existiert
+					deoOut = new WarehouseReturnDEO(null, "Kassierer angelegt", Status.OK);
+				} else {
+					deoOut = new WarehouseReturnDEO(null, "Falsche Daten", Status.ERROR);
+				}
+				break;
+
+			case KASSIERER_UPDATE:
+				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
+					thw.edu.javaII.port.warehouse.model.Kassierer k = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
+					store.updateKassierer(k); // Setzt voraus, dass diese Methode im IStorage existiert
+					deoOut = new WarehouseReturnDEO(null, "Kassierer aktualisiert", Status.OK);
+				} else {
+					deoOut = new WarehouseReturnDEO(null, "Falsche Daten", Status.ERROR);
+				}
+				break;
+
+			case KASSIERER_DELETE:
+				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
+					thw.edu.javaII.port.warehouse.model.Kassierer k = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
+					store.deleteKassierer(k.getNummer()); // Setzt voraus, dass diese Methode im IStorage existiert
+					deoOut = new WarehouseReturnDEO(null, "Kassierer gelöscht", Status.OK);
+				} else {
+					deoOut = new WarehouseReturnDEO(null, "Falsche Daten", Status.ERROR);
+				}
+				break;
 			default:
 				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando in Zone KASSE", Status.ERROR);
 				break;

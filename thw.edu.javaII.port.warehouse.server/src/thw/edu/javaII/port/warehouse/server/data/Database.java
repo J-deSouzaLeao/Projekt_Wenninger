@@ -77,9 +77,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Schreibt ein einzelnes, neues Lager per SQL-INSERT in die Datenbank.
-	 */
 	@Override
 	public void addLager(Lager model) {
 		String sql = "INSERT INTO LAGER (id,name,ort,art) VALUES (?, ?, ?, ?)";
@@ -95,9 +92,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Überschreibt die Daten eines bestehenden Lagers anhand seiner ID.
-	 */
 	@Override
 	public void updateLager(Lager model) {
 		String sql = "UPDATE LAGER SET name=?, ort=?, art=? WHERE id=?";
@@ -113,9 +107,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Löscht ein Lager komplett aus der Datenbank.
-	 */
 	@Override
 	public void deleteLager(Lager model) {
 		String sql = "DELETE FROM LAGER WHERE id=?";
@@ -128,9 +119,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Liest alle gespeicherten Lager aus der Tabelle aus und gibt sie als Liste zurück.
-	 */
 	@Override
 	public List<Lager> getLagers() {
 		List<Lager> l = new ArrayList<>();
@@ -147,9 +135,6 @@ public class Database implements IStorage {
 		return l;
 	}
 
-	/**
-	 * Sucht ein ganz bestimmtes Lager direkt anhand seiner ID.
-	 */
 	public Lager getLagerById(int id) {
 		Lager model = new Lager();
 		String sql = "SELECT * FROM LAGER WHERE id=?";
@@ -170,9 +155,6 @@ public class Database implements IStorage {
 		return model;
 	}
 
-	/**
-	 * Bereitet die Lagerplatz-Tabelle vor und füllt sie mit Startdaten.
-	 */
 	@Override
 	public void initLagerPlatz(List<LagerPlatz> list) {
 		if (tableDoesNotExist("LAGERPLATZ")) {
@@ -194,9 +176,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Legt einen neuen Lagerplatz in der Datenbank an.
-	 */
 	@Override
 	public void addLagerPlatz(LagerPlatz model) {
 		String sql = "INSERT INTO LAGERPLATZ (id,name,kapazitaet,lager_id) VALUES (?, ?, ?, ?)";
@@ -212,9 +191,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Speichert Änderungen (z.B. eine neue Kapazität) für einen Lagerplatz ab.
-	 */
 	@Override
 	public void updateLagerPlatz(LagerPlatz model) {
 		String sql = "UPDATE LAGERPLATZ SET name=?, kapazitaet=?, lager_id=? WHERE id=?";
@@ -230,9 +206,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Entfernt einen Lagerplatz aus der Datenbank.
-	 */
 	@Override
 	public void deleteLagerPlatz(LagerPlatz model) {
 		String sql = "DELETE FROM LAGERPLATZ WHERE id=?";
@@ -245,9 +218,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Lädt alle Lagerplätze aus der Datenbank und ordnet ihnen direkt das passende Hauptlager zu.
-	 */
 	@Override
 	public List<LagerPlatz> getLagerPlatzs() {
 		List<LagerPlatz> l = new ArrayList<>();
@@ -265,9 +235,6 @@ public class Database implements IStorage {
 		return l;
 	}
 
-	/**
-	 * Hilfsmethode, um einen einzelnen Lagerplatz samt seinem Hauptlager zu laden.
-	 */
 	public LagerPlatz getLagerPlatzById(int id) {
 		LagerPlatz model = new LagerPlatz();
 		String sql = "SELECT * FROM LAGERPLATZ WHERE id=?";
@@ -288,9 +255,6 @@ public class Database implements IStorage {
 		return model;
 	}
 
-	/**
-	 * Erstellt die Bestands-Tabelle oder setzt sie auf die Startdaten zurück.
-	 */
 	@Override
 	public void initLagerBestand(List<LagerBestand> list) {
 		if (tableDoesNotExist("LAGERBESTAND")) {
@@ -312,9 +276,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Legt einen neuen Lagerbestand (Verknüpfung Menge - Produkt - Platz) an.
-	 */
 	@Override
 	public void addLagerBestand(LagerBestand model) {
 		String sql = "INSERT INTO LAGERBESTAND (id,anzahl,produkt_id,lagerplatz_id) VALUES (?, ?, ?, ?)";
@@ -330,9 +291,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Passt einen bestehenden Bestand an (z.B. wenn sich die Anzahl geändert hat).
-	 */
 	@Override
 	public void updateLagerBestand(LagerBestand model) {
 		String sql = "UPDATE LAGERBESTAND SET anzahl=?, produkt_id=?, lagerplatz_id=? WHERE id=?";
@@ -348,9 +306,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Löscht einen Bestandseintrag komplett.
-	 */
 	@Override
 	public void deleteLagerBestand(LagerBestand model) {
 		String sql = "DELETE FROM LAGERBESTAND WHERE id=?";
@@ -363,9 +318,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Liest alle Bestände aus. Zu jedem Bestand wird automatisch das richtige Produkt und der Platz geladen.
-	 */
 	@Override
 	public List<LagerBestand> getLagerBestands() {
 		List<LagerBestand> l = new ArrayList<>();
@@ -384,9 +336,6 @@ public class Database implements IStorage {
 		return l;
 	}
 
-	/**
-	 * Baut die Produkttabelle auf und lädt die Start-Produkte hinein.
-	 */
 	@Override
 	public void initProdukt(List<Produkt> list) {
 		if (tableDoesNotExist("PRODUKT")) {
@@ -408,9 +357,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Trägt ein neues Produkt in die Datenbank ein.
-	 */
 	@Override
 	public void addProdukt(Produkt model) {
 		String sql = "INSERT INTO PRODUKT (id,name,hersteller,preis) VALUES (?, ?, ?, ?)";
@@ -426,17 +372,11 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Sucht ein Produkt über ein als Hülle übergebenes Modell (delegiert an getProduktById).
-	 */
 	@Override
 	public Produkt getProduktByModel(Produkt mod) {
 		return getProduktById(mod.getId());
 	}
 
-	/**
-	 * Sucht ein Produkt anhand seiner eindeutigen ID.
-	 */
 	public Produkt getProduktById(int id) {
 		Produkt model = new Produkt();
 		String sql = "SELECT * FROM PRODUKT WHERE id=?";
@@ -457,9 +397,6 @@ public class Database implements IStorage {
 		return model;
 	}
 
-	/**
-	 * Speichert aktualisierte Produktinformationen ab.
-	 */
 	@Override
 	public void updateProdukt(Produkt model) {
 		String sql = "UPDATE PRODUKT SET name=?, hersteller=?, preis=? WHERE id=?";
@@ -475,9 +412,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Löscht ein Produkt aus der Datenbank.
-	 */
 	@Override
 	public void deleteProdukt(Produkt model) {
 		String sql = "DELETE FROM PRODUKT WHERE id=?";
@@ -490,9 +424,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Holt sich alle eingetragenen Produkte aus der Tabelle.
-	 */
 	@Override
 	public List<Produkt> getProdukts() {
 		List<Produkt> l = new ArrayList<>();
@@ -509,9 +440,6 @@ public class Database implements IStorage {
 		return l;
 	}
 
-	/**
-	 * Initialisiert die Demo-Tabelle für einfache Tests.
-	 */
 	@Override
 	public void initDemo(List<DemoModel> list) {
 		if (tableDoesNotExist("DEMOS")) {
@@ -533,9 +461,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Fügt einen Demo-Eintrag in die Datenbank ein.
-	 */
 	@Override
 	public void addDemo(DemoModel model) {
 		String sql = "INSERT INTO DEMOS (id,name) VALUES (?, ?)";
@@ -549,12 +474,7 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Interne Hilfsmethode, um alle Datensätze einer Tabelle schnell zu löschen.
-	 * @param tableName Der Name der zu leerenden Tabelle.
-	 */
 	private void truncateTable(String tableName) {
-		//noinspection all
 		String sql = "DELETE FROM " + tableName;
 		try (Connection con = DriverManager.getConnection(dbUrl);
 		     Statement st = con.createStatement()) {
@@ -564,11 +484,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Interne Hilfsmethode, die nachschaut, ob eine Tabelle in der Datenbank bereits existiert.
-	 * @param tableName Der Tabellenname.
-	 * @return True, wenn sie NICHT existiert, sonst False.
-	 */
 	private boolean tableDoesNotExist(String tableName) {
 		boolean exists = true;
 		try (Connection con = DriverManager.getConnection(dbUrl)) {
@@ -587,37 +502,123 @@ public class Database implements IStorage {
 	// ==========================================
 
 	/**
-	 * Legt alle notwendigen Tabellen für das Kassensystem (Kassierer, Kassenzettel, etc.) an
-	 * und erstellt automatisch einen normalen Kassierer sowie einen Chef-Nutzer für Freigaben.
+	 * Legt alle notwendigen Tabellen für das Kassensystem (Kassierer, Kassenzettel, etc.) an.
+	 * Die Tabelle KASSIERER enthält nun die Spalte "manager" für erweiterte Rechte.
 	 */
 	@Override
 	public void initKassenTabellen() {
-		String sqlKassierer = "CREATE TABLE IF NOT EXISTS KASSIERER (id integer PRIMARY KEY AUTOINCREMENT, nummer integer UNIQUE NOT NULL, pin text NOT NULL, name text NOT NULL)";
+		// NEU: manager Spalte als integer (0 = Nein, 1 = Ja)
+		String sqlKassierer = "CREATE TABLE IF NOT EXISTS KASSIERER (id integer PRIMARY KEY AUTOINCREMENT, nummer integer UNIQUE NOT NULL, pin text NOT NULL, name text NOT NULL, manager integer DEFAULT 0)";
 		String sqlKassenzettel = "CREATE TABLE IF NOT EXISTS KASSENZETTEL (id integer PRIMARY KEY AUTOINCREMENT, datum text NOT NULL, uhrzeit text NOT NULL, zahlart text NOT NULL, kassierer_id integer NOT NULL, gesamtpreis real NOT NULL)";
 		String sqlPositionen = "CREATE TABLE IF NOT EXISTS KASSENZETTEL_POSITION (id integer PRIMARY KEY AUTOINCREMENT, kassenzettel_id integer NOT NULL, produkt_id integer NOT NULL, anzahl integer NOT NULL, gesamtpreis real NOT NULL)";
 		String sqlAbschluss = "CREATE TABLE IF NOT EXISTS KASSENABSCHLUSS (id integer PRIMARY KEY AUTOINCREMENT, datum text NOT NULL, uhrzeit text NOT NULL, kassierer_id integer NOT NULL, soll real NOT NULL, ist real NOT NULL)";
 
 		try (Connection con = DriverManager.getConnection(dbUrl);
 		     Statement st = con.createStatement()) {
+
+			// Tabellen anlegen
 			st.executeUpdate(sqlKassierer);
 			st.executeUpdate(sqlKassenzettel);
 			st.executeUpdate(sqlPositionen);
 			st.executeUpdate(sqlAbschluss);
 
+			// Falls die Datenbank schon existiert, probieren wir das Feld "manager" sicherheitshalber nachzutragen
+			try {
+				st.executeUpdate("ALTER TABLE KASSIERER ADD COLUMN manager integer DEFAULT 0");
+			} catch (SQLException ignored) {
+				// Ignorieren, falls die Spalte schon existiert
+			}
+
+			// Demodaten prüfen
 			ResultSet rs = st.executeQuery("SELECT count(*) FROM KASSIERER");
 			if (rs.next() && rs.getInt(1) == 0) {
-				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name) VALUES (1001, '1234', 'Max Muster')");
-				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name) VALUES (9999, '0000', 'Chef Autorisierung')");
+				// Normaler Kassierer (manager = 0)
+				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name, manager) VALUES (1001, '1234', 'Max Muster', 0)");
+				// Manager (manager = 1)
+				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name, manager) VALUES (9999, '0000', 'Chef Autorisierung', 1)");
 			}
 			rs.close();
 		} catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Fehler", e);
+			LOGGER.log(Level.SEVERE, "Fehler beim Initialisieren der Kassentabellen", e);
+		}
+	}
+
+	// ==========================================
+	// BEREICH: KASSIERER VERWALTUNG (NEU)
+	// ==========================================
+
+	/**
+	 * Holt eine Liste aller hinterlegten Kassierer aus der Datenbank.
+	 */
+	@Override
+	public List<Kassierer> getAllKassierer() {
+		List<Kassierer> list = new ArrayList<>();
+		String sql = "SELECT * FROM KASSIERER";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
+			while (rs.next()) {
+				Kassierer k = new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
+				k.setManager(rs.getInt("manager") == 1); // 1 = true, 0 = false
+				list.add(k);
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler beim Abrufen der Kassierer", e);
+		}
+		return list;
+	}
+
+	/**
+	 * Fügt einen neuen Kassierer zur Datenbank hinzu.
+	 */
+	@Override
+	public void addKassierer(Kassierer k) {
+		String sql = "INSERT INTO KASSIERER (nummer, name, pin, manager) VALUES (?, ?, ?, ?)";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, k.getNummer());
+			pstmt.setString(2, k.getName());
+			pstmt.setString(3, k.getPin());
+			pstmt.setInt(4, k.isManager() ? 1 : 0);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler beim Hinzufügen eines Kassierers", e);
 		}
 	}
 
 	/**
-	 * Sucht einen Kassierer anhand seiner Anmeldenummer (Login am Touch-Panel).
+	 * Aktualisiert einen bestehenden Kassierer (Identifizierung über die Nummer).
 	 */
+	@Override
+	public void updateKassierer(Kassierer k) {
+		String sql = "UPDATE KASSIERER SET name=?, pin=?, manager=? WHERE nummer=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setString(1, k.getName());
+			pstmt.setString(2, k.getPin());
+			pstmt.setInt(3, k.isManager() ? 1 : 0);
+			pstmt.setInt(4, k.getNummer());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler beim Aktualisieren des Kassierers", e);
+		}
+	}
+
+	/**
+	 * Löscht einen Kassierer komplett aus der Datenbank.
+	 */
+	@Override
+	public void deleteKassierer(int nummer) {
+		String sql = "DELETE FROM KASSIERER WHERE nummer=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, nummer);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler beim Löschen des Kassierers", e);
+		}
+	}
+
 	@Override
 	public Kassierer getKassiererByNummer(int nummer) {
 		Kassierer k = null;
@@ -628,6 +629,7 @@ public class Database implements IStorage {
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
 				k = new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
+				k.setManager(rs.getInt("manager") == 1);
 			}
 			rs.close();
 		} catch (SQLException e) {
@@ -636,10 +638,28 @@ public class Database implements IStorage {
 		return k;
 	}
 
-	/**
-	 * Speichert einen kompletten Kassenbon. Erstellt zuerst den Kopf des Bons und
-	 * verknüpft danach alle einzelnen gekauften Positionen damit in der Datenbank.
-	 */
+	public Kassierer getKassiererById(int id) {
+		Kassierer k = null;
+		String sql = "SELECT * FROM KASSIERER WHERE id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql)) {
+			pstmt.setInt(1, id);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				k = new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
+				k.setManager(rs.getInt("manager") == 1);
+			}
+			rs.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler", e);
+		}
+		return k;
+	}
+
+	// ==========================================
+	// BEREICH: BESTEHENDE KASSENBEFEHLE
+	// ==========================================
+
 	@Override
 	public void saveKassenzettel(Kassenzettel kassenzettel) {
 		String sqlInsertZettel = "INSERT INTO KASSENZETTEL (datum, uhrzeit, zahlart, kassierer_id, gesamtpreis) VALUES (?, ?, ?, ?, ?)";
@@ -678,9 +698,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Speichert den Tages- oder Schichtabschluss der Kasse inklusive Soll/Ist-Vergleich.
-	 */
 	@Override
 	public void saveKassenabschluss(Kassenabschluss abschluss) {
 		String sql = "INSERT INTO KASSENABSCHLUSS (datum, uhrzeit, kassierer_id, soll, ist) VALUES (?, ?, ?, ?, ?)";
@@ -697,34 +714,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Ruft den zeitlich letzten Kassenabschluss ab, um zu berechnen, ab wann Einnahmen neu gezählt werden müssen.
-	 */
-	@Override
-	public Kassenabschluss getLastKassenabschluss() {
-		Kassenabschluss abschluss = null;
-		String sql = "SELECT * FROM KASSENABSCHLUSS ORDER BY id DESC LIMIT 1";
-		try (Connection con = DriverManager.getConnection(dbUrl);
-		     PreparedStatement pstmt = con.prepareStatement(sql);
-		     ResultSet rs = pstmt.executeQuery()) {
-			if (rs.next()) {
-				abschluss = new Kassenabschluss();
-				abschluss.setId(rs.getInt("id"));
-				abschluss.setDatum(rs.getString("datum"));
-				abschluss.setUhrzeit(rs.getString("uhrzeit"));
-				abschluss.setSollBestand(rs.getDouble("soll"));
-				abschluss.setIstBestand(rs.getDouble("ist"));
-			}
-		} catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Fehler", e);
-		}
-		return abschluss;
-	}
-
-	/**
-	 * Bucht verkaufte Ware direkt aus dem Lager aus. Bricht ab und wirft einen Fehler,
-	 * wenn versucht wird, mehr zu verkaufen, als da ist.
-	 */
 	@Override
 	public void reduceLagerbestand(int produktId, int anzahl) throws NegativeStockException {
 		String selectSql = "SELECT id, anzahl FROM LAGERBESTAND WHERE produkt_id=? ORDER BY id LIMIT 1";
@@ -760,48 +749,6 @@ public class Database implements IStorage {
 		}
 	}
 
-	/**
-	 * Errechnet die Summe aller Barverkäufe, die seit dem letzten Kassenabschluss getätigt wurden.
-	 */
-	@Override
-	public double getBargeldEinnahmenSeitLetztemAbschluss() {
-		double einnahmen = 0.0;
-		String sql = "SELECT SUM(gesamtpreis) FROM KASSENZETTEL WHERE zahlart='Bar' AND id > COALESCE((SELECT MAX(id) FROM KASSENABSCHLUSS), 0)";
-		try (Connection con = DriverManager.getConnection(dbUrl);
-		     PreparedStatement pstmt = con.prepareStatement(sql);
-		     ResultSet rs = pstmt.executeQuery()) {
-			if (rs.next()) {
-				einnahmen = rs.getDouble(1);
-			}
-		} catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Fehler", e);
-		}
-		return einnahmen;
-	}
-
-	/**
-	 * Hilfsmethode, um einen bestimmten Kassierer über seine Datenbank-ID zu finden (wird für die Bon-Historie genutzt).
-	 */
-	public Kassierer getKassiererById(int id) {
-		Kassierer k = null;
-		String sql = "SELECT * FROM KASSIERER WHERE id=?";
-		try (Connection con = DriverManager.getConnection(dbUrl);
-		     PreparedStatement pstmt = con.prepareStatement(sql)) {
-			pstmt.setInt(1, id);
-			ResultSet rs = pstmt.executeQuery();
-			if (rs.next()) {
-				k = new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
-			}
-			rs.close();
-		} catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Fehler", e);
-		}
-		return k;
-	}
-
-	/**
-	 * Liest die komplette Historie aller jemals erstellten Kassenzettel aus.
-	 */
 	@Override
 	public List<Kassenzettel> getAllKassenzettel() {
 		List<Kassenzettel> list = new ArrayList<>();

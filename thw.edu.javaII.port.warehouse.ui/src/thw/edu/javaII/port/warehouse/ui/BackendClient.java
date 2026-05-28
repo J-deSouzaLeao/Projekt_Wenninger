@@ -448,4 +448,70 @@ public class BackendClient {
         }
         return null;
     }
+
+    // ==========================================
+    // BEREICH: KASSIERER-VERWALTUNG
+    // ==========================================
+
+    /**
+     * Ruft eine Liste aller im System hinterlegten Kassierer ab.
+     * @return Liste aller Kassierer.
+     * @throws Exception Bei Kommunikationsfehlern.
+     */
+    public List<thw.edu.javaII.port.warehouse.model.Kassierer> getAllKassierer() throws Exception {
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.KASSIERER_LISTE);
+        var ret = sendRequest(deo);
+
+        if (ret.getStatus() == Status.OK && ret.getData() != null) {
+            return Cast.safeListCast(ret.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
+        }
+        return List.of();
+    }
+
+    /**
+     * Legt einen neuen Kassierer im System an.
+     * @param k Der neu anzulegende Kassierer.
+     * @return true bei Erfolg.
+     * @throws Exception Bei Kommunikationsfehlern.
+     */
+    public boolean addKassierer(thw.edu.javaII.port.warehouse.model.Kassierer k) throws Exception {
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.KASSIERER_ADD);
+        deo.setData(k);
+        return sendRequest(deo).getStatus() == Status.OK;
+    }
+
+    /**
+     * Aktualisiert die Daten eines Kassierers (z.B. neue PIN).
+     * @param k Der aktualisierte Kassierer.
+     * @return true bei Erfolg.
+     * @throws Exception Bei Kommunikationsfehlern.
+     */
+    public boolean updateKassierer(thw.edu.javaII.port.warehouse.model.Kassierer k) throws Exception {
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.KASSIERER_UPDATE);
+        deo.setData(k);
+        return sendRequest(deo).getStatus() == Status.OK;
+    }
+
+    /**
+     * Löscht einen Kassierer anhand seiner Nummer.
+     * @param nummer Die Identifikationsnummer des Kassierers.
+     * @return true bei Erfolg.
+     * @throws Exception Bei Kommunikationsfehlern.
+     */
+    public boolean deleteKassierer(int nummer) throws Exception {
+        var k = new thw.edu.javaII.port.warehouse.model.Kassierer();
+        k.setNummer(nummer);
+
+        var deo = new WarehouseDEO();
+        deo.setZone(Zone.KASSE);
+        deo.setCommand(Command.KASSIERER_DELETE);
+        deo.setData(k);
+        return sendRequest(deo).getStatus() == Status.OK;
+    }
 }
