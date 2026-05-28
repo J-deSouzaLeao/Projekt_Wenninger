@@ -123,6 +123,25 @@ public class KassenUI extends JFrame {
         abschlussBtn.setForeground(Color.WHITE);
         abschlussBtn.addActionListener(e -> new KassenabschlussDialog(this, client, kassierer).setVisible(true));
 
+        // NEU: Manager-Prüfung
+        if (kassierer.isManager()) {
+            aktionPanel.setLayout(new GridLayout(4, 1, 5, 5)); // 4 Zeilen statt 3
+            JButton adminBtn = new JButton("ADMIN");
+            adminBtn.setBackground(Color.DARK_GRAY);
+            adminBtn.setForeground(Color.WHITE);
+            adminBtn.addActionListener(e -> new AdminKassiererDialog(this, client, kassierer).setVisible(true));
+
+            aktionPanel.add(bezahlenBtn);
+            aktionPanel.add(stornoBtn);
+            aktionPanel.add(abschlussBtn);
+            aktionPanel.add(adminBtn); // Extra Button für den Manager
+        } else {
+            aktionPanel.setLayout(new GridLayout(3, 1, 5, 5));
+            aktionPanel.add(bezahlenBtn);
+            aktionPanel.add(stornoBtn);
+            aktionPanel.add(abschlussBtn);
+        }
+
         // Raster anpassen von 2 Zeilen auf 3 Zeilen
         aktionPanel.setLayout(new GridLayout(3, 1, 5, 5));
         aktionPanel.add(bezahlenBtn);
@@ -199,7 +218,7 @@ public class KassenUI extends JFrame {
         if (stornoZaehler >= 2) {
             boolean autorisiert = false;
             while (!autorisiert) {
-                String chefNrStr = JOptionPane.showInputDialog(this, "Sicherheits-Sperre! 2 Stornos erreicht.\nBitte andere Kassierer-Nr eingeben:");
+                String chefNrStr = JOptionPane.showInputDialog(this, "Sicherheits-Sperre! 2 Stornos erreicht.\nManagerfreigabe erforderlich:");
                 if (chefNrStr == null) return; // Abbrechen gedrückt
                 String chefPin = showPasswordDialog();
                 if (chefPin == null) return;

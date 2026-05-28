@@ -97,4 +97,12 @@ public class Kassierer implements Serializable {
     public void setStartBestand(double startBestand) {
         this.startBestand = startBestand;
     }
+
+    /**
+     * Legt fest, ob dieser Kassierer administrative Rechte (Manager) besitzt.
+     */
+    private boolean isManager;
+
+    public boolean isManager() { return isManager; }
+    public void setManager(boolean manager) { this.isManager = manager; }
 }

@@ -84,6 +84,15 @@ public class KassenLoginScreen extends JFrame {
         loginBtn.addActionListener(e -> performLogin());
         numpad.add(loginBtn);
 
+        // --- NEU: PIN vergessen Button ---
+        JButton pinResetBtn = new JButton("PIN vergessen?");
+        pinResetBtn.setBackground(new Color(255, 140, 0));
+        pinResetBtn.setForeground(Color.WHITE);
+        pinResetBtn.setFont(new Font("Arial", Font.BOLD, 16));
+        pinResetBtn.setFocusable(false);
+        pinResetBtn.addActionListener(e -> new KassenPinResetDialog(this, client).setVisible(true));
+        numpad.add(pinResetBtn); // Wird als letztes Element im Grid hinzugefügt
+
         add(numpad, BorderLayout.CENTER);
     }
 

@@ -57,5 +57,17 @@ public enum Command {
 	ABSCHLUSS_SPEICHERN,
 
 	/** Fordert eine Historie aller bisher getätigten Käufe und Kassenbons an. */
-	KASSENZETTEL_LISTE
+	KASSENZETTEL_LISTE,
+
+	/** Listet alle Mitarbeiter auf. **/
+	KASSIERER_LISTE,
+
+	/** Fügt einen Kassierer der Mitarbeiterliste hinzu. */
+	KASSIERER_ADD,
+
+	/** Löscht einen Kassierer aus der Mitarbeiterliste. */
+	KASSIERER_DELETE,
+
+	/** Bearbeitet einen Kassierer in der Mitarbeiterliste. */
+	KASSIERER_UPDATE
 }
