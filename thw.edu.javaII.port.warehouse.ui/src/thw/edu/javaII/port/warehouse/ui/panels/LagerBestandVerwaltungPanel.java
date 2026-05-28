@@ -69,9 +69,11 @@ public class LagerBestandVerwaltungPanel extends JPanel {
         try {
             var client = new BackendClient();
             for (var lb : client.getAllLagerBestaende()) {
-                String prodInfo = lb.getProdukt_id() != null ? String.valueOf(lb.getProdukt_id().getId()) : "Keines";
+                // Produkt-ID wird nicht mehr für die Tabelle ausgelesen
                 String platzInfo = lb.getLagerplatz_id() != null ? String.valueOf(lb.getLagerplatz_id().getId()) : "Keiner";
-                tableModel.addRow(new Object[]{lb.getId(), lb.getAnzahl(), prodInfo, platzInfo});
+
+                // Übergibt nur noch 3 Werte: Index 0, 1 und 2
+                tableModel.addRow(new Object[]{lb.getId(), lb.getAnzahl(), platzInfo});
             }
             client.close();
         } catch (Exception e) {
@@ -106,16 +108,16 @@ public class LagerBestandVerwaltungPanel extends JPanel {
      */
     private void editLagerBestand() {
         int row = table.getSelectedRow();
-        if (row == -1) {
-            showError("Bitte einen Bestand auswählen.");
-            return;
-        }
+        if (row == -1) { showError("Bitte einen Bestand auswählen."); return; }
 
-        int id = (int) tableModel.getValueAt(row, 0);
+        int id = (int) tableModel.getValueAt(row, 0); // Bestands-ID
         var txtAnzahl = new JTextField(tableModel.getValueAt(row, 1).toString());
-        var txtProdId = new JTextField(tableModel.getValueAt(row, 2).toString());
-        var txtPlatzId = new JTextField(tableModel.getValueAt(row, 3).toString());
-        Object[] msg = {"Bestands-ID: " + id, "Anzahl:", txtAnzahl, "Lagerplatz-ID:", txtPlatzId};
+        var txtPlatzId = new JTextField(tableModel.getValueAt(row, 2).toString()); // Ist jetzt auf Index 2!
+
+        // Da Bestands-ID und Produkt-ID denselben Inhalt haben, nehmen wir einfach die 'id'
+        var txtProdId = new JTextField(String.valueOf(id));
+
+        Object[] msg = {"Bestands-ID: " + id, "Anzahl:", txtAnzahl, "Produkt-ID:", txtProdId, "Lagerplatz-ID:", txtPlatzId};
 
         if (JOptionPane.showConfirmDialog(this, msg, "Bestand bearbeiten", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
             saveLagerBestand(id, txtAnzahl.getText(), txtProdId.getText(), txtPlatzId.getText(), true);

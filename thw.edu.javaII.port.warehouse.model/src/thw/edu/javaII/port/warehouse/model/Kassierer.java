@@ -84,4 +84,17 @@ public class Kassierer implements Serializable {
      * * @param name Der neue Name.
      */
     public void setName(String name) { this.name = name; }
+
+    /** * Temporärer Speicher für den Startbestand (Wechselgeld) bei Schichtbeginn.
+     * Wird beim Login an den Server übertragen.
+     */
+    private double startBestand;
+
+    public double getStartBestand() {
+        return startBestand;
+    }
+
+    public void setStartBestand(double startBestand) {
+        this.startBestand = startBestand;
+    }
 }
