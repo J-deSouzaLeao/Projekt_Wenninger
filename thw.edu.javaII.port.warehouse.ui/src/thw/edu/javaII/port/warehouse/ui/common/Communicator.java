@@ -100,19 +100,33 @@ public class Communicator {
 	}
 
 	/**
-	 * Sendet einen Suchbegriff an den Server, um spezifische Lagerbestände zu filtern.
-	 * * @param search Der gesuchte Begriff (z. B. ein Produktname oder Hersteller).
-	 * @return Eine Liste der Bestände, auf die der Suchbegriff passt.
+	 * Fordert vom Server die Top 10 Lagerbestände mit dem höchsten gebundenen Kapital an.
+	 * * @return Liste der kapitalintensivsten Bestände.
 	 */
-	public List<LagerBestand> search(String search) {
+	public List<LagerBestand> getKapitalbindungBestand() {
 		try {
 			WarehouseDEO deo = new WarehouseDEO();
-			deo.setZone(Zone.LAGERBESTAND);
-			deo.setCommand(Command.SEARCH);
-			deo.setData(search);
+			deo.setZone(Zone.STATISTIK);
+			deo.setCommand(Command.KAPITAL); // NEU: Muss in der Klasse 'Command' als Enum hinzugefügt werden!
 			toServer.writeObject(deo);
-			WarehouseReturnDEO d = ((WarehouseReturnDEO) fromServer.readObject());
-			return Cast.safeListCast(d.getData(), LagerBestand.class);
+			return Cast.safeListCast(((WarehouseReturnDEO) fromServer.readObject()).getData(), LagerBestand.class);
+		} catch (IOException | ClassNotFoundException e) {
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
+		}
+		return null;
+	}
+
+	/**
+	 * Fordert vom Server eine Liste aller kritischen Lagerbestände an (Engpässe < 5 Stück).
+	 * * @return Liste der Bestände, die dringend nachbestellt werden müssen.
+	 */
+	public List<LagerBestand> getKritischerBestand() {
+		try {
+			WarehouseDEO deo = new WarehouseDEO();
+			deo.setZone(Zone.STATISTIK);
+			deo.setCommand(Command.KRITISCH); // NEU: Muss in der Klasse 'Command' als Enum hinzugefügt werden!
+			toServer.writeObject(deo);
+			return Cast.safeListCast(((WarehouseReturnDEO) fromServer.readObject()).getData(), LagerBestand.class);
 		} catch (IOException | ClassNotFoundException e) {
 			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 		}

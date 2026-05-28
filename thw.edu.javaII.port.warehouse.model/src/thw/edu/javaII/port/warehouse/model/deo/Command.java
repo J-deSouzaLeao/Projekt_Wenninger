@@ -69,5 +69,9 @@ public enum Command {
 	KASSIERER_DELETE,
 
 	/** Bearbeitet einen Kassierer in der Mitarbeiterliste. */
-	KASSIERER_UPDATE
+	KASSIERER_UPDATE,
+
+	KAPITAL,
+
+	KRITISCH
 }

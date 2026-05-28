@@ -231,4 +231,14 @@ public interface IStorage {
 	 * @param nummer Die Identifikationsnummer des Kassierers.
 	 */
 	void deleteKassierer(int nummer);
+
+	/**
+	 * Ermittelt die Top 10 Lagerbestände mit der höchsten Kapitalbindung.
+	 */
+	List<LagerBestand> getKapitalbindungBestand();
+
+	/**
+	 * Ermittelt alle Lagerbestände, die einen kritischen Meldebestand erreicht haben.
+	 */
+	List<LagerBestand> getKritischerBestand();
 }

@@ -41,15 +41,12 @@ public class LagerPlatzVerwaltungPanel extends JPanel {
         var btnAdd = new JButton("Neu");
         var btnEdit = new JButton("Bearbeiten");
         var btnDelete = new JButton("Löschen");
-        var btnRefresh = new JButton("Aktualisieren");
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
-        buttonPanel.add(btnRefresh);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        btnRefresh.addActionListener(e -> loadData());
         btnAdd.addActionListener(e -> addLagerPlatz());
         btnEdit.addActionListener(e -> editLagerPlatz());
         btnDelete.addActionListener(e -> deleteLagerPlatz());

@@ -25,6 +25,7 @@ import thw.edu.javaII.port.warehouse.ui.panels.WelcomePage;
  * Sie dient als Rahmen für die gesamte Anwendung und enthält das Hauptmenü (oben),
  * eine Fußzeile (unten) und einen dynamischen Mittelbereich, in dem die verschiedenen
  * Ansichten (Panels) je nach Menüauswahl ausgetauscht werden.
+ * * @author juan.de.souza.leao
  */
 public class LagerUI extends JFrame {
 	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(LagerUI.class.getName());
@@ -74,7 +75,6 @@ public class LagerUI extends JFrame {
 		generateMenu();
 		generateFooter();
 		createMenuBar();
-
 	}
 
 	/**
@@ -96,47 +96,55 @@ public class LagerUI extends JFrame {
 	/**
 	 * Erstellt die primären Menüeinträge der oberen Menüleiste.
 	 * Verbindet Basis-Aktionen (wie Startseite, Suchen, Statistik, Beenden)
-	 * mit dem zentralen Action-Handler (LagerUIHandler).
+	 * mit dem zentralen Action-Handler (LagerUIHandler). Der redundante Reiter "Bestand"
+	 * wurde entfernt, da die "Suche" dessen Funktionalität vollständig abdeckt.
 	 */
 	private void generateMenu() {
 		menuBar = new JMenuBar();
+
+		// Datei-Menü
 		JMenu menuDatei = new JMenu("Datei");
 		menuDatei.setPreferredSize(new Dimension(160, menuDatei.getPreferredSize().height));
-		JMenuItem miBeenden = new JMenuItem("Beenden");
-		miBeenden.setPreferredSize(new Dimension(160, miBeenden.getPreferredSize().height));
-		miBeenden.setActionCommand(MenuActionCommands.BEENDEN.toString());
-		miBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+
 		JMenuItem miStartseite = new JMenuItem("Startseite");
 		miStartseite.setPreferredSize(new Dimension(160, miStartseite.getPreferredSize().height));
 		miStartseite.setActionCommand(MenuActionCommands.STARTSEITE.toString());
 		miStartseite.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+
 		JMenuItem miServerBeenden = new JMenuItem("Server Beenden");
 		miServerBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miServerBeenden.setActionCommand(MenuActionCommands.SERVERBEENDEN.toString());
-		JMenuItem miBestand = new JMenuItem("Bestand");
-		miBestand.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
-		miBestand.setActionCommand(MenuActionCommands.BESTAND.toString());
-		miBestand.setPreferredSize(new Dimension(160, miBestand.getPreferredSize().height));
+
+		JMenuItem miBeenden = new JMenuItem("Beenden");
+		miBeenden.setPreferredSize(new Dimension(160, miBeenden.getPreferredSize().height));
+		miBeenden.setActionCommand(MenuActionCommands.BEENDEN.toString());
+		miBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+
+		// Weitere Hauptmenüpunkte
 		JMenuItem miStatistik = new JMenuItem("Statistik");
 		miStatistik.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miStatistik.setActionCommand(MenuActionCommands.STATISTIK.toString());
 		miStatistik.setPreferredSize(new Dimension(160, miStatistik.getPreferredSize().height));
-		JMenuItem miSuchen = new JMenuItem("Suchen");
+
+		JMenuItem miSuchen = new JMenuItem("Bestand");
 		miSuchen.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miSuchen.setActionCommand(MenuActionCommands.SUCHEN.toString());
 		miSuchen.setPreferredSize(new Dimension(160, miSuchen.getPreferredSize().height));
+
 		JMenuItem miInfo = new JMenuItem("Info");
 		miInfo.setPreferredSize(new Dimension(160, miInfo.getPreferredSize().height));
 		miInfo.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
 		miInfo.setActionCommand(MenuActionCommands.INFO.toString());
+
+		// Elemente der Menüleiste hinzufügen
 		setJMenuBar(menuBar);
 		menuBar.add(menuDatei);
 		menuDatei.add(miStartseite);
-		menuDatei.add(miBeenden);
 		menuDatei.add(miServerBeenden);
-		menuBar.add(miBestand);
+		menuDatei.add(miBeenden);
+
+		menuBar.add(miSuchen); // Suche übernimmt jetzt primär die Bestandsansicht
 		menuBar.add(miStatistik);
-		menuBar.add(miSuchen);
 		menuBar.add(miInfo);
 	}
 
@@ -150,21 +158,21 @@ public class LagerUI extends JFrame {
 		JMenu menuStammdaten = new JMenu("Stammdaten");
 		JMenuItem itemProdukte = new JMenuItem("Produkte verwalten");
 		JMenuItem itemLager = new JMenuItem("Lager verwalten");
-		JMenuItem itemLagerPlatz = new JMenuItem("Lagerplätze verwalten"); // Hier hinzugefügt
+		JMenuItem itemLagerPlatz = new JMenuItem("Lagerplätze verwalten");
 
 		menuStammdaten.add(itemProdukte);
 		menuStammdaten.add(itemLager);
-		menuStammdaten.add(itemLagerPlatz); // Hier hinzugefügt
+		menuStammdaten.add(itemLagerPlatz);
 
 		// Menü Lagerbetrieb
 		JMenu menuLagerbetrieb = new JMenu("Lagerbetrieb");
 		JMenuItem itemBestand = new JMenuItem("Bestandsübersicht");
 		menuLagerbetrieb.add(itemBestand);
 
-		// Action Listeners
+		// Action Listeners für Stammdaten & Lagerbetrieb
 		itemProdukte.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.ProduktVerwaltungPanel()));
 		itemLager.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerVerwaltungPanel()));
-		itemLagerPlatz.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerPlatzVerwaltungPanel())); // Jetzt aktiv
+		itemLagerPlatz.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerPlatzVerwaltungPanel()));
 		itemBestand.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerBestandVerwaltungPanel()));
 
 		// An die bestehende menuBar aus generateMenu() anhängen
@@ -178,8 +186,6 @@ public class LagerUI extends JFrame {
 		itemKassenzettel.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.KassenzettelVerwaltungPanel()));
 
 		this.menuBar.add(menuKasse);
-
-		// this.setJMenuBar() entfällt, da die Leiste bereits im Fenster hängt
 	}
 
 	/**
