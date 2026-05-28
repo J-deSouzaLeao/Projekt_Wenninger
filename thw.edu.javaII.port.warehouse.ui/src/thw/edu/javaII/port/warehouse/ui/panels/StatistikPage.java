@@ -5,123 +5,106 @@ import javax.swing.JScrollPane;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
+import javax.swing.ButtonGroup;
 
 import thw.edu.javaII.port.warehouse.ui.common.Session;
 import thw.edu.javaII.port.warehouse.ui.model.BestandTableModel;
 
 import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.io.Serial;
+import java.util.List;
+import thw.edu.javaII.port.warehouse.model.LagerBestand;
 
 /**
  * Diese Klasse repräsentiert die Statistik-Seite in der grafischen Benutzeroberfläche.
- * Sie zeigt eine übersichtliche Tabelle an, in der der Benutzer bequem zwischen
- * den "Top 10" (Artikel mit dem absolut höchsten Lagerbestand) und den "Low 10"
- * (Artikel mit dem geringsten Bestand, die eventuell nachbestellt werden müssen) wechseln kann.
+ * Sie liefert dem Management wichtige Kennzahlen zur Optimierung des Lagerbestands.
+ * Über eine Schalterleiste (Toggle-Buttons) kann bequem zwischen verschiedenen
+ * Analyseverfahren gewechselt werden (Menge, gebundenes Kapital, Engpässe).
  * * @author juan.de.souza.leao
  */
 public class StatistikPage extends JPanel {
 
 	@Serial
 	private static final long serialVersionUID = 6991507120124679776L;
-	private JTable table;
-	private final JToggleButton tglbtnNewToggleButton;
-	private final JToggleButton tglbtnNewToggleButton_1;
+	private final JTable table;
+	private final BestandTableModel model;
 
 	/**
-	 * Erstellt das Statistik-Panel und baut die dazugehörige Benutzeroberfläche auf.
-	 * Beim ersten Aufruf wird standardmäßig die Top 10-Ansicht vom Server geladen.
-	 * Außerdem richtet diese Methode die Toggle-Buttons (Schalter) am unteren Rand ein,
-	 * mit denen dynamisch die Daten ausgetauscht werden können.
-	 * * @param ses    Die aktuelle Benutzersitzung (Session), über die die Verbindung
-	 * zum Server und die Datenabfrage gesteuert wird.
-	 * @param parent Das übergeordnete Hauptfenster (JFrame). Wird benötigt, um das Fenster
-	 * nach dem Umschalten der Tabellen neu zu zeichnen (aktualisieren).
+	 * Erstellt das Statistik-Panel und baut die Benutzeroberfläche auf.
+	 * Nutzt eine ButtonGroup für die nahtlose Umschaltung zwischen den
+	 * vier zentralen Business-Metriken, ohne die UI neu laden zu müssen.
+	 * * @param ses    Die aktuelle Benutzersitzung (Session) für die Serverkommunikation.
+	 * @param parent Das übergeordnete Hauptfenster.
 	 */
 	public StatistikPage(Session ses, JFrame parent) {
-		setLayout(new BorderLayout(0, 0));
+		setLayout(new BorderLayout(10, 10));
 
-		JLabel lblNewLabel = new JLabel("Statistik");
-		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 16));
-		add(lblNewLabel, BorderLayout.NORTH);
+		// Kopfbereich
+		JLabel lblTitle = new JLabel("Lager-Statistiken & KPIs");
+		lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
+		lblTitle.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		add(lblTitle, BorderLayout.NORTH);
 
-		BestandTableModel model = new BestandTableModel(ses.getCommunicator().getTOP10Bestand());
+		// Tabelle initialisieren (Standardmäßig TOP 10)
+		model = new BestandTableModel(ses.getCommunicator().getTOP10Bestand());
 		table = new JTable(model);
 		model.setJTableColumnsWidth(table, 800, 10, 20, 20, 10, 20, 20);
 		table.setShowGrid(true);
 		table.setShowVerticalLines(true);
 		table.setShowHorizontalLines(true);
 		table.setGridColor(Color.DARK_GRAY);
+
 		JScrollPane js = new JScrollPane(table);
-		js.setVisible(true);
 		add(js, BorderLayout.CENTER);
 
-		JPanel panel = new JPanel();
-		add(panel, BorderLayout.SOUTH);
+		// Aktionsbereich mit Toggle-Buttons
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+		add(buttonPanel, BorderLayout.SOUTH);
 
-		tglbtnNewToggleButton = new JToggleButton("TOP 10");
-		tglbtnNewToggleButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if(tglbtnNewToggleButton_1.isSelected()) {
-					tglbtnNewToggleButton.setSelected(true);
-					tglbtnNewToggleButton_1.setSelected(false);
-					BestandTableModel model = new BestandTableModel(ses.getCommunicator().getTOP10Bestand());
-					table = new JTable(model);
-					model.setJTableColumnsWidth(table, 800, 10, 20, 20, 10, 20, 20);
-					table.setShowGrid(true);
-					table.setShowVerticalLines(true);
-					table.setShowHorizontalLines(true);
-					table.setGridColor(Color.DARK_GRAY);
-					JScrollPane js = new JScrollPane(table);
-					js.setVisible(true);
-					BorderLayout layout = (BorderLayout) getLayout();
-					remove(layout.getLayoutComponent(BorderLayout.CENTER));
-					add(js, BorderLayout.CENTER);
-					setVisible(true);
-					parent.setVisible(true);
-				}
-				else {
-					tglbtnNewToggleButton.setSelected(true);
-				}
-			}
-		});
-		tglbtnNewToggleButton.setSelected(true);
-		panel.add(tglbtnNewToggleButton);
+		JToggleButton btnTop10 = new JToggleButton("TOP 10 (Menge)");
+		JToggleButton btnLow10 = new JToggleButton("LOW 10 (Menge)");
+		JToggleButton btnKapital = new JToggleButton("Top Kapitalbindung");
+		JToggleButton btnKritisch = new JToggleButton("Kritische Engpässe");
 
+		// ButtonGroup sorgt dafür, dass immer nur exakt EIN Button gedrückt sein kann
+		ButtonGroup group = new ButtonGroup();
+		group.add(btnTop10);
+		group.add(btnLow10);
+		group.add(btnKapital);
+		group.add(btnKritisch);
 
-		tglbtnNewToggleButton_1 = new JToggleButton("LOW 10");
-		tglbtnNewToggleButton_1.addActionListener(e -> {
-			if(tglbtnNewToggleButton.isSelected()) {
-				tglbtnNewToggleButton_1.setSelected(true);
-				tglbtnNewToggleButton.setSelected(false);
-				BestandTableModel model1 = new BestandTableModel(ses.getCommunicator().getLOW10Bestand());
-				table = new JTable(model1);
-				model1.setJTableColumnsWidth(table, 800, 10, 20, 20, 10, 20, 20);
-				table.setShowGrid(true);
-				table.setShowVerticalLines(true);
-				table.setShowHorizontalLines(true);
-				table.setGridColor(Color.DARK_GRAY);
-				JScrollPane js1 = new JScrollPane(table);
-				js1.setVisible(true);
-				BorderLayout layout = (BorderLayout) getLayout();
-				remove(layout.getLayoutComponent(BorderLayout.CENTER));
-				add(js1, BorderLayout.CENTER);
-				setVisible(true);
-				parent.setVisible(true);
-			}
-			else {
-				tglbtnNewToggleButton_1.setSelected(true);
-			}
-		});
-		tglbtnNewToggleButton_1.setSelected(false);
-		panel.add(tglbtnNewToggleButton_1);
+		buttonPanel.add(btnTop10);
+		buttonPanel.add(btnLow10);
+		buttonPanel.add(btnKapital);
+		buttonPanel.add(btnKritisch);
 
+		btnTop10.setSelected(true); // Start-Zustand
+
+		// Listener für saubere, performante Updates im Hintergrund
+		btnTop10.addActionListener(e -> updateTableData(ses.getCommunicator().getTOP10Bestand()));
+		btnLow10.addActionListener(e -> updateTableData(ses.getCommunicator().getLOW10Bestand()));
+
+		// HINWEIS: Diese beiden Methoden musst du im Communicator / in der Database noch anlegen!
+		btnKapital.addActionListener(e -> updateTableData(ses.getCommunicator().getKapitalbindungBestand()));
+		btnKritisch.addActionListener(e -> updateTableData(ses.getCommunicator().getKritischerBestand()));
 	}
 
+	/**
+	 * Tauscht die Daten im Tabellenmodell aus und informiert die Oberfläche
+	 * über die Änderung, anstatt das komplette Panel neu zu zeichnen.
+	 * * @param neueDaten Die vom Server gelieferte, neue Liste an Lagerbeständen.
+	 */
+	private void updateTableData(List<LagerBestand> neueDaten) {
+		if (neueDaten == null) {
+			neueDaten = new java.util.ArrayList<>();
+		}
+		model.setData(neueDaten);
+		model.fireTableDataChanged();
+	}
 }

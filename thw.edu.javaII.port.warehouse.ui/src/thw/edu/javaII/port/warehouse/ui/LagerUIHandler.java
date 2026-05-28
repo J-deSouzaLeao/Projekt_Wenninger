@@ -8,7 +8,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import thw.edu.javaII.port.warehouse.ui.common.Session;
-import thw.edu.javaII.port.warehouse.ui.panels.BestandPage;
 import thw.edu.javaII.port.warehouse.ui.panels.InfoPage;
 import thw.edu.javaII.port.warehouse.ui.panels.SearchPage;
 import thw.edu.javaII.port.warehouse.ui.panels.StatistikPage;
@@ -19,6 +18,7 @@ import thw.edu.javaII.port.warehouse.ui.panels.WelcomePage;
  * Sie fängt alle Klicks auf die Menüeinträge der oberen Leiste ab, wertet den dazugehörigen Befehl
  * aus und führt die entsprechende Aktion aus – wie beispielsweise das Wechseln der Hauptansicht
  * im Fenster oder das Beenden des Programms.
+ * * @author juan.de.souza.leao
  */
 public class LagerUIHandler implements ActionListener {
 	private final Session ses;
@@ -63,13 +63,12 @@ public class LagerUIHandler implements ActionListener {
 				switchPage(new WelcomePage());
 				break;
 			case BESTAND:
-				switchPage(new BestandPage());
+			case SUCHEN:
+				// Beide Befehle leiten nun auf die zentrale SearchPage (Bestandsansicht) um
+				switchPage(new SearchPage(ses));
 				break;
 			case STATISTIK:
 				switchPage(new StatistikPage(ses, parent));
-				break;
-			case SUCHEN:
-				switchPage(new SearchPage(ses));
 				break;
 			case INFO:
 				switchPage(new InfoPage());

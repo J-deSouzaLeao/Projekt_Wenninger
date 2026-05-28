@@ -55,6 +55,7 @@ public class Database implements IStorage {
 	/**
 	 * Erstellt die Lagertabelle (falls sie noch nicht existiert) oder leert sie
 	 * und füllt sie anschließend mit den Basisdaten aus dem Initializer.
+	 * @param list Die initiale Liste an Lagern (wird hier indirekt über den Initializer gesteuert).
 	 */
 	@Override
 	public void initLager(List<Lager> list) {
@@ -77,6 +78,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Fügt ein neues Lager zur Datenbank hinzu.
+	 * @param model Das zu speichernde Lager-Objekt.
+	 */
 	@Override
 	public void addLager(Lager model) {
 		String sql = "INSERT INTO LAGER (id,name,ort,art) VALUES (?, ?, ?, ?)";
@@ -92,6 +97,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Aktualisiert die Daten eines bestehenden Lagers anhand seiner ID.
+	 * @param model Das Lager mit den neuen Werten.
+	 */
 	@Override
 	public void updateLager(Lager model) {
 		String sql = "UPDATE LAGER SET name=?, ort=?, art=? WHERE id=?";
@@ -107,6 +116,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Löscht ein Lager aus der Datenbank.
+	 * @param model Das zu löschende Lager.
+	 */
 	@Override
 	public void deleteLager(Lager model) {
 		String sql = "DELETE FROM LAGER WHERE id=?";
@@ -119,6 +132,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Ruft alle gespeicherten Lager aus der Datenbank ab.
+	 * @return Eine Liste aller Lager.
+	 */
 	@Override
 	public List<Lager> getLagers() {
 		List<Lager> l = new ArrayList<>();
@@ -135,6 +152,11 @@ public class Database implements IStorage {
 		return l;
 	}
 
+	/**
+	 * Sucht ein bestimmtes Lager anhand seiner eindeutigen ID.
+	 * @param id Die Datenbank-ID des Lagers.
+	 * @return Das gefundene Lager-Objekt oder ein leeres Objekt.
+	 */
 	public Lager getLagerById(int id) {
 		Lager model = new Lager();
 		String sql = "SELECT * FROM LAGER WHERE id=?";
@@ -155,6 +177,10 @@ public class Database implements IStorage {
 		return model;
 	}
 
+	/**
+	 * Erstellt oder setzt die Tabelle für Lagerplätze zurück und füllt sie mit Demodaten.
+	 * @param list Die Liste der initialen Lagerplätze.
+	 */
 	@Override
 	public void initLagerPlatz(List<LagerPlatz> list) {
 		if (tableDoesNotExist("LAGERPLATZ")) {
@@ -176,6 +202,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Speichert einen neuen Lagerplatz in der Datenbank.
+	 * @param model Der neue Lagerplatz.
+	 */
 	@Override
 	public void addLagerPlatz(LagerPlatz model) {
 		String sql = "INSERT INTO LAGERPLATZ (id,name,kapazitaet,lager_id) VALUES (?, ?, ?, ?)";
@@ -191,6 +221,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Aktualisiert die Informationen eines bestehenden Lagerplatzes.
+	 * @param model Der Lagerplatz mit aktualisierten Werten.
+	 */
 	@Override
 	public void updateLagerPlatz(LagerPlatz model) {
 		String sql = "UPDATE LAGERPLATZ SET name=?, kapazitaet=?, lager_id=? WHERE id=?";
@@ -206,6 +240,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Entfernt einen Lagerplatz aus der Datenbank.
+	 * @param model Der zu löschende Lagerplatz.
+	 */
 	@Override
 	public void deleteLagerPlatz(LagerPlatz model) {
 		String sql = "DELETE FROM LAGERPLATZ WHERE id=?";
@@ -218,6 +256,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Ruft eine Liste aller vorhandenen Lagerplätze ab.
+	 * @return Die Liste der Lagerplätze.
+	 */
 	@Override
 	public List<LagerPlatz> getLagerPlatzs() {
 		List<LagerPlatz> l = new ArrayList<>();
@@ -235,6 +277,11 @@ public class Database implements IStorage {
 		return l;
 	}
 
+	/**
+	 * Sucht einen spezifischen Lagerplatz anhand seiner ID.
+	 * @param id Die ID des Lagerplatzes.
+	 * @return Das gefundene Lagerplatz-Objekt.
+	 */
 	public LagerPlatz getLagerPlatzById(int id) {
 		LagerPlatz model = new LagerPlatz();
 		String sql = "SELECT * FROM LAGERPLATZ WHERE id=?";
@@ -255,6 +302,10 @@ public class Database implements IStorage {
 		return model;
 	}
 
+	/**
+	 * Erstellt oder setzt die Lagerbestands-Tabelle zurück.
+	 * @param list Die initialen Lagerbestände.
+	 */
 	@Override
 	public void initLagerBestand(List<LagerBestand> list) {
 		if (tableDoesNotExist("LAGERBESTAND")) {
@@ -276,6 +327,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Bucht einen neuen Lagerbestand in die Datenbank ein.
+	 * @param model Der zu speichernde Lagerbestand.
+	 */
 	@Override
 	public void addLagerBestand(LagerBestand model) {
 		String sql = "INSERT INTO LAGERBESTAND (id,anzahl,produkt_id,lagerplatz_id) VALUES (?, ?, ?, ?)";
@@ -291,6 +346,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Aktualisiert Menge oder Zuordnung eines bestehenden Lagerbestands.
+	 * @param model Der aktualisierte Lagerbestand.
+	 */
 	@Override
 	public void updateLagerBestand(LagerBestand model) {
 		String sql = "UPDATE LAGERBESTAND SET anzahl=?, produkt_id=?, lagerplatz_id=? WHERE id=?";
@@ -306,6 +365,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Entfernt einen Lagerbestand vollständig aus der Datenbank.
+	 * @param model Der zu löschende Bestand.
+	 */
 	@Override
 	public void deleteLagerBestand(LagerBestand model) {
 		String sql = "DELETE FROM LAGERBESTAND WHERE id=?";
@@ -318,6 +381,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Ruft alle System-Lagerbestände mitsamt verknüpften Produkten und Plätzen ab.
+	 * @return Liste der Lagerbestände.
+	 */
 	@Override
 	public List<LagerBestand> getLagerBestands() {
 		List<LagerBestand> l = new ArrayList<>();
@@ -336,6 +403,61 @@ public class Database implements IStorage {
 		return l;
 	}
 
+	/**
+	 * Ermittelt die Top 10 Lagerbestände mit der höchsten Kapitalbindung.
+	 * Die Datenbank berechnet live den Gesamtwert (Menge * Stückpreis) und
+	 * sortiert das Ergebnis absteigend.
+	 * @return Eine Liste der 10 teuersten Lagerbestände.
+	 */
+	public List<LagerBestand> getKapitalbindungBestand() {
+		List<LagerBestand> list = new ArrayList<>();
+		String sql = "SELECT lb.* FROM LAGERBESTAND lb " +
+				"JOIN PRODUKT p ON lb.produkt_id = p.id " +
+				"ORDER BY (lb.anzahl * p.preis) DESC LIMIT 10";
+
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
+
+			while (rs.next()) {
+				LagerPlatz lagerplatz_id = getLagerPlatzById(rs.getInt("lagerplatz_id"));
+				Produkt produkt_id = getProduktById(rs.getInt("produkt_id"));
+				list.add(new LagerBestand(rs.getInt("id"), rs.getInt("anzahl"), produkt_id, lagerplatz_id));
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler bei der Berechnung der Kapitalbindung", e);
+		}
+		return list;
+	}
+
+	/**
+	 * Ermittelt alle Lagerbestände, die einen kritischen Meldebestand erreicht haben.
+	 * Aktuell ist der Schwellenwert auf unter 5 Stück festgelegt.
+	 * @return Liste der kritischen Lagerbestände, aufsteigend sortiert nach Menge.
+	 */
+	public List<LagerBestand> getKritischerBestand() {
+		List<LagerBestand> list = new ArrayList<>();
+		String sql = "SELECT * FROM LAGERBESTAND WHERE anzahl < 5 ORDER BY anzahl ASC";
+
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
+
+			while (rs.next()) {
+				LagerPlatz lagerplatz_id = getLagerPlatzById(rs.getInt("lagerplatz_id"));
+				Produkt produkt_id = getProduktById(rs.getInt("produkt_id"));
+				list.add(new LagerBestand(rs.getInt("id"), rs.getInt("anzahl"), produkt_id, lagerplatz_id));
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler beim Abrufen der kritischen Bestände", e);
+		}
+		return list;
+	}
+
+	/**
+	 * Initialisiert die Tabelle für die Stammdaten der Produkte.
+	 * @param list Die initiale Produktliste.
+	 */
 	@Override
 	public void initProdukt(List<Produkt> list) {
 		if (tableDoesNotExist("PRODUKT")) {
@@ -357,6 +479,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Fügt ein neues Produkt in die Datenbank ein.
+	 * @param model Das Produkt.
+	 */
 	@Override
 	public void addProdukt(Produkt model) {
 		String sql = "INSERT INTO PRODUKT (id,name,hersteller,preis) VALUES (?, ?, ?, ?)";
@@ -372,11 +498,21 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Gibt ein Produkt-Objekt basierend auf der ID eines übergebenen Objekts zurück.
+	 * @param mod Ein Produkt-Objekt, das als Container für die ID dient.
+	 * @return Das gefundene Produkt aus der Datenbank.
+	 */
 	@Override
 	public Produkt getProduktByModel(Produkt mod) {
 		return getProduktById(mod.getId());
 	}
 
+	/**
+	 * Sucht ein Produkt gezielt über seine ID.
+	 * @param id Die Produkt-ID.
+	 * @return Das gefundene Produkt.
+	 */
 	public Produkt getProduktById(int id) {
 		Produkt model = new Produkt();
 		String sql = "SELECT * FROM PRODUKT WHERE id=?";
@@ -397,6 +533,10 @@ public class Database implements IStorage {
 		return model;
 	}
 
+	/**
+	 * Aktualisiert die Eigenschaften (z.B. Preis, Name) eines Produkts.
+	 * @param model Das Produkt mit den neuen Eigenschaften.
+	 */
 	@Override
 	public void updateProdukt(Produkt model) {
 		String sql = "UPDATE PRODUKT SET name=?, hersteller=?, preis=? WHERE id=?";
@@ -412,6 +552,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Löscht ein Produkt aus den Stammdaten.
+	 * @param model Das zu löschende Produkt.
+	 */
 	@Override
 	public void deleteProdukt(Produkt model) {
 		String sql = "DELETE FROM PRODUKT WHERE id=?";
@@ -424,6 +568,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Ruft alle Produkte aus der Datenbank ab.
+	 * @return Liste aller Produkte.
+	 */
 	@Override
 	public List<Produkt> getProdukts() {
 		List<Produkt> l = new ArrayList<>();
@@ -440,6 +588,10 @@ public class Database implements IStorage {
 		return l;
 	}
 
+	/**
+	 * Initialisiert die Tabelle für Demodaten.
+	 * @param list Die Liste an Demo-Objekten.
+	 */
 	@Override
 	public void initDemo(List<DemoModel> list) {
 		if (tableDoesNotExist("DEMOS")) {
@@ -461,6 +613,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Fügt ein Demo-Objekt in die Datenbank ein.
+	 * @param model Das Demo-Objekt.
+	 */
 	@Override
 	public void addDemo(DemoModel model) {
 		String sql = "INSERT INTO DEMOS (id,name) VALUES (?, ?)";
@@ -474,7 +630,13 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Hilfsmethode, um den gesamten Inhalt einer Tabelle zu löschen.
+	 * Der Kommentar schützt vor lästigen IDE-Warnungen wegen des fehlenden WHERE.
+	 * @param tableName Der Name der zu leerenden Tabelle.
+	 */
 	private void truncateTable(String tableName) {
+		//noinspection SqlWithoutWhere
 		String sql = "DELETE FROM " + tableName;
 		try (Connection con = DriverManager.getConnection(dbUrl);
 		     Statement st = con.createStatement()) {
@@ -484,6 +646,11 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Prüft anhand der Datenbank-Metadaten, ob eine Tabelle existiert.
+	 * @param tableName Der zu prüfende Tabellenname.
+	 * @return true, falls sie noch nicht existiert.
+	 */
 	private boolean tableDoesNotExist(String tableName) {
 		boolean exists = true;
 		try (Connection con = DriverManager.getConnection(dbUrl)) {
@@ -503,7 +670,7 @@ public class Database implements IStorage {
 
 	/**
 	 * Legt alle notwendigen Tabellen für das Kassensystem (Kassierer, Kassenzettel, etc.) an.
-	 * Die Tabelle KASSIERER enthält nun die Spalte "manager" für erweiterte Rechte.
+	 * Die Tabelle KASSIERER enthält die Spalte "manager" für erweiterte Rechte.
 	 */
 	@Override
 	public void initKassenTabellen() {
@@ -516,25 +683,20 @@ public class Database implements IStorage {
 		try (Connection con = DriverManager.getConnection(dbUrl);
 		     Statement st = con.createStatement()) {
 
-			// Tabellen anlegen
 			st.executeUpdate(sqlKassierer);
 			st.executeUpdate(sqlKassenzettel);
 			st.executeUpdate(sqlPositionen);
 			st.executeUpdate(sqlAbschluss);
 
-			// Falls die Datenbank schon existiert, probieren wir das Feld "manager" sicherheitshalber nachzutragen
 			try {
 				st.executeUpdate("ALTER TABLE KASSIERER ADD COLUMN manager integer DEFAULT 0");
 			} catch (SQLException ignored) {
 				// Ignorieren, falls die Spalte schon existiert
 			}
 
-			// Demodaten prüfen
 			ResultSet rs = st.executeQuery("SELECT count(*) FROM KASSIERER");
 			if (rs.next() && rs.getInt(1) == 0) {
-				// Normaler Kassierer (manager = 0)
 				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name, manager) VALUES (1001, '1234', 'Max Muster', 0)");
-				// Manager (manager = 1)
 				st.executeUpdate("INSERT INTO KASSIERER (nummer, pin, name, manager) VALUES (9999, '0000', 'Chef Autorisierung', 1)");
 			}
 			rs.close();
@@ -544,11 +706,12 @@ public class Database implements IStorage {
 	}
 
 	// ==========================================
-	// BEREICH: KASSIERER VERWALTUNG (NEU)
+	// BEREICH: KASSIERER VERWALTUNG
 	// ==========================================
 
 	/**
 	 * Holt eine Liste aller hinterlegten Kassierer aus der Datenbank.
+	 * @return Liste der Kassierer.
 	 */
 	@Override
 	public List<Kassierer> getAllKassierer() {
@@ -559,7 +722,7 @@ public class Database implements IStorage {
 		     ResultSet rs = pstmt.executeQuery()) {
 			while (rs.next()) {
 				Kassierer k = new Kassierer(rs.getInt("id"), rs.getInt("nummer"), rs.getString("pin"), rs.getString("name"));
-				k.setManager(rs.getInt("manager") == 1); // 1 = true, 0 = false
+				k.setManager(rs.getInt("manager") == 1);
 				list.add(k);
 			}
 		} catch (SQLException e) {
@@ -570,6 +733,7 @@ public class Database implements IStorage {
 
 	/**
 	 * Fügt einen neuen Kassierer zur Datenbank hinzu.
+	 * @param k Der anzulegende Kassierer.
 	 */
 	@Override
 	public void addKassierer(Kassierer k) {
@@ -588,6 +752,7 @@ public class Database implements IStorage {
 
 	/**
 	 * Aktualisiert einen bestehenden Kassierer (Identifizierung über die Nummer).
+	 * @param k Der Kassierer mit aktualisierten Daten.
 	 */
 	@Override
 	public void updateKassierer(Kassierer k) {
@@ -606,6 +771,7 @@ public class Database implements IStorage {
 
 	/**
 	 * Löscht einen Kassierer komplett aus der Datenbank.
+	 * @param nummer Die eindeutige Nummer des Kassierers.
 	 */
 	@Override
 	public void deleteKassierer(int nummer) {
@@ -619,6 +785,11 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Sucht einen Kassierer anhand seiner Login-Nummer.
+	 * @param nummer Die Personalnummer.
+	 * @return Der Kassierer (oder null, falls nicht gefunden).
+	 */
 	@Override
 	public Kassierer getKassiererByNummer(int nummer) {
 		Kassierer k = null;
@@ -638,6 +809,11 @@ public class Database implements IStorage {
 		return k;
 	}
 
+	/**
+	 * Sucht einen Kassierer anhand seiner Datenbank-ID.
+	 * @param id Die interne Datenbank-ID.
+	 * @return Der Kassierer.
+	 */
 	public Kassierer getKassiererById(int id) {
 		Kassierer k = null;
 		String sql = "SELECT * FROM KASSIERER WHERE id=?";
@@ -660,6 +836,10 @@ public class Database implements IStorage {
 	// BEREICH: BESTEHENDE KASSENBEFEHLE
 	// ==========================================
 
+	/**
+	 * Speichert einen abgeschlossenen Kassenzettel inklusive all seiner Positionen.
+	 * @param kassenzettel Der fertige Kassenzettel vom Kassen-Client.
+	 */
 	@Override
 	public void saveKassenzettel(Kassenzettel kassenzettel) {
 		String sqlInsertZettel = "INSERT INTO KASSENZETTEL (datum, uhrzeit, zahlart, kassierer_id, gesamtpreis) VALUES (?, ?, ?, ?, ?)";
@@ -698,6 +878,10 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Speichert das Protokoll eines Schicht- bzw. Kassenabschlusses.
+	 * @param abschluss Das Abschluss-Objekt (Soll, Ist, Kassierer).
+	 */
 	@Override
 	public void saveKassenabschluss(Kassenabschluss abschluss) {
 		String sql = "INSERT INTO KASSENABSCHLUSS (datum, uhrzeit, kassierer_id, soll, ist) VALUES (?, ?, ?, ?, ?)";
@@ -714,6 +898,12 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Reduziert nach einem erfolgreichen Verkauf den Lagerbestand des jeweiligen Produkts.
+	 * @param produktId Die ID des verkauften Produkts.
+	 * @param anzahl Die gekaufte Menge, die abgebucht werden soll.
+	 * @throws NegativeStockException Falls durch den Verkauf der Bestand unter 0 fallen würde.
+	 */
 	@Override
 	public void reduceLagerbestand(int produktId, int anzahl) throws NegativeStockException {
 		String selectSql = "SELECT id, anzahl FROM LAGERBESTAND WHERE produkt_id=? ORDER BY id LIMIT 1";
@@ -749,25 +939,51 @@ public class Database implements IStorage {
 		}
 	}
 
+	/**
+	 * Liest die komplette Historie aller jemals erstellten Kassenzettel aus der Datenbank.
+	 * Lädt in einer Sub-Query direkt alle dazugehörigen Positionen mit.
+	 * @return Eine Liste aller Kassenzettel inklusive Positionen.
+	 */
 	@Override
 	public List<Kassenzettel> getAllKassenzettel() {
 		List<Kassenzettel> list = new ArrayList<>();
-		String sql = "SELECT * FROM KASSENZETTEL";
+		String sqlZettel = "SELECT * FROM KASSENZETTEL";
+		String sqlPositionen = "SELECT * FROM KASSENZETTEL_POSITION WHERE kassenzettel_id=?";
+
 		try (Connection con = DriverManager.getConnection(dbUrl);
-		     PreparedStatement pstmt = con.prepareStatement(sql);
-		     ResultSet rs = pstmt.executeQuery()) {
-			while (rs.next()) {
+		     PreparedStatement pstmtZettel = con.prepareStatement(sqlZettel);
+		     ResultSet rsZettel = pstmtZettel.executeQuery()) {
+
+			while (rsZettel.next()) {
 				Kassenzettel z = new Kassenzettel();
-				z.setId(rs.getInt("id"));
-				z.setDatum(rs.getString("datum"));
-				z.setUhrzeit(rs.getString("uhrzeit"));
-				z.setZahlart(rs.getString("zahlart"));
-				z.setGesamtpreis(rs.getDouble("gesamtpreis"));
-				z.setKassierer(getKassiererById(rs.getInt("kassierer_id")));
+				int zettelId = rsZettel.getInt("id");
+
+				z.setId(zettelId);
+				z.setDatum(rsZettel.getString("datum"));
+				z.setUhrzeit(rsZettel.getString("uhrzeit"));
+				z.setZahlart(rsZettel.getString("zahlart"));
+				z.setGesamtpreis(rsZettel.getDouble("gesamtpreis"));
+				z.setKassierer(getKassiererById(rsZettel.getInt("kassierer_id")));
+
+				try (PreparedStatement pstmtPos = con.prepareStatement(sqlPositionen)) {
+					pstmtPos.setInt(1, zettelId);
+					try (ResultSet rsPos = pstmtPos.executeQuery()) {
+						while (rsPos.next()) {
+							thw.edu.javaII.port.warehouse.model.KassenzettelPosition pos = new thw.edu.javaII.port.warehouse.model.KassenzettelPosition();
+							thw.edu.javaII.port.warehouse.model.Produkt p = getProduktById(rsPos.getInt("produkt_id"));
+
+							pos.setProdukt(p);
+							pos.setAnzahl(rsPos.getInt("anzahl"));
+							pos.setGesamtpreis(rsPos.getDouble("gesamtpreis"));
+
+							z.getPositionen().add(pos);
+						}
+					}
+				}
 				list.add(z);
 			}
 		} catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Fehler", e);
+			LOGGER.log(Level.SEVERE, "Fehler beim Laden der Kassenzettel und Positionen", e);
 		}
 		return list;
 	}

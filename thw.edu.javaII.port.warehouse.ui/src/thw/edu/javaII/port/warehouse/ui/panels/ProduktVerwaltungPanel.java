@@ -44,21 +44,18 @@ public class ProduktVerwaltungPanel extends JPanel {
         table = new JTable(tableModel);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Buttons konfigurieren
+        // Buttons konfigurieren (Aktualisieren-Button entfernt)
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         var btnAdd = new JButton("Neu");
         var btnEdit = new JButton("Bearbeiten");
         var btnDelete = new JButton("Löschen");
-        var btnRefresh = new JButton("Aktualisieren");
 
         buttonPanel.add(btnAdd);
         buttonPanel.add(btnEdit);
         buttonPanel.add(btnDelete);
-        buttonPanel.add(btnRefresh);
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Listener hinzufügen
-        btnRefresh.addActionListener(e -> loadData());
         btnAdd.addActionListener(e -> addProdukt());
         btnEdit.addActionListener(e -> editProdukt());
         btnDelete.addActionListener(e -> deleteProdukt());
@@ -105,7 +102,7 @@ public class ProduktVerwaltungPanel extends JPanel {
                         Integer.parseInt(txtId.getText().trim()),
                         txtName.getText().trim(),
                         txtHersteller.getText().trim(),
-                        Double.parseDouble(txtPreis.getText().trim().replace(",", ".")) // Komma durch Punkt ersetzen für Robustheit
+                        Double.parseDouble(txtPreis.getText().trim().replace(",", "."))
                 );
                 var client = new BackendClient();
                 boolean erfolgreich = client.addProdukt(p);
@@ -114,7 +111,6 @@ public class ProduktVerwaltungPanel extends JPanel {
                 if (erfolgreich) {
                     loadData();
                 } else {
-                    // ANGEPASST: Konkrete Fehlermeldung bei abgelehnter Speicherung
                     showError("Das Produkt konnte nicht angelegt werden.\nMöglicherweise wird diese Produkt-ID bereits verwendet.");
                 }
             } catch (NumberFormatException ex) {
@@ -128,8 +124,6 @@ public class ProduktVerwaltungPanel extends JPanel {
     /**
      * Öffnet einen Eingabedialog zum Bearbeiten eines bestehenden Produkts.
      * Das Produkt muss dafür vorher in der Tabelle per Mausklick markiert worden sein.
-     * Die aktuelle ID bleibt fest (kann nicht geändert werden), die anderen Werte
-     * werden in die Felder vorgeladen.
      */
     private void editProdukt() {
         int selectedRow = table.getSelectedRow();
@@ -193,7 +187,7 @@ public class ProduktVerwaltungPanel extends JPanel {
     }
 
     /**
-     * Hilfsmethode, um standardisierte Fehlermeldungen als Pop-up (Dialog-Fenster) anzuzeigen.
+     * Hilfsmethode, um standardisierte Fehlermeldungen als Pop-up anzuzeigen.
      * @param msg Die Nachricht, die dem Benutzer angezeigt werden soll.
      */
     private void showError(String msg) {

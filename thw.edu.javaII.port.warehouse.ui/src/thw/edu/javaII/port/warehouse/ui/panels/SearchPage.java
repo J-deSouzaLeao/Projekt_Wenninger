@@ -7,8 +7,9 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.Serial;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -18,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.table.TableRowSorter;
 
 import thw.edu.javaII.port.warehouse.model.LagerBestand;
 import thw.edu.javaII.port.warehouse.ui.common.Session;
@@ -26,8 +29,9 @@ import thw.edu.javaII.port.warehouse.ui.model.BestandTableModel;
 /**
  * Diese Klasse repräsentiert die Such- und Verwaltungsansicht der grafischen Benutzeroberfläche.
  * Hier kann der Benutzer gezielt nach Lagerbeständen suchen, die angezeigten Ergebnisse
- * in einer Tabelle einsehen, bestehende Bestände bearbeiten (z. B. Mengen korrigieren)
- * oder den Dialog für die Einlagerung eines komplett neuen Produkts aufrufen.
+ * in einer Tabelle einsehen, bestehende Bestände bearbeiten oder neue anlegen.
+ * * Durch den integrierten TableRowSorter erfolgt die Suche nun in Echtzeit und
+ * filtert zuverlässig über alle Spalten (inklusive IDs und Namen).
  * * @author juan.de.souza.leao
  */
 public class SearchPage extends JPanel {
@@ -37,20 +41,32 @@ public class SearchPage extends JPanel {
 	private final JTable table;
 	private final JTextField textField;
 	private final BestandTableModel model;
+	private final TableRowSorter<BestandTableModel> sorter;
 
 	/**
 	 * Erstellt das Such-Panel und baut die komplette Benutzeroberfläche auf.
-	 * Dazu gehören die Suchleiste im oberen Bereich, die große Ergebnistabelle in der Mitte
-	 * und die Aktions-Buttons (Verändern / Neues Produkt) am unteren Rand.
-	 * Beim Start wird die Tabelle standardmäßig mit dem kompletten Lagerbestand gefüllt.
+	 * Die Tabelle wird initial mit dem kompletten Bestand gefüllt und ein Sorter
+	 * für die Echtzeit-Suche wird darübergelegt.
 	 * * @param ses Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
 	 */
 	public SearchPage(Session ses) {
 		setLayout(new BorderLayout(0, 0));
 
-		JLabel lblNewLabel = new JLabel("Suche");
+		JLabel lblNewLabel = new JLabel("Lagerbestand");
 		lblNewLabel.setFont(new Font("Lucida Grande", Font.BOLD, 16));
 		add(lblNewLabel, BorderLayout.NORTH);
+
+		// --- Tabellen-Modell und Sorter initialisieren ---
+		model = new BestandTableModel(ses.getCommunicator().getBestand());
+		table = new JTable(model);
+		table.setShowGrid(true);
+		table.setShowVerticalLines(true);
+		table.setShowHorizontalLines(true);
+		table.setGridColor(Color.DARK_GRAY);
+
+		// Sorter für die Live-Suche über alle Spalten anlegen
+		sorter = new TableRowSorter<>(model);
+		table.setRowSorter(sorter);
 
 		JPanel pannel_2 = getJPanel(ses);
 		add(pannel_2, BorderLayout.SOUTH);
@@ -64,6 +80,7 @@ public class SearchPage extends JPanel {
 		gbl_panel.rowWeights = new double[] { 0.0, 0.0, 1.0 };
 		panel.setLayout(gbl_panel);
 
+		// Suchfeld-Bereich
 		JPanel panel_1 = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel_1.getLayout();
 		flowLayout.setAlignment(FlowLayout.RIGHT);
@@ -77,7 +94,15 @@ public class SearchPage extends JPanel {
 		panel_1.add(textField);
 		textField.setColumns(20);
 
-		JButton btnSearch = createBtnSearch(ses);
+		// --- Live-Überwachung des Suchfeldes (Echtzeit-Filterung) ---
+		textField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				anwendenFilter();
+			}
+		});
+
+		JButton btnSearch = createBtnSearch();
 		panel_1.add(btnSearch);
 
 		JLabel lblNewLabel_1 = new JLabel("Ergebnisse");
@@ -86,13 +111,6 @@ public class SearchPage extends JPanel {
 		gbc_lblNewLabel_1.gridx = 0;
 		gbc_lblNewLabel_1.gridy = 1;
 		panel.add(lblNewLabel_1, gbc_lblNewLabel_1);
-
-		model = new BestandTableModel(ses.getCommunicator().getBestand());
-		table = new JTable(model);
-		table.setShowGrid(true);
-		table.setShowVerticalLines(true);
-		table.setShowHorizontalLines(true);
-		table.setGridColor(Color.DARK_GRAY);
 
 		JScrollPane js = new JScrollPane(table);
 		js.setVisible(true);
@@ -105,9 +123,21 @@ public class SearchPage extends JPanel {
 	}
 
 	/**
+	 * Wendet den Text aus dem Suchfeld als Filter auf die Tabelle an.
+	 * Ist das Feld leer, wird der Filter entfernt und alles angezeigt.
+	 */
+	private void anwendenFilter() {
+		String searchText = textField.getText().trim();
+		if (searchText.isEmpty()) {
+			sorter.setRowFilter(null);
+		} else {
+			// (?i) = Sucht unabhängig von Groß- und Kleinschreibung
+			sorter.setRowFilter(RowFilter.regexFilter("(?i)" + searchText));
+		}
+	}
+
+	/**
 	 * Erstellt den unteren Bereich (Panel) mit den Haupt-Aktionsschaltflächen.
-	 * Hier werden die Buttons zum Bearbeiten eines Bestands und zum Anlegen
-	 * eines neuen Produkts eingebunden.
 	 * * @param ses Die aktuelle Benutzersitzung.
 	 * @return Das fertig konfigurierte Panel für den unteren Rand.
 	 */
@@ -124,7 +154,7 @@ public class SearchPage extends JPanel {
 			ap.setModalityType(ModalityType.APPLICATION_MODAL);
 			ap.setVisible(true);
 
-			// Nach dem Schließen des "Neues Produkt"-Dialogs wird die Tabelle aktualisiert
+			// Tabelle updaten und Filter beibehalten
 			model.setData(ses.getCommunicator().getBestand());
 			model.fireTableDataChanged();
 		});
@@ -134,54 +164,46 @@ public class SearchPage extends JPanel {
 	}
 
 	/**
-	 * Erstellt den "Suchen"-Button, inklusive der Logik für die Validierung der Eingabe.
-	 * Stellt sicher, dass der Benutzer mindestens 3 Zeichen in das Suchfeld eingibt,
-	 * bevor eine Anfrage an den Server geschickt wird.
-	 * * @param ses Die aktuelle Benutzersitzung.
-	 * @return Der fertig konfigurierte Such-Button.
+	 * Erstellt den "Suchen"-Button.
+	 * Da wir nun Live-Suche haben, wendet der Button einfach den Sorter an,
+	 * falls der Nutzer aus Gewohnheit darauf klickt.
+	 * * @return Der fertig konfigurierte Such-Button.
 	 */
-	private JButton createBtnSearch(Session ses) {
+	private JButton createBtnSearch() {
 		JButton btnSearch = new JButton("Suchen");
-		btnSearch.addActionListener(e -> {
-			if (textField.getText().length() < 3) {
-				// FIXME ggf. ein ICON einfügen das ein Die Info entsprechend darstellt.
-				JOptionPane.showMessageDialog(null, "Für eine Suche müssen mindestens 3 Zeichen eingegeben werden!",
-						"Hinweis: Eingabefehler", JOptionPane.INFORMATION_MESSAGE);
-			} else {
-				List<LagerBestand> searchBestand = ses.getCommunicator().search(textField.getText());
-				if (!searchBestand.isEmpty()) {
-					model.setData(searchBestand);
-					model.fireTableDataChanged();
-				}
-			}
-		});
+		btnSearch.addActionListener(e -> anwendenFilter());
 		return btnSearch;
 	}
 
 	/**
-	 * Erstellt den "Verändern"-Button.
-	 * Dieser öffnet einen Dialog, in dem der ausgewählte Eintrag aus der Tabelle bearbeitet werden kann.
-	 * Nach der Bearbeitung wird die Anzeige der Tabelle automatisch aktualisiert.
+	 * Erstellt den "Verändern"-Button für die Bearbeitung eines Bestands.
+	 * Da die Tabelle nun gefiltert sein kann, wird hier der korrekte Index
+	 * von der Ansicht (View) auf das Modell umgerechnet.
 	 * * @param ses Die aktuelle Benutzersitzung.
 	 * @return Der fertig konfigurierte "Verändern"-Button.
 	 */
 	private JButton createBtnNewButton(Session ses) {
 		JButton btnNewButton = new JButton("Verändern");
 		btnNewButton.addActionListener(e -> {
-			LagerBestand l = model.getObjectAt(table.getSelectedRow());
+			int selectedRowView = table.getSelectedRow();
+			if (selectedRowView == -1) {
+				JOptionPane.showMessageDialog(this, "Bitte wählen Sie zuerst einen Eintrag zum Verändern aus.",
+						"Hinweis", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+
+			// WICHTIG: Visuelle Zeile in die echte Daten-Zeile umrechnen (wegen Filter/Sortierung)
+			int selectedRowModel = table.convertRowIndexToModel(selectedRowView);
+
+			LagerBestand l = model.getObjectAt(selectedRowModel);
 			ChangeLagerBestand clb = new ChangeLagerBestand(l, ses);
 			clb.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			clb.setModalityType(ModalityType.APPLICATION_MODAL);
 			clb.setVisible(true);
 
-			// Aktualisiert die Tabelle nach dem Schließen des Bearbeitungs-Dialogs
-			if (textField.getText().length() < 3) {
-				model.setData(ses.getCommunicator().getBestand());
-				model.fireTableDataChanged();
-			} else {
-				model.setData(ses.getCommunicator().search(textField.getText()));
-				model.fireTableDataChanged();
-			}
+			// Nach dem Ändern einfach den neuesten Stand laden, der Sorter behält den Suchtext automatisch!
+			model.setData(ses.getCommunicator().getBestand());
+			model.fireTableDataChanged();
 		});
 		return btnNewButton;
 	}

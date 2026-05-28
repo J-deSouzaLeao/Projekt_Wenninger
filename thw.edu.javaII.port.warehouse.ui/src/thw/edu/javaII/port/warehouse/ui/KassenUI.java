@@ -9,8 +9,9 @@ import java.awt.*;
 
 /**
  * Stellt die grafische Benutzeroberfläche für die Kasse dar.
- * Beinhaltet die Artikelanzeige (Kassenzettel), ein Numpad zur Eingabe
- * von Artikelnummern sowie Funktionen für Bezahlung, Storno und Kassenabschluss.
+ * Beinhaltet die Artikelanzeige (Kassenzettel), ein dynamisches Numpad zur Eingabe
+ * von Artikelnummern und Mengen sowie Funktionen für Bezahlung, Storno und Kassenabschluss.
+ * * @author juan.de.souza.leao
  */
 public class KassenUI extends JFrame {
     private final BackendClient client;
@@ -19,14 +20,16 @@ public class KassenUI extends JFrame {
 
     private final DefaultTableModel tableModel;
     private final JTable artikelTabelle;
-    private final JTextField eingabeFeld;
+    private final JTextField txtProduktId;
+    private final JTextField txtMenge;
     private final JLabel summenLabel;
 
     private int stornoZaehler = 0;
 
     /**
      * Initialisiert das Kassenfenster für den angemeldeten Kassierer.
-     * Baut das Layout auf (Tabelle links, Numpad und Aktionen rechts).
+     * Baut das Layout auf (Tabelle links, Numpad und Aktionen rechts)
+     * und integriert die Mengen-Eingabe.
      * * @param client    Der BackendClient für die Serverkommunikation.
      * @param kassierer Der aktuell angemeldete Kassierer.
      */
@@ -70,13 +73,31 @@ public class KassenUI extends JFrame {
 
         // --- Rechter Bereich: Touch-Eingabe und Numpad ---
         JPanel eingabePanel = new JPanel(new BorderLayout());
-        eingabePanel.setPreferredSize(new Dimension(350, 0));
+        eingabePanel.setPreferredSize(new Dimension(380, 0));
         eingabePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        eingabeFeld = new JTextField();
-        eingabeFeld.setFont(new Font("Arial", Font.BOLD, 36));
-        eingabeFeld.setHorizontalAlignment(JTextField.RIGHT);
-        eingabePanel.add(eingabeFeld, BorderLayout.NORTH);
+        // Obere Eingabefelder (Produkt-ID und Menge)
+        JPanel textFeldPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+
+        JLabel lblId = new JLabel("ID:");
+        lblId.setFont(new Font("Arial", Font.BOLD, 22));
+        textFeldPanel.add(lblId);
+
+        txtProduktId = new JTextField();
+        txtProduktId.setFont(new Font("Arial", Font.BOLD, 28));
+        txtProduktId.setHorizontalAlignment(JTextField.RIGHT);
+        textFeldPanel.add(txtProduktId);
+
+        JLabel lblMenge = new JLabel("Menge:");
+        lblMenge.setFont(new Font("Arial", Font.BOLD, 22));
+        textFeldPanel.add(lblMenge);
+
+        txtMenge = new JTextField("1");
+        txtMenge.setFont(new Font("Arial", Font.BOLD, 28));
+        txtMenge.setHorizontalAlignment(JTextField.CENTER);
+        textFeldPanel.add(txtMenge);
+
+        eingabePanel.add(textFeldPanel, BorderLayout.NORTH);
 
         // Numpad
         JPanel numpad = new JPanel(new GridLayout(4, 3, 5, 5));
@@ -95,37 +116,30 @@ public class KassenUI extends JFrame {
 
         eingabePanel.add(numpad, BorderLayout.CENTER);
 
-        // Aktions-Buttons (Vorbereitung für Phase 4)
-        JPanel aktionPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        // Aktions-Buttons
+        JPanel aktionPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+
         JButton bezahlenBtn = new JButton("BEZAHLEN");
         bezahlenBtn.addActionListener(e -> bezahlenVorgang());
-
         bezahlenBtn.setFont(new Font("Arial", Font.BOLD, 24));
         bezahlenBtn.setBackground(new Color(70, 130, 180));
         bezahlenBtn.setForeground(Color.WHITE);
 
         JButton stornoBtn = new JButton("STORNO");
         stornoBtn.addActionListener(e -> stornoVorgang());
-
         stornoBtn.setFont(new Font("Arial", Font.BOLD, 24));
         stornoBtn.setBackground(new Color(220, 20, 60));
         stornoBtn.setForeground(Color.WHITE);
 
-        aktionPanel.add(bezahlenBtn);
-        aktionPanel.add(stornoBtn);
-        eingabePanel.add(aktionPanel, BorderLayout.SOUTH);
-
-        add(eingabePanel, BorderLayout.EAST);
-
         JButton abschlussBtn = new JButton("ABSCHLUSS");
+        abschlussBtn.addActionListener(e -> new KassenabschlussDialog(this, client, kassierer).setVisible(true));
         abschlussBtn.setFont(new Font("Arial", Font.BOLD, 24));
         abschlussBtn.setBackground(new Color(255, 140, 0));
         abschlussBtn.setForeground(Color.WHITE);
-        abschlussBtn.addActionListener(e -> new KassenabschlussDialog(this, client, kassierer).setVisible(true));
 
-        // NEU: Manager-Prüfung
+        // Manager-Prüfung für erweiterte Optionen
         if (kassierer.isManager()) {
-            aktionPanel.setLayout(new GridLayout(4, 1, 5, 5)); // 4 Zeilen statt 3
+            aktionPanel.setLayout(new GridLayout(4, 1, 5, 5));
             JButton adminBtn = new JButton("ADMIN");
             adminBtn.setBackground(Color.DARK_GRAY);
             adminBtn.setForeground(Color.WHITE);
@@ -134,51 +148,82 @@ public class KassenUI extends JFrame {
             aktionPanel.add(bezahlenBtn);
             aktionPanel.add(stornoBtn);
             aktionPanel.add(abschlussBtn);
-            aktionPanel.add(adminBtn); // Extra Button für den Manager
+            aktionPanel.add(adminBtn);
         } else {
-            aktionPanel.setLayout(new GridLayout(3, 1, 5, 5));
             aktionPanel.add(bezahlenBtn);
             aktionPanel.add(stornoBtn);
             aktionPanel.add(abschlussBtn);
         }
 
-        // Raster anpassen von 2 Zeilen auf 3 Zeilen
-        aktionPanel.setLayout(new GridLayout(3, 1, 5, 5));
-        aktionPanel.add(bezahlenBtn);
-        aktionPanel.add(stornoBtn);
-        aktionPanel.add(abschlussBtn); // NEU
+        eingabePanel.add(aktionPanel, BorderLayout.SOUTH);
+        add(eingabePanel, BorderLayout.EAST);
+
+        // Initialen Fokus setzen
+        SwingUtilities.invokeLater(txtProduktId::requestFocus);
     }
 
     /**
-     * Erstellt einen Button für das Numpad.
+     * Erstellt einen Button für das Numpad und deaktiviert dessen Fokus,
+     * damit der Cursor im jeweiligen Textfeld (ID oder Menge) bleibt.
      * * @param text Die Beschriftung des Buttons (Zahl oder "C").
      * @return Der konfigurierte JButton.
      */
     private JButton createNumButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Arial", Font.BOLD, 28));
+        btn.setFocusable(false); // Verhindert, dass der Button den Fokus klaut
         btn.addActionListener(e -> {
             if (text.equals("C")) {
-                eingabeFeld.setText("");
+                txtProduktId.setText("");
+                txtMenge.setText("1");
+                txtProduktId.requestFocus();
             } else {
-                eingabeFeld.setText(eingabeFeld.getText() + text);
+                appendNumpadDigit(text);
             }
         });
         return btn;
     }
 
     /**
-     * Liest die Artikelnummer aus dem Eingabefeld, ruft das Produkt vom Server ab
-     * und fügt es dem aktuellen Kassenzettel (Tabelle) hinzu.
+     * Ein intelligenter Listener für die Numpad-Tasten.
+     * Fügt die Ziffer automatisch in das Feld ein, in dem der Cursor gerade steht.
+     * * @param digit Die gedrückte Ziffer.
+     */
+    private void appendNumpadDigit(String digit) {
+        Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+
+        if (focusOwner instanceof JTextField aktivesFeld) {
+
+            // Wenn im Mengen-Feld noch die standardmäßige "1" steht, überschreiben wir sie
+            if (aktivesFeld == txtMenge && aktivesFeld.getText().equals("1")) {
+                aktivesFeld.setText(digit);
+            } else {
+                aktivesFeld.setText(aktivesFeld.getText() + digit);
+            }
+        } else {
+            // Fallback: Wenn nichts markiert ist, schreiben wir in die Produkt-ID
+            txtProduktId.setText(txtProduktId.getText() + digit);
+        }
+    }
+
+    /**
+     * Liest die Artikelnummer und die gewünschte Menge aus, ruft das Produkt vom Server ab
+     * und fügt es dem aktuellen Kassenzettel hinzu. Setzt die Eingabefelder danach zurück.
      */
     private void artikelHinzufuegen() {
         try {
-            int artNr = Integer.parseInt(eingabeFeld.getText().trim());
+            int artNr = Integer.parseInt(txtProduktId.getText().trim());
+            int menge = Integer.parseInt(txtMenge.getText().trim());
+
+            if (menge <= 0) {
+                JOptionPane.showMessageDialog(this, "Die Menge muss mindestens 1 betragen.", "Ungültige Menge", JOptionPane.WARNING_MESSAGE);
+                txtMenge.setText("1");
+                return;
+            }
+
             Produkt p = client.getProduktById(artNr);
 
             if (p != null && p.getName() != null) {
-                // Menge ist hier standardmäßig 1. (Könnte für Phase 4 noch um Multiplikatoren ergänzt werden)
-                int menge = 1;
                 double gesamt = p.getPreis() * menge;
 
                 tableModel.addRow(new Object[]{
@@ -191,13 +236,18 @@ public class KassenUI extends JFrame {
 
                 gesamtSumme += gesamt;
                 summenLabel.setText(String.format("Gesamt: %.2f €", gesamtSumme));
-                eingabeFeld.setText(""); // Feld nach erfolgreicher Eingabe leeren
+
+                // Felder zurücksetzen
+                txtProduktId.setText("");
+                txtMenge.setText("1");
+                txtProduktId.requestFocus(); // Direkt bereit für den nächsten Artikel
             } else {
                 JOptionPane.showMessageDialog(this, "Artikelnummer nicht gefunden!", "Fehler", JOptionPane.ERROR_MESSAGE);
-                eingabeFeld.setText("");
+                txtProduktId.setText("");
+                txtProduktId.requestFocus();
             }
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Bitte eine gültige Artikelnummer eingeben.", "Hinweis", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Bitte eine gültige Artikelnummer und Menge eingeben.", "Hinweis", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Verbindungsfehler zum Server.", "Fehler", JOptionPane.ERROR_MESSAGE);
         }
@@ -205,7 +255,7 @@ public class KassenUI extends JFrame {
 
     /**
      * Entfernt den in der Tabelle ausgewählten Artikel vom Kassenzettel.
-     * Nach zwei Stornovorgängen wird die Autorisierung durch einen anderen Kassierer erzwungen.
+     * Nach zwei Stornovorgängen wird die Autorisierung durch einen Manager erzwungen.
      */
     private void stornoVorgang() {
         int selectedRow = artikelTabelle.getSelectedRow();
@@ -229,13 +279,15 @@ public class KassenUI extends JFrame {
                         JOptionPane.showMessageDialog(this, "Sie können sich nicht selbst autorisieren!", "Fehler", JOptionPane.ERROR_MESSAGE);
                         continue;
                     }
-                    Kassierer chef = client.loginKassierer(chefNr, chefPin);
-                    if (chef != null) {
+                    // WICHTIG: loginKassierer erfordert nun den Startbestand, für die reine Autorisierung senden wir 0.0
+                    Kassierer chef = client.loginKassierer(chefNr, chefPin, 0.0);
+
+                    if (chef != null && chef.isManager()) {
                         autorisiert = true;
                         stornoZaehler = 0; // Reset nach Autorisierung
                         JOptionPane.showMessageDialog(this, "Autorisierung durch " + chef.getName() + " erfolgreich.");
                     } else {
-                        JOptionPane.showMessageDialog(this, "Autorisierung fehlgeschlagen!", "Fehler", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Autorisierung fehlgeschlagen! Keine Manager-Rechte oder PIN falsch.", "Fehler", JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Ungültige Eingabe oder Verbindungsfehler.", "Fehler", JOptionPane.ERROR_MESSAGE);
@@ -252,6 +304,8 @@ public class KassenUI extends JFrame {
 
         tableModel.removeRow(selectedRow);
         stornoZaehler++;
+
+        txtProduktId.requestFocus();
     }
 
     /**
@@ -320,6 +374,8 @@ public class KassenUI extends JFrame {
                 gesamtSumme = 0.0;
                 stornoZaehler = 0;
                 summenLabel.setText("Gesamt: 0.00 €");
+
+                txtProduktId.requestFocus();
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Fehler beim Verbuchen: " + ex.getMessage(), "Backend-Fehler", JOptionPane.ERROR_MESSAGE);

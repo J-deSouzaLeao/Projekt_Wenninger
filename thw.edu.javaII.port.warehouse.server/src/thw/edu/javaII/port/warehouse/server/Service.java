@@ -296,7 +296,6 @@ public class Service extends Thread {
 				if (deoIn.getData() != null && deoIn.getData() instanceof Produkt) {
 					Produkt neuesProdukt = Cast.safeCast(deoIn.getData(), Produkt.class);
 
-					// --- NEU: Manuelle Prüfung, ob die ID bereits existiert ---
 					boolean idExistiert = false;
 					for (Produkt p : store.getProdukts()) {
 						if (p.getId() == neuesProdukt.getId()) {
@@ -306,10 +305,8 @@ public class Service extends Thread {
 					}
 
 					if (idExistiert) {
-						// ID ist schon vergeben -> Sende ERROR an den Client
 						deoOut = new WarehouseReturnDEO(null, "Fehler: Produkt-ID existiert bereits!", Status.ERROR);
 					} else {
-						// ID ist frei -> Speichern und OK senden
 						store.addProdukt(neuesProdukt);
 						deoOut = new WarehouseReturnDEO(null, "Produkt erfolgreich angelegt", Status.OK);
 					}
@@ -385,20 +382,28 @@ public class Service extends Thread {
 			case BESTAND:
 				data = store.getLagerBestands();
 				data.sort(new BestandByProduktAlpha());
-				deoOut = new WarehouseReturnDEO(data, "Liste der Prdoukte mit Lagerinfo alphabetisch", Status.OK);
+				deoOut = new WarehouseReturnDEO(data, "Liste der Produkte mit Lagerinfo alphabetisch", Status.OK);
 				break;
 			case TOP:
 				data = store.getLagerBestands();
 				data.sort(new BestandByLagerBestand());
 				Collections.reverse(data);
 				relevantData = data.stream().limit(10).collect(Collectors.toList());
-				deoOut = new WarehouseReturnDEO(relevantData, "Liste der TOP 10 Prdoukte nach Lagerbestand", Status.OK);
+				deoOut = new WarehouseReturnDEO(relevantData, "Liste der TOP 10 Produkte nach Lagerbestand", Status.OK);
 				break;
 			case LOW:
 				data = store.getLagerBestands();
 				data.sort(new BestandByLagerBestand());
 				relevantData = data.stream().limit(10).collect(Collectors.toList());
-				deoOut = new WarehouseReturnDEO(relevantData, "Liste der LOW 10 Prdoukte nach Lagerbestand", Status.OK);
+				deoOut = new WarehouseReturnDEO(relevantData, "Liste der LOW 10 Produkte nach Lagerbestand", Status.OK);
+				break;
+			case KAPITAL:
+				// Holt die teuersten Bestände aus der Datenbank
+				deoOut = new WarehouseReturnDEO(store.getKapitalbindungBestand(), "Top Kapitalbindung", Status.OK);
+				break;
+			case KRITISCH:
+				// Holt die Engpässe aus der Datenbank
+				deoOut = new WarehouseReturnDEO(store.getKritischerBestand(), "Kritische Engpässe", Status.OK);
 				break;
 			default:
 				deoOut = new WarehouseReturnDEO(null, "Unbekanntes Kommando", Status.ERROR);
@@ -479,9 +484,7 @@ public class Service extends Thread {
 					thw.edu.javaII.port.warehouse.model.Kassierer k = store.getKassiererByNummer(req.getNummer());
 
 					if (k != null && k.getPin().equals(req.getPin())) {
-						// --- NEU: Den Startbestand beim Login serverseitig abspeichern ---
 						aktuellerStartBestand = req.getStartBestand();
-
 						deoOut = new WarehouseReturnDEO(k, "Login erfolgreich", Status.OK);
 					} else {
 						deoOut = new WarehouseReturnDEO(null, "Ungültige Nummer oder PIN", Status.ERROR);
@@ -495,16 +498,12 @@ public class Service extends Thread {
 					thw.edu.javaII.port.warehouse.model.Kassenzettel zettel = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassenzettel.class);
 
 					try {
-						// 1. Zettel und Positionen in DB speichern (für die Historie)
 						store.saveKassenzettel(zettel);
 
-						// 2. Lagerbestand reduzieren
 						for (thw.edu.javaII.port.warehouse.model.KassenzettelPosition pos : zettel.getPositionen()) {
 							store.reduceLagerbestand(pos.getProdukt().getId(), pos.getAnzahl());
 						}
 
-						// --- NEU: Umsatz der aktuellen Schicht berechnen ---
-						// Wir addieren den Umsatz NUR, wenn der Kunde in Bar gezahlt hat!
 						if ("Bar".equalsIgnoreCase(zettel.getZahlart())) {
 							aktuellerSchichtUmsatz += zettel.getGesamtpreis();
 						}
@@ -521,8 +520,6 @@ public class Service extends Thread {
 				break;
 
 			case ABSCHLUSS_LADEN:
-				// --- NEU: Wir fragen nicht mehr die fehleranfällige Datenbank ab! ---
-				// Stattdessen nutzen wir unseren exakten, internen Schicht-Zähler.
 				deoOut = new WarehouseReturnDEO(new double[]{aktuellerStartBestand, aktuellerSchichtUmsatz}, "Abschlussdaten geladen", Status.OK);
 				break;
 
@@ -530,11 +527,8 @@ public class Service extends Thread {
 				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassenabschluss) {
 					thw.edu.javaII.port.warehouse.model.Kassenabschluss abschluss = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassenabschluss.class);
 
-					// Für die Historie/Statistik in der DB speichern
 					store.saveKassenabschluss(abschluss);
 
-					// --- NEU: Kasse "leeren" nach dem Abschluss (Simulation der Geldabgabe an die Bank/Tresor) ---
-					// Sowohl der Startbestand als auch die gezählten Einnahmen werden genullt!
 					aktuellerStartBestand = 0.0;
 					aktuellerSchichtUmsatz = 0.0;
 
@@ -554,7 +548,7 @@ public class Service extends Thread {
 			case KASSIERER_ADD:
 				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
 					thw.edu.javaII.port.warehouse.model.Kassierer k = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
-					store.addKassierer(k); // Setzt voraus, dass diese Methode im IStorage existiert
+					store.addKassierer(k);
 					deoOut = new WarehouseReturnDEO(null, "Kassierer angelegt", Status.OK);
 				} else {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten", Status.ERROR);
@@ -564,7 +558,7 @@ public class Service extends Thread {
 			case KASSIERER_UPDATE:
 				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
 					thw.edu.javaII.port.warehouse.model.Kassierer k = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
-					store.updateKassierer(k); // Setzt voraus, dass diese Methode im IStorage existiert
+					store.updateKassierer(k);
 					deoOut = new WarehouseReturnDEO(null, "Kassierer aktualisiert", Status.OK);
 				} else {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten", Status.ERROR);
@@ -574,7 +568,7 @@ public class Service extends Thread {
 			case KASSIERER_DELETE:
 				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
 					thw.edu.javaII.port.warehouse.model.Kassierer k = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
-					store.deleteKassierer(k.getNummer()); // Setzt voraus, dass diese Methode im IStorage existiert
+					store.deleteKassierer(k.getNummer());
 					deoOut = new WarehouseReturnDEO(null, "Kassierer gelöscht", Status.OK);
 				} else {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten", Status.ERROR);
