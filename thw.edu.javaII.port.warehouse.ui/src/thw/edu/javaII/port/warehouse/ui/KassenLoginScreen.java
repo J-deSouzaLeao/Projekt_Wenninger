@@ -9,7 +9,8 @@ import java.awt.event.FocusEvent;
 /**
  * Diese Klasse repräsentiert den Login-Bildschirm für das Kassen-Terminal (Point of Sale).
  * Sie ist speziell für die Touchscreen-Bedienung optimiert und enthält ein eigenes Numpad
- * (Ziffernblock) zur Eingabe der Kassierer-Nummer, der PIN und des anfänglichen Kassenbestands.
+ * zur Eingabe der Kassierer-Nummer, der PIN und des anfänglichen Kassenbestands.
+ * Beinhaltet eine Sicherheitsfunktion, die bei wiederholten Fehlversuchen eine Managerfreigabe erzwingt.
  */
 public class KassenLoginScreen extends JFrame {
     private final JTextField nrField;
@@ -17,25 +18,28 @@ public class KassenLoginScreen extends JFrame {
     private final JTextField bestandField;
     private final BackendClient client;
 
-    // Speichert, welches Feld gerade vom Benutzer ausgewählt ist
+    /** Speichert, welches Feld gerade vom Benutzer ausgewählt ist. */
     private JTextField aktivesFeld;
+
+    /** Speichert die aktuelle Anzahl aufeinanderfolgender Fehlversuche. */
+    private int fehlversuche = 0;
+
+    /** Definiert das Limit, ab dem eine Managerfreigabe erzwungen wird. */
+    private static final int MAX_FEHLVERSUCHE = 3;
 
     /**
      * Erstellt das Login-Fenster und initialisiert die Benutzeroberfläche.
-     * Baut die Eingabefelder auf und richtet einen Focus-Listener ein, der stets
-     * überwacht, welches Textfeld gerade aktiv (angetippt) ist, damit das Numpad
-     * die Zahlen in das richtige Feld schreibt.
+     * Baut die Eingabefelder auf und richtet einen Focus-Listener ein.
      * * @param client Der BackendClient für die Serverkommunikation (Authentifizierung).
      */
     public KassenLoginScreen(BackendClient client) {
         this.client = client;
         setTitle("Kassen-Terminal Login");
-        setSize(500, 650); // Fenster minimal höher gemacht für den zusätzlichen Button
+        setSize(500, 650);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Eingabefelder
         JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
         inputPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -56,8 +60,7 @@ public class KassenLoginScreen extends JFrame {
 
         add(inputPanel, BorderLayout.NORTH);
 
-        // Wir merken uns immer, welches Feld zuletzt angetippt wurde
-        aktivesFeld = nrField; // Standard beim Start: Das oberste Feld
+        aktivesFeld = nrField;
         FocusAdapter focusTracker = new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -68,7 +71,6 @@ public class KassenLoginScreen extends JFrame {
         pinField.addFocusListener(focusTracker);
         bestandField.addFocusListener(focusTracker);
 
-        // --- BUGFIX: GridLayout Zeilen auf 0 (automatisch) setzen, da wir 13 Buttons haben! ---
         JPanel numpad = new JPanel(new GridLayout(0, 3, 5, 5));
         for (int i = 1; i <= 9; i++) {
             numpad.add(createNumButton(String.valueOf(i)));
@@ -80,40 +82,32 @@ public class KassenLoginScreen extends JFrame {
         loginBtn.setBackground(new Color(60, 179, 113));
         loginBtn.setForeground(Color.WHITE);
         loginBtn.setFont(new Font("Arial", Font.BOLD, 20));
-        loginBtn.setFocusable(false); // Verhindert Fokus-Klau beim Login-Button
+        loginBtn.setFocusable(false);
         loginBtn.addActionListener(e -> performLogin());
         numpad.add(loginBtn);
 
-        // --- BUGFIX: HTML-Zeilenumbruch und Margins für bessere Lesbarkeit ---
         JButton pinResetBtn = new JButton("<html><center>PIN<br>vergessen?</center></html>");
-        pinResetBtn.setMargin(new Insets(2, 2, 2, 2)); // Nimmt den unsichtbaren Rand weg
+        pinResetBtn.setMargin(new Insets(2, 2, 2, 2));
         pinResetBtn.setBackground(new Color(255, 140, 0));
         pinResetBtn.setForeground(Color.WHITE);
         pinResetBtn.setFont(new Font("Arial", Font.BOLD, 16));
         pinResetBtn.setFocusable(false);
         pinResetBtn.addActionListener(e -> new KassenPinResetDialog(this, client).setVisible(true));
 
-        // Da wir 13 Buttons haben, fügen wir vorher 2 unsichtbare Platzhalter ein,
-        // damit der PIN-Button schön mittig oder rechts in der neuen 5. Zeile sitzt.
-        numpad.add(new JLabel("")); // Leerer Platzhalter links
-        numpad.add(pinResetBtn);    // Button in der Mitte
-        // numpad.add(new JLabel("")); // Optional: Weiterer Platzhalter rechts
+        numpad.add(new JLabel(""));
+        numpad.add(pinResetBtn);
 
         add(numpad, BorderLayout.CENTER);
     }
 
     /**
      * Hilfsmethode zur Erstellung der einzelnen Ziffern-Buttons für das Numpad.
-     * Stellt sicher, dass die Buttons nicht den Fokus stehlen (setFocusable(false)),
-     * damit der Cursor im anvisierten Textfeld bleibt.
      * * @param text Die Ziffer oder "C" (Clear) für den Button.
      * @return Der fertig konfigurierte Numpad-Button.
      */
     private JButton createNumButton(String text) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Arial", Font.BOLD, 24));
-
-        // WICHTIG: Das Numpad darf den Textfeldern nicht den Fokus stehlen!
         btn.setFocusable(false);
 
         btn.addActionListener(e -> {
@@ -121,7 +115,6 @@ public class KassenLoginScreen extends JFrame {
                 if (text.equals("C")) {
                     aktivesFeld.setText("");
                 } else {
-                    // Schreibt die Zahl an das Ende des aktuell gemerkten Feldes
                     aktivesFeld.setText(aktivesFeld.getText() + text);
                 }
             }
@@ -130,33 +123,82 @@ public class KassenLoginScreen extends JFrame {
     }
 
     /**
-     * Führt den eigentlichen Anmeldevorgang durch.
-     * Liest Kassierer-Nummer, PIN und den deklarierten Startbestand aus.
-     * Sendet diese Daten zur Überprüfung und Schichteröffnung an den Server.
+     * Führt den Anmeldevorgang durch. Zählt Fehlversuche und sperrt das Terminal
+     * bei Erreichen des definierten Limits.
      */
     private void performLogin() {
+        if (fehlversuche >= MAX_FEHLVERSUCHE) {
+            erzwingeManagerFreigabe();
+            return;
+        }
+
         try {
             int nr = Integer.parseInt(nrField.getText().trim());
             String pin = new String(pinField.getPassword());
-
-            // Startbestand aus dem Textfeld auslesen
             double bestand = Double.parseDouble(bestandField.getText().trim().replace(",", "."));
 
-            // Übergabe des 'bestand' an die aktualisierte Client-Methode
             Kassierer k = client.loginKassierer(nr, pin, bestand);
 
             if (k != null) {
+                fehlversuche = 0;
                 JOptionPane.showMessageDialog(this, "Willkommen, " + k.getName() + "\nBargeldbestand: " + bestand + "€ bestätigt.");
                 dispose();
-
                 new KassenUI(client, k).setVisible(true);
             } else {
-                JOptionPane.showMessageDialog(this, "Login fehlgeschlagen. Nummer oder PIN falsch.", "Fehler", JOptionPane.ERROR_MESSAGE);
+                fehlversuche++;
+                if (fehlversuche >= MAX_FEHLVERSUCHE) {
+                    JOptionPane.showMessageDialog(this, "Zu viele Fehlversuche! Das Terminal ist gesperrt. Managerfreigabe erforderlich.", "System gesperrt", JOptionPane.ERROR_MESSAGE);
+                    erzwingeManagerFreigabe();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Login fehlgeschlagen. Nummer oder PIN falsch.\nVersuch " + fehlversuche + " von " + MAX_FEHLVERSUCHE, "Fehler", JOptionPane.WARNING_MESSAGE);
+                }
             }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Bitte gültige Zahlen eingeben.", "Eingabefehler", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Verbindungsfehler zum Server.", "Fehler", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Öffnet einen modalen Dialog zur Eingabe von Manager-Logindaten.
+     * Prüft die Berechtigung und setzt bei Erfolg den Fehlerzähler zurück.
+     * Bricht der Nutzer ab, wird die Anwendung aus Sicherheitsgründen geschlossen.
+     */
+    private void erzwingeManagerFreigabe() {
+        JTextField txtManagerNummer = new JTextField();
+        JPasswordField txtManagerPin = new JPasswordField();
+        Object[] msg = {
+                "Manager-Personalnummer:", txtManagerNummer,
+                "Manager-PIN:", txtManagerPin
+        };
+
+        int option = JOptionPane.showConfirmDialog(this, msg, "Managerfreigabe erforderlich",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                int mgrNummer = Integer.parseInt(txtManagerNummer.getText().trim());
+                String mgrPin = new String(txtManagerPin.getPassword());
+
+                Kassierer manager = client.getAllKassierer().stream()
+                        .filter(k -> k.getNummer() == mgrNummer)
+                        .findFirst()
+                        .orElse(null);
+
+                if (manager != null && manager.isManager() && manager.getPin().equals(mgrPin)) {
+                    fehlversuche = 0;
+                    JOptionPane.showMessageDialog(this, "Freigabe durch Manager '" + manager.getName() + "' erteilt. System entsperrt.", "Erfolgreich", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Ungültige Managerdaten. Terminal bleibt gesperrt.", "Freigabe abgelehnt", JOptionPane.ERROR_MESSAGE);
+                    erzwingeManagerFreigabe();
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Fehlerhafte Eingabe. Terminal bleibt gesperrt.", "Fehler", JOptionPane.ERROR_MESSAGE);
+                erzwingeManagerFreigabe();
+            }
+        } else {
+            System.exit(0);
         }
     }
 }

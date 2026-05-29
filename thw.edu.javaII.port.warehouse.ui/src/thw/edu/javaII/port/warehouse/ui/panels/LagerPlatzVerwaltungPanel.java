@@ -34,7 +34,7 @@ public class LagerPlatzVerwaltungPanel extends JPanel {
         add(topPanel, BorderLayout.NORTH);
 
         // --- Tabelle ---
-        String[] columnNames = {"ID", "Name", "Kapazität", "Lager (ID)"};
+        String[] columnNames = {"Lagerplatz-ID", "Name", "Kapazität", "Lager-ID"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }

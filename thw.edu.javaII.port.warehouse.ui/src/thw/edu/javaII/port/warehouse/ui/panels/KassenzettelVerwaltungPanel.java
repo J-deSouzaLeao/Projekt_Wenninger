@@ -131,6 +131,7 @@ public class KassenzettelVerwaltungPanel extends JPanel {
 
     /**
      * Lädt die komplette Historie aller Kassenzettel vom Server herunter.
+     * Zeigt eine Fehlermeldung, falls keine Einträge vorhanden sind.
      * Um eine eindeutige Suche zu garantieren, wird die Datenbank-ID optisch
      * mit führenden Nullen auf 5 Stellen formatiert (z. B. "00001" statt "1").
      */
@@ -140,20 +141,29 @@ public class KassenzettelVerwaltungPanel extends JPanel {
             BackendClient client = new BackendClient();
             aktuelleZettelListe = client.getAllKassenzettel();
 
-            for (Kassenzettel z : aktuelleZettelListe) {
-                String kassiererName = z.getKassierer() != null ? z.getKassierer().getName() : "Unbekannt";
+            // --- NEU: Abfrage auf leere Einträge ---
+            if (aktuelleZettelListe == null || aktuelleZettelListe.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "Fehler beim Laden der Kassenzettel",
+                        "Keine Daten vorhanden",
+                        JOptionPane.WARNING_MESSAGE);
+            } else {
+                // Wenn Daten vorhanden sind, Tabelle normal füllen
+                for (Kassenzettel z : aktuelleZettelListe) {
+                    String kassiererName = z.getKassierer() != null ? z.getKassierer().getName() : "Unbekannt";
 
-                // NEU: ID-Formatierung für eindeutige Suchergebnisse
-                String formatierteId = String.format("%05d", z.getId());
+                    // ID-Formatierung für eindeutige Suchergebnisse
+                    String formatierteId = String.format("%05d", z.getId());
 
-                model.addRow(new Object[]{
-                        formatierteId,
-                        z.getDatum(),
-                        z.getUhrzeit(),
-                        z.getZahlart(),
-                        kassiererName,
-                        String.format("%.2f", z.getGesamtpreis())
-                });
+                    model.addRow(new Object[]{
+                            formatierteId,
+                            z.getDatum(),
+                            z.getUhrzeit(),
+                            z.getZahlart(),
+                            kassiererName,
+                            String.format("%.2f", z.getGesamtpreis())
+                    });
+                }
             }
             client.close();
         } catch (Exception e) {
