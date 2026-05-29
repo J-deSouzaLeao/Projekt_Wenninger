@@ -98,6 +98,8 @@ public class Service extends Thread {
 					default -> new WarehouseReturnDEO(null, "Unbekannte Zone", Status.ERROR);
 				};
 				toClient.writeObject(deoOut);
+				toClient.reset();
+				toClient.flush();
 			}
 		} catch (IOException e) {
 			System.out.println("IO-Error bei Client " + currentNumber);
@@ -296,20 +298,32 @@ public class Service extends Thread {
 				if (deoIn.getData() != null && deoIn.getData() instanceof Produkt) {
 					Produkt neuesProdukt = Cast.safeCast(deoIn.getData(), Produkt.class);
 
-					boolean idExistiert = false;
-					for (Produkt p : store.getProdukts()) {
-						if (p.getId() == neuesProdukt.getId()) {
-							idExistiert = true;
-							break;
+					// --- Automatische und einheitliche ID-Generierung ---
+					List<Produkt> alleProdukte = store.getProdukts();
+					int neueId = 1000; // Startwert für einheitliche Produkt-IDs
+
+					for (Produkt p : alleProdukte) {
+						if (p.getId() >= neueId) {
+							neueId = p.getId() + 1;
 						}
 					}
 
-					if (idExistiert) {
-						deoOut = new WarehouseReturnDEO(null, "Fehler: Produkt-ID existiert bereits!", Status.ERROR);
-					} else {
-						store.addProdukt(neuesProdukt);
-						deoOut = new WarehouseReturnDEO(null, "Produkt erfolgreich angelegt", Status.OK);
+					boolean vergeben = true;
+					while (vergeben) {
+						vergeben = false;
+						for (Produkt p : alleProdukte) {
+							if (p.getId() == neueId) {
+								vergeben = true;
+								neueId++;
+								break;
+							}
+						}
 					}
+
+					neuesProdukt.setId(neueId);
+					store.addProdukt(neuesProdukt);
+
+					deoOut = new WarehouseReturnDEO(neuesProdukt, "Produkt erfolgreich angelegt", Status.OK);
 				} else {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
@@ -537,19 +551,32 @@ public class Service extends Thread {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten übergeben", Status.ERROR);
 				}
 				break;
-			case KASSENZETTEL_LISTE:
+			case KASSENZETTEL_LIST:
 				deoOut = new WarehouseReturnDEO(store.getAllKassenzettel(), "Kassenzettel geladen", Status.OK);
 				break;
 
-			case KASSIERER_LISTE:
+			case ABSCHLUSS_LIST:
+				// Ruft die Historie aus der Datenbank ab und sendet sie an den Client
+				deoOut = new WarehouseReturnDEO(store.getAllKassenabschluesse(), "Abschlüsse geladen", Status.OK);
+				break;
+
+			case KASSIERER_LIST:
 				deoOut = new WarehouseReturnDEO(store.getAllKassierer(), "Kassierer-Liste geladen", Status.OK);
 				break;
 
 			case KASSIERER_ADD:
 				if (deoIn.getData() != null && deoIn.getData() instanceof thw.edu.javaII.port.warehouse.model.Kassierer) {
 					thw.edu.javaII.port.warehouse.model.Kassierer k = Cast.safeCast(deoIn.getData(), thw.edu.javaII.port.warehouse.model.Kassierer.class);
-					store.addKassierer(k);
-					deoOut = new WarehouseReturnDEO(null, "Kassierer angelegt", Status.OK);
+
+					// --- BUGFIX: Prüfen, ob die Nummer bereits vergeben ist ---
+					if (store.getKassiererByNummer(k.getNummer()) != null) {
+						// Nummer existiert bereits -> Sende ERROR an die Oberfläche
+						deoOut = new WarehouseReturnDEO(null, "Fehler: Personalnummer existiert bereits!", Status.ERROR);
+					} else {
+						// Nummer ist frei -> Speichern und OK senden
+						store.addKassierer(k);
+						deoOut = new WarehouseReturnDEO(null, "Kassierer angelegt", Status.OK);
+					}
 				} else {
 					deoOut = new WarehouseReturnDEO(null, "Falsche Daten", Status.ERROR);
 				}

@@ -57,10 +57,10 @@ public enum Command {
 	ABSCHLUSS_SPEICHERN,
 
 	/** Fordert eine Historie aller bisher getätigten Käufe und Kassenbons an. */
-	KASSENZETTEL_LISTE,
+	KASSENZETTEL_LIST,
 
 	/** Listet alle Mitarbeiter auf. **/
-	KASSIERER_LISTE,
+	KASSIERER_LIST,
 
 	/** Fügt einen Kassierer der Mitarbeiterliste hinzu. */
 	KASSIERER_ADD,
@@ -73,5 +73,8 @@ public enum Command {
 
 	KAPITAL,
 
-	KRITISCH
+	KRITISCH,
+
+	/** Fordert eine Liste aller Kassenabschlüsse an. */
+	ABSCHLUSS_LIST
 }

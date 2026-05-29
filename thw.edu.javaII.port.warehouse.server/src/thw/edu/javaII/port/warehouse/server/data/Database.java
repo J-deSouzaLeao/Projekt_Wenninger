@@ -987,4 +987,37 @@ public class Database implements IStorage {
 		}
 		return list;
 	}
+
+	/**
+	 * Liest die komplette Historie aller jemals durchgeführten Kassenabschlüsse aus der Datenbank.
+	 * @return Eine Liste aller Kassenabschlüsse inklusive Kassierer-Referenz.
+	 */
+	@Override
+	public List<Kassenabschluss> getAllKassenabschluesse() {
+		List<Kassenabschluss> list = new ArrayList<>();
+		String sql = "SELECT * FROM KASSENABSCHLUSS";
+
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sql);
+		     ResultSet rs = pstmt.executeQuery()) {
+
+			while (rs.next()) {
+				Kassenabschluss a = new Kassenabschluss();
+				// ID setzen (Wichtig für die spätere formatierte Anzeige)
+				a.setId(rs.getInt("id"));
+				a.setDatum(rs.getString("datum"));
+				a.setUhrzeit(rs.getString("uhrzeit"));
+				a.setSollBestand(rs.getDouble("soll"));
+				a.setIstBestand(rs.getDouble("ist"));
+
+				// Kassierer-Objekt anhand der hinterlegten ID auflösen
+				a.setKassierer(getKassiererById(rs.getInt("kassierer_id")));
+
+				list.add(a);
+			}
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler beim Laden der Kassenabschlüsse", e);
+		}
+		return list;
+	}
 }

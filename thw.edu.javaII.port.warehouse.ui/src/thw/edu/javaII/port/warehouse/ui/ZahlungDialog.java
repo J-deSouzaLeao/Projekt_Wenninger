@@ -7,10 +7,11 @@ import java.awt.*;
  * Diese Klasse repräsentiert den Dialog (Pop-up-Fenster) für den Bezahlvorgang an der Kasse.
  * Sie zeigt den zu zahlenden Gesamtbetrag an und bietet Eingabefelder zur Berechnung des
  * Rückgeldes bei Barzahlung. Alternativ kann eine EC-Kartenzahlung (als Simulation)
- * durchgeführt werden. Nach erfolgreicher Zahlung übergibt der Dialog die gewählte
- * Zahlart zurück an die Hauptkasse.
+ * durchgeführt werden.
+ * NEU: Beinhaltet eine smarte Prüfung, ob genügend Wechselgeld in der Kasse vorhanden ist.
  */
 public class ZahlungDialog extends JDialog {
+    private final BackendClient client; // NEU: Für den Kassenbestand
     private final double zuZahlen;
     private boolean erfolgreich = false;
     private String gewaehlteZahlart = "";
@@ -21,10 +22,12 @@ public class ZahlungDialog extends JDialog {
      * Erstellt den Zahlungsdialog und baut die Benutzeroberfläche auf.
      * Blockiert die Hauptansicht (modal = true), bis die Zahlung abgeschlossen oder abgebrochen wurde.
      * * @param parent         Das aufrufende Hauptfenster (die KassenUI).
+     * @param client         Netzwerk-Client zum Abruf des aktuellen Kassenbestands.
      * @param zuZahlenSumme  Der Gesamtbetrag des aktuellen Kassenzettels, der bezahlt werden muss.
      */
-    public ZahlungDialog(JFrame parent, double zuZahlenSumme) {
+    public ZahlungDialog(JFrame parent, BackendClient client, double zuZahlenSumme) {
         super(parent, "Bezahlvorgang", true);
+        this.client = client;
         this.zuZahlen = zuZahlenSumme;
 
         setSize(400, 350);
@@ -81,30 +84,42 @@ public class ZahlungDialog extends JDialog {
 
     /**
      * Liest den eingegebenen Betrag aus dem "Gegeben"-Feld aus und berechnet das Rückgeld.
-     * Ist der gegebene Betrag kleiner als die zu zahlende Summe, wird eine Warnung in Rot angezeigt.
-     * Andernfalls wird das Rückgeld grün dargestellt.
+     * Prüft dabei direkt beim Server ab, ob der physische Kassenbestand ausreicht.
      */
     private void berechneRueckgeld() {
         try {
             double gegeben = Double.parseDouble(gegebenFeld.getText().replace(",", "."));
             if (gegeben >= zuZahlen) {
                 double rueck = gegeben - zuZahlen;
+
+                // --- NEU: Wechselgeld-Prüfung ---
+                double[] daten = client.getAbschlussDaten();
+                double maximalesRueckgeld = daten[0] + daten[1]; // Startbestand + bisherige Barumsätze
+
+                if (rueck > maximalesRueckgeld) {
+                    rueckgeldLabel.setText("Kasse leer!");
+                    rueckgeldLabel.setForeground(Color.RED);
+                    JOptionPane.showMessageDialog(this,
+                            String.format("Nicht genügend Wechselgeld in der Kasse!\nMaximal verfügbar: %.2f €", maximalesRueckgeld),
+                            "Kassenbestand zu gering",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 rueckgeldLabel.setText(String.format("%.2f", rueck));
                 rueckgeldLabel.setForeground(new Color(60, 179, 113));
             } else {
                 rueckgeldLabel.setText("Zu wenig!");
                 rueckgeldLabel.setForeground(Color.RED);
             }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Ungültiger Betrag!", "Fehler", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ungültiger Betrag oder Netzwerkfehler!", "Fehler", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     /**
      * Schließt den Dialog nach einer erfolgreichen Bezahlung ab.
-     * Bei Barzahlung wird vorher geprüft, ob der gegebene Betrag überhaupt ausreicht.
-     * Setzt den Status auf erfolgreich und speichert die gewählte Zahlart.
-     * * @param zahlart Die verwendete Zahlungsart (z. B. "Bar" oder "EC-Karte").
+     * Führt bei Barzahlung eine finale Sicherheitsprüfung des Kassenbestands durch.
      */
     private void schliesseErfolgreich(String zahlart) {
         if (zahlart.equals("Bar")) {
@@ -114,6 +129,20 @@ public class ZahlungDialog extends JDialog {
                     JOptionPane.showMessageDialog(this, "Gegebener Betrag reicht nicht aus!", "Fehler", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
+
+                // --- NEU: Finale Prüfung auch beim direkten Klick auf BAR ZAHLEN ---
+                double rueck = gegeben - zuZahlen;
+                double[] daten = client.getAbschlussDaten();
+                double maximalesRueckgeld = daten[0] + daten[1];
+
+                if (rueck > maximalesRueckgeld) {
+                    JOptionPane.showMessageDialog(this,
+                            String.format("Zahlung abgebrochen!\nNicht genügend Wechselgeld in der Kasse!\nMaximal verfügbar: %.2f €", maximalesRueckgeld),
+                            "Kassenbestand zu gering",
+                            JOptionPane.ERROR_MESSAGE);
+                    return; // Bricht den Bezahlvorgang ab!
+                }
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Bitte zuerst Barbetrag eingeben!", "Fehler", JOptionPane.WARNING_MESSAGE);
                 return;
@@ -124,18 +153,10 @@ public class ZahlungDialog extends JDialog {
         dispose();
     }
 
-    /**
-     * Gibt an, ob der Bezahlvorgang erfolgreich abgeschlossen wurde.
-     * * @return true, wenn die Zahlung erfolgreich war, andernfalls false (z.B. bei Abbruch).
-     */
     public boolean isErfolgreich() {
         return erfolgreich;
     }
 
-    /**
-     * Gibt die Bezeichnung der beim Bezahlvorgang verwendeten Zahlart zurück.
-     * * @return Ein String mit der Zahlart (z.B. "Bar" oder "EC-Karte").
-     */
     public String getGewaehlteZahlart() {
         return gewaehlteZahlart;
     }

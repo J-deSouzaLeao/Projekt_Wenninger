@@ -10,7 +10,7 @@ import java.awt.*;
 /**
  * Stellt die grafische Benutzeroberfläche für die Kasse dar.
  * Beinhaltet die Artikelanzeige (Kassenzettel), ein dynamisches Numpad zur Eingabe
- * von Artikelnummern und Mengen sowie Funktionen für Bezahlung, Storno und Kassenabschluss.
+ * von Artikelnummern und Mengen sowie Funktionen für Bezahlung, Storno, Abmeldung und Kassenabschluss.
  * * @author juan.de.souza.leao
  */
 public class KassenUI extends JFrame {
@@ -117,7 +117,9 @@ public class KassenUI extends JFrame {
         eingabePanel.add(numpad, BorderLayout.CENTER);
 
         // Aktions-Buttons
-        JPanel aktionPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+        // Ein Slot mehr für den Abmelden-Button (3 -> 4, bzw. 4 -> 5 bei Managern)
+        int layoutRows = kassierer.isManager() ? 5 : 4;
+        JPanel aktionPanel = new JPanel(new GridLayout(layoutRows, 1, 5, 5));
 
         JButton bezahlenBtn = new JButton("BEZAHLEN");
         bezahlenBtn.addActionListener(e -> bezahlenVorgang());
@@ -137,22 +139,27 @@ public class KassenUI extends JFrame {
         abschlussBtn.setBackground(new Color(255, 140, 0));
         abschlussBtn.setForeground(Color.WHITE);
 
+        // --- NEU: Abmelden Button ---
+        JButton abmeldenBtn = new JButton("ABMELDEN");
+        abmeldenBtn.setFont(new Font("Arial", Font.BOLD, 24));
+        abmeldenBtn.setBackground(Color.RED);
+        abmeldenBtn.setForeground(Color.WHITE);
+        abmeldenBtn.addActionListener(e -> abmelden());
+
+        // Buttons hinzufügen (Reihenfolge ist wichtig für UX)
+        aktionPanel.add(bezahlenBtn);
+        aktionPanel.add(stornoBtn);
+        aktionPanel.add(abschlussBtn);
+        aktionPanel.add(abmeldenBtn);
+
         // Manager-Prüfung für erweiterte Optionen
         if (kassierer.isManager()) {
-            aktionPanel.setLayout(new GridLayout(4, 1, 5, 5));
             JButton adminBtn = new JButton("ADMIN");
             adminBtn.setBackground(Color.DARK_GRAY);
             adminBtn.setForeground(Color.WHITE);
+            adminBtn.setFont(new Font("Arial", Font.BOLD, 24));
             adminBtn.addActionListener(e -> new AdminKassiererDialog(this, client, kassierer).setVisible(true));
-
-            aktionPanel.add(bezahlenBtn);
-            aktionPanel.add(stornoBtn);
-            aktionPanel.add(abschlussBtn);
             aktionPanel.add(adminBtn);
-        } else {
-            aktionPanel.add(bezahlenBtn);
-            aktionPanel.add(stornoBtn);
-            aktionPanel.add(abschlussBtn);
         }
 
         eingabePanel.add(aktionPanel, BorderLayout.SOUTH);
@@ -160,6 +167,31 @@ public class KassenUI extends JFrame {
 
         // Initialen Fokus setzen
         SwingUtilities.invokeLater(txtProduktId::requestFocus);
+    }
+
+    /**
+     * Beendet die aktuelle Sitzung sicher.
+     * Prüft, ob ein Einkauf offen ist, schließt das aktuelle Kassenfenster
+     * und ruft den Login-Bildschirm auf.
+     */
+    public void abmelden() {
+        if (tableModel.getRowCount() > 0) {
+            JOptionPane.showMessageDialog(this, "Bitte beenden oder stornieren Sie den aktuellen Bezahlvorgang, bevor Sie sich abmelden.", "Abmeldung nicht möglich", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int antwort = JOptionPane.showConfirmDialog(
+                this,
+                "Möchten Sie sich wirklich abmelden?",
+                "Abmelden",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (antwort == JOptionPane.YES_OPTION) {
+            this.dispose(); // Schließt dieses Kassenfenster
+            new KassenLoginScreen(client).setVisible(true); // Öffnet das Login-Fenster (Anpassen, falls deine Klasse anders heißt)
+        }
     }
 
     /**
@@ -332,7 +364,7 @@ public class KassenUI extends JFrame {
             return;
         }
 
-        ZahlungDialog dialog = new ZahlungDialog(this, gesamtSumme);
+        ZahlungDialog dialog = new ZahlungDialog(this, client, gesamtSumme);
         dialog.setVisible(true);
 
         if (dialog.isErfolgreich()) {

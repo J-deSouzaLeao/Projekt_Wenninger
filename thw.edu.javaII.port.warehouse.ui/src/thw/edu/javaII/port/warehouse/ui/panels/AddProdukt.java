@@ -101,18 +101,34 @@ public class AddProdukt extends JDialog {
 		// Speichern-Button inkl. Verarbeitung der Eingaben
 		JButton btnSpeichern = new JButton("speichern");
 		btnSpeichern.addActionListener(e -> {
-			Produkt p = new Produkt(0, txtName.getText(), txtHersteller.getText(),
-					Double.parseDouble(txtPreis.getText()));
-			LagerBestand l = new LagerBestand(0, Integer.parseInt(txtBestand.getText()), p,
-					cbLagerPlatz.getModel().getElementAt(cbLagerPlatz.getSelectedIndex()));
+			try {
+				// 1. Text auslesen, trimmen und ggf. Komma durch Punkt ersetzen (für den Preis)
+				double preis = Double.parseDouble(txtPreis.getText().trim().replace(",", "."));
+				int bestand = Integer.parseInt(txtBestand.getText().trim());
 
-			boolean okay = ses.getCommunicator().addProdukt(p,l);
-			if(okay) {
-				dispose(); // Schließt den Dialog bei Erfolg
-			} else {
-				// FIXME ggf. ein ICON einfügen das die Info entsprechend darstellt.
-				JOptionPane.showMessageDialog(null, "Fehler beim Speichern. Der Datensatz konnte nicht gespeichert werden",
-						"Fehler: Speichern", JOptionPane.ERROR_MESSAGE);
+				// 2. Objekte mit den sicheren Zahlenwerten erstellen
+				Produkt p = new Produkt(0, txtName.getText().trim(), txtHersteller.getText().trim(), preis);
+				LagerBestand l = new LagerBestand(0, bestand, p,
+						cbLagerPlatz.getModel().getElementAt(cbLagerPlatz.getSelectedIndex()));
+
+				// 3. An den Server senden
+				boolean okay = ses.getCommunicator().addProdukt(p, l);
+				if (okay) {
+					dispose(); // Schließt den Dialog bei Erfolg
+				} else {
+					JOptionPane.showMessageDialog(this, "Fehler beim Speichern. Der Datensatz konnte nicht gespeichert werden.",
+							"Fehler: Speichern", JOptionPane.ERROR_MESSAGE);
+				}
+
+			} catch (NumberFormatException ex) {
+				// --- HIER WIRD DER FEHLER BEI TEXTEINGABE ABGEFANGEN ---
+				JOptionPane.showMessageDialog(this,
+						"Ungültige Eingabe! Bitte stellen Sie sicher, dass 'Einzelpreis' und 'Bestand' nur aus Zahlen bestehen.",
+						"Eingabefehler",
+						JOptionPane.WARNING_MESSAGE);
+			} catch (Exception ex) {
+				JOptionPane.showMessageDialog(this, "Ein unerwarteter Fehler ist aufgetreten: " + ex.getMessage(),
+						"Fehler", JOptionPane.ERROR_MESSAGE);
 			}
 		});
 

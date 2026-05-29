@@ -241,4 +241,10 @@ public interface IStorage {
 	 * Ermittelt alle Lagerbestände, die einen kritischen Meldebestand erreicht haben.
 	 */
 	List<LagerBestand> getKritischerBestand();
+
+	/**
+	 * Ruft eine Historie aller bisher durchgeführten Kassenabschlüsse ab.
+	 * @return Liste der Kassenabschlüsse.
+	 */
+	List<Kassenabschluss> getAllKassenabschluesse();
 }

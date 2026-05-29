@@ -183,7 +183,7 @@ public class SearchPage extends JPanel {
 	 * @return Der fertig konfigurierte "Verändern"-Button.
 	 */
 	private JButton createBtnNewButton(Session ses) {
-		JButton btnNewButton = new JButton("Verändern");
+		JButton btnNewButton = new JButton("Bestand Verändern");
 		btnNewButton.addActionListener(e -> {
 			int selectedRowView = table.getSelectedRow();
 			if (selectedRowView == -1) {

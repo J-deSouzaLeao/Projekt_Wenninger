@@ -17,7 +17,7 @@ public class KassenLoginScreen extends JFrame {
     private final JTextField bestandField;
     private final BackendClient client;
 
-    // NEU: Speichert, welches Feld gerade vom Benutzer ausgewählt ist
+    // Speichert, welches Feld gerade vom Benutzer ausgewählt ist
     private JTextField aktivesFeld;
 
     /**
@@ -30,7 +30,7 @@ public class KassenLoginScreen extends JFrame {
     public KassenLoginScreen(BackendClient client) {
         this.client = client;
         setTitle("Kassen-Terminal Login");
-        setSize(500, 600);
+        setSize(500, 650); // Fenster minimal höher gemacht für den zusätzlichen Button
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -56,7 +56,7 @@ public class KassenLoginScreen extends JFrame {
 
         add(inputPanel, BorderLayout.NORTH);
 
-        // NEU: Wir merken uns immer, welches Feld zuletzt angetippt wurde
+        // Wir merken uns immer, welches Feld zuletzt angetippt wurde
         aktivesFeld = nrField; // Standard beim Start: Das oberste Feld
         FocusAdapter focusTracker = new FocusAdapter() {
             @Override
@@ -68,8 +68,8 @@ public class KassenLoginScreen extends JFrame {
         pinField.addFocusListener(focusTracker);
         bestandField.addFocusListener(focusTracker);
 
-        // Touch Numpad (vereinfacht für Login)
-        JPanel numpad = new JPanel(new GridLayout(4, 3, 5, 5));
+        // --- BUGFIX: GridLayout Zeilen auf 0 (automatisch) setzen, da wir 13 Buttons haben! ---
+        JPanel numpad = new JPanel(new GridLayout(0, 3, 5, 5));
         for (int i = 1; i <= 9; i++) {
             numpad.add(createNumButton(String.valueOf(i)));
         }
@@ -84,14 +84,20 @@ public class KassenLoginScreen extends JFrame {
         loginBtn.addActionListener(e -> performLogin());
         numpad.add(loginBtn);
 
-        // --- NEU: PIN vergessen Button ---
-        JButton pinResetBtn = new JButton("PIN vergessen?");
+        // --- BUGFIX: HTML-Zeilenumbruch und Margins für bessere Lesbarkeit ---
+        JButton pinResetBtn = new JButton("<html><center>PIN<br>vergessen?</center></html>");
+        pinResetBtn.setMargin(new Insets(2, 2, 2, 2)); // Nimmt den unsichtbaren Rand weg
         pinResetBtn.setBackground(new Color(255, 140, 0));
         pinResetBtn.setForeground(Color.WHITE);
         pinResetBtn.setFont(new Font("Arial", Font.BOLD, 16));
         pinResetBtn.setFocusable(false);
         pinResetBtn.addActionListener(e -> new KassenPinResetDialog(this, client).setVisible(true));
-        numpad.add(pinResetBtn); // Wird als letztes Element im Grid hinzugefügt
+
+        // Da wir 13 Buttons haben, fügen wir vorher 2 unsichtbare Platzhalter ein,
+        // damit der PIN-Button schön mittig oder rechts in der neuen 5. Zeile sitzt.
+        numpad.add(new JLabel("")); // Leerer Platzhalter links
+        numpad.add(pinResetBtn);    // Button in der Mitte
+        // numpad.add(new JLabel("")); // Optional: Weiterer Platzhalter rechts
 
         add(numpad, BorderLayout.CENTER);
     }
@@ -136,7 +142,7 @@ public class KassenLoginScreen extends JFrame {
             // Startbestand aus dem Textfeld auslesen
             double bestand = Double.parseDouble(bestandField.getText().trim().replace(",", "."));
 
-            // NEU: Übergabe des 'bestand' an die aktualisierte Client-Methode
+            // Übergabe des 'bestand' an die aktualisierte Client-Methode
             Kassierer k = client.loginKassierer(nr, pin, bestand);
 
             if (k != null) {
