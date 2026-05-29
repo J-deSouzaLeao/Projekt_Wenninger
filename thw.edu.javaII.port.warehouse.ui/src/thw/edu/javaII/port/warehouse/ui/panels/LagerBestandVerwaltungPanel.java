@@ -15,6 +15,8 @@ import thw.edu.javaII.port.warehouse.ui.BackendClient;
 /**
  * Verwaltungsoberfläche für Lagerbestände.
  * Inklusive Echtzeit-Suchfilter und ID-Formatierung.
+ *
+ * @author juan.de.souza.leao
  */
 public class LagerBestandVerwaltungPanel extends JPanel {
     private final JTable table;

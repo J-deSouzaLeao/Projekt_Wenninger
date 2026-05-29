@@ -28,9 +28,10 @@ import thw.edu.javaII.port.warehouse.server.init.Loading;
  * für genau einen verbundenen Client (z. B. das Kassenterminal oder die Verwaltungsoberfläche).
  * Sie nimmt die Anfragen (DEOs) des Clients entgegen, leitet sie an den richtigen Bereich
  * der Datenbank weiter und sendet die passenden Antworten zurück.
- * * Da die Client-Verbindungen zustandslos sind (pro Request ein neuer Socket/Service),
+ * Da die Client-Verbindungen zustandslos sind (pro Request ein neuer Socket/Service),
  * verwaltet diese Klasse den Schicht-Startbestand der Kasse in einer statischen Variablen.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class Service extends Thread {
 	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Service.class.getName());
@@ -55,7 +56,8 @@ public class Service extends Thread {
 	 * Erstellt einen neuen Service-Betreuer für eine eingehende Client-Verbindung.
 	 * Öffnet die Datenströme zum Senden und Empfangen von Nachrichten und
 	 * stellt die Verbindung zur Datenbank her.
-	 * * @param sock Der Socket (die Netzwerkverbindung) des verbundenen Clients.
+	 *
+	 * @param sock Der Socket (die Netzwerkverbindung) des verbundenen Clients.
 	 */
 	public Service(Socket sock) {
 		try {
@@ -122,7 +124,8 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet alle Anfragen, die den Bereich "Lager" (Hauptstandorte) betreffen.
-	 * * @param deoIn Das empfangene Datenpaket des Clients.
+	 *
+	 * @param deoIn Das empfangene Datenpaket des Clients.
 	 * @return Die Antwort, die an den Client zurückgesendet wird.
 	 */
 	private WarehouseReturnDEO handleZoneLager(WarehouseDEO deoIn) {
@@ -170,7 +173,8 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet alle Anfragen, die einzelne Lagerplätze betreffen.
-	 * * @param deoIn Das empfangene Datenpaket des Clients.
+	 *
+	 * @param deoIn Das empfangene Datenpaket des Clients.
 	 * @return Die Antwort, die an den Client zurückgesendet wird.
 	 */
 	private WarehouseReturnDEO handleZoneLagerPlatz(WarehouseDEO deoIn) {
@@ -218,7 +222,8 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet alle Anfragen zur Buchung und Verwaltung von Lagerbeständen (Mengen).
-	 * * @param deoIn Das empfangene Datenpaket des Clients.
+	 *
+	 * @param deoIn Das empfangene Datenpaket des Clients.
 	 * @return Die Antwort, die an den Client zurückgesendet wird.
 	 */
 	private WarehouseReturnDEO handleZoneLagerBestand(WarehouseDEO deoIn) {
@@ -376,7 +381,8 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet Anforderungen für statistische Auswertungen (z. B. Top 10 Produkte oder Engpässe).
-	 * * @param deoIn Das empfangene Datenpaket des Clients.
+	 *
+	 * @param deoIn Das empfangene Datenpaket des Clients.
 	 * @return Die Antwort inklusive der gefilterten oder sortierten Listen.
 	 */
 	private WarehouseReturnDEO handleZoneStatistik(WarehouseDEO deoIn) {
@@ -428,7 +434,8 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet den Befehl zum Zurücksetzen oder Initialisieren der Datenbank mit Startwerten.
-	 * * @param deoIn Das empfangene Datenpaket.
+	 *
+	 * @param deoIn Das empfangene Datenpaket.
 	 * @return Status der Initialisierung.
 	 */
 	private WarehouseReturnDEO handleZoneInit(WarehouseDEO deoIn) {
@@ -454,7 +461,8 @@ public class Service extends Thread {
 
 	/**
 	 * Verarbeitet systemweite Befehle, wie z. B. das Trennen der Verbindung oder das Herunterfahren des Servers.
-	 * * @param deoIn Das empfangene Datenpaket.
+	 *
+	 * @param deoIn Das empfangene Datenpaket.
 	 * @return Status der Systemanfrage.
 	 */
 	private WarehouseReturnDEO handleZoneGeneral(WarehouseDEO deoIn) {
@@ -486,7 +494,8 @@ public class Service extends Thread {
 	/**
 	 * Verarbeitet alle Anfragen, die direkt vom Kassenterminal kommen (Verkauf, Login, Abschluss).
 	 * Speichert den Schicht-Startbestand, berechnet den korrekten Soll-Bestand und führt den Abschluss durch.
-	 * * @param deoIn Das empfangene Datenpaket des Kassen-Clients.
+	 *
+	 * @param deoIn Das empfangene Datenpaket des Kassen-Clients.
 	 * @return Die Antwort (z. B. Erfolg bei Verkauf oder Kassenstand beim Abschluss).
 	 */
 	private WarehouseReturnDEO handleZoneKasse(WarehouseDEO deoIn) {

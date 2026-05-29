@@ -19,6 +19,8 @@ import thw.edu.javaII.port.warehouse.model.deo.Zone;
  * und dem Backend-Server. Er kapselt die gesamte Netzwerklogik. Lokale Methodenaufrufe (wie z. B. addProdukt)
  * werden hier in standardisierte Datentransferobjekte (DEOs) verpackt, über eine Socket-Verbindung
  * an den Server gesendet, und die Server-Antworten werden wieder in nutzbare Java-Objekte übersetzt.
+ *
+ * @author juan.de.souza.leao
  */
 public class BackendClient {
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(BackendClient.class.getName());
@@ -54,14 +56,6 @@ public class BackendClient {
             return list != null ? list : List.of();
         }
         return List.of();
-    }
-
-    public boolean addProdukt(Produkt produkt) throws Exception {
-        var deo = new WarehouseDEO();
-        deo.setZone(Zone.PRODUKT);
-        deo.setCommand(Command.ADD);
-        deo.setData(produkt);
-        return sendRequest(deo).getStatus() == Status.OK;
     }
 
     public boolean updateProdukt(Produkt produkt) throws Exception {

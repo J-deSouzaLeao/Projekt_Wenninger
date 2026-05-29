@@ -11,7 +11,8 @@ import java.io.Serial;
  * Sie sorgt dafür, dass die Auswahlbox ausschließlich Lagerplatz-Objekte verwalten kann
  * und macht es einfacher, den vom Benutzer ausgewählten Platz im Code direkt als
  * richtiges Objekt weiterzuverarbeiten (anstatt nur als simplen Text).
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class LagerPlatzComboboxModel extends DefaultComboBoxModel<LagerPlatz> {
 
@@ -21,7 +22,8 @@ public class LagerPlatzComboboxModel extends DefaultComboBoxModel<LagerPlatz> {
 	/**
 	 * Erstellt ein neues Datenmodell für das Dropdown-Menü und füllt es direkt
 	 * mit einer Start-Liste an Lagerplätzen.
-	 * * @param items Ein Array mit allen Lagerplätzen, die zur Auswahl stehen sollen.
+	 *
+	 * @param items Ein Array mit allen Lagerplätzen, die zur Auswahl stehen sollen.
 	 */
 	public LagerPlatzComboboxModel(LagerPlatz[] items) {
 		super(items);
@@ -32,7 +34,8 @@ public class LagerPlatzComboboxModel extends DefaultComboBoxModel<LagerPlatz> {
 	 * Durch das Überschreiben dieser Methode wird automatisch direkt ein echtes
 	 * LagerPlatz-Objekt zurückgegeben, sodass wir es in der Benutzeroberfläche
 	 * nicht mehr mühsam manuell umwandeln (casten) müssen.
-	 * * @return Der vom Benutzer ausgewählte Lagerplatz.
+	 *
+	 * @return Der vom Benutzer ausgewählte Lagerplatz.
 	 */
 	@Override
 	public LagerPlatz getSelectedItem() {

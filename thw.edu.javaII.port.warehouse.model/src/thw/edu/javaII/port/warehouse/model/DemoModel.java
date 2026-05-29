@@ -7,7 +7,8 @@ import java.io.Serializable;
  * Diese Klasse ist ein einfaches Demo-Modell für Testzwecke.
  * Sie wird hauptsächlich verwendet, um die grundsätzliche Netzwerkverbindung
  * oder einfache Datenbankabfragen zu überprüfen, bevor die komplexeren Klassen zum Einsatz kommen.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class DemoModel implements Serializable {
 
@@ -29,7 +30,8 @@ public class DemoModel implements Serializable {
 	/**
 	 * Erstellt ein neues Demo-Objekt mit einer ID und einem Namen.
 	 * Wird genutzt, um Testdaten (wie "Hallo" oder "Welt") schnell anzulegen.
-	 * * @param id   Die eindeutige Test-ID.
+	 *
+	 * @param id   Die eindeutige Test-ID.
 	 * @param name Der Test-Text oder Name.
 	 */
 	public DemoModel(int id, String name) {
@@ -39,7 +41,8 @@ public class DemoModel implements Serializable {
 
 	/**
 	 * Gibt die interne Identifikationsnummer des Demo-Objekts zurück.
-	 * * @return Die ID.
+	 *
+	 * @return Die ID.
 	 */
 	public int getId() {
 		return id;
@@ -47,7 +50,8 @@ public class DemoModel implements Serializable {
 
 	/**
 	 * Setzt die Identifikationsnummer für dieses Demo-Objekt.
-	 * * @param id Die neue ID.
+	 *
+	 * @param id Die neue ID.
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -55,7 +59,8 @@ public class DemoModel implements Serializable {
 
 	/**
 	 * Gibt den Namen oder den Text dieses Demo-Objekts zurück.
-	 * * @return Der Name als Text.
+	 *
+	 * @return Der Name als Text.
 	 */
 	public String getName() {
 		return name;
@@ -63,7 +68,8 @@ public class DemoModel implements Serializable {
 
 	/**
 	 * Legt den Namen oder den Text für dieses Demo-Objekt fest.
-	 * * @param name Der neue Name.
+	 *
+	 * @param name Der neue Name.
 	 */
 	public void setName(String name) {
 		this.name = name;

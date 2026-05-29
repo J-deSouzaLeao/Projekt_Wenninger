@@ -8,7 +8,8 @@ import java.io.Serializable;
  * Immer wenn der Client eine Anfrage an den Server stellt, schickt der Server
  * ein Objekt dieser Klasse zurück. Es bündelt die eigentlichen Daten,
  * einen Erfolgsstatus und eine optionale Textnachricht (z. B. bei Fehlern) für den Netzwerk-Transport.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class WarehouseReturnDEO implements Serializable {
 
@@ -22,7 +23,8 @@ public class WarehouseReturnDEO implements Serializable {
 	/**
 	 * Gibt die vom Server gelieferten Nutzdaten zurück.
 	 * Das kann beispielsweise eine Liste von Produkten oder ein Kassierer-Objekt sein.
-	 * * @return Die angefragten Daten (müssen vom Client noch passend gecastet werden).
+	 *
+	 * @return Die angefragten Daten (müssen vom Client noch passend gecastet werden).
 	 */
 	public Object getData() {
 		return data;
@@ -31,7 +33,8 @@ public class WarehouseReturnDEO implements Serializable {
 	/**
 	 * Gibt die Begleitnachricht des Servers zurück.
 	 * Wird meistens genutzt, um dem Benutzer im Fehlerfall den genauen Grund anzuzeigen.
-	 * * @return Die Nachricht als Text.
+	 *
+	 * @return Die Nachricht als Text.
 	 */
 	public String getMessage() {
 		return message;
@@ -40,7 +43,8 @@ public class WarehouseReturnDEO implements Serializable {
 	/**
 	 * Gibt den Status der Serverantwort zurück.
 	 * Daran erkennt der Client sofort, ob die Operation erfolgreich war oder abgebrochen wurde.
-	 * * @return Der Status (z. B. OK oder ERROR).
+	 *
+	 * @return Der Status (z. B. OK oder ERROR).
 	 */
 	public Status getStatus() {
 		return status;
@@ -49,7 +53,8 @@ public class WarehouseReturnDEO implements Serializable {
 	/**
 	 * Erstellt ein neues Antwort-Objekt mit allen benötigten Informationen.
 	 * Wird vom Server aufgerufen, kurz bevor die Antwort an den Client gesendet wird.
-	 * * @param data Die Nutzdaten, die zurückgesendet werden sollen.
+	 *
+	 * @param data Die Nutzdaten, die zurückgesendet werden sollen.
 	 * @param message Eine erklärende Nachricht oder Fehlermeldung.
 	 * @param status Der generelle Erfolgsstatus der Aktion.
 	 */

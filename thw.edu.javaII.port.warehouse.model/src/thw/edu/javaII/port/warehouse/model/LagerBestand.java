@@ -7,7 +7,8 @@ import java.io.Serializable;
  * Diese Klasse repräsentiert den tatsächlichen Lagerbestand in unserem System.
  * Sie fungiert als Bindeglied und verknüpft ein bestimmtes Produkt mit einem
  * konkreten Lagerplatz und speichert die genaue Stückzahl, die dort aktuell liegt.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class LagerBestand implements Serializable {
 
@@ -21,7 +22,8 @@ public class LagerBestand implements Serializable {
 
 	/**
 	 * Gibt die eindeutige Identifikationsnummer dieses Bestands-Eintrags zurück.
-	 * * @return Die ID des Bestands.
+	 *
+	 * @return Die ID des Bestands.
 	 */
 	public int getId() {
 		return id;
@@ -29,7 +31,8 @@ public class LagerBestand implements Serializable {
 
 	/**
 	 * Setzt eine neue Identifikationsnummer für diesen Bestands-Eintrag.
-	 * * @param id Die neue ID.
+	 *
+	 * @param id Die neue ID.
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -37,7 +40,8 @@ public class LagerBestand implements Serializable {
 
 	/**
 	 * Gibt die aktuell gelagerte Menge (Stückzahl) dieses Produkts auf diesem Platz zurück.
-	 * * @return Die aktuelle Anzahl.
+	 *
+	 * @return Die aktuelle Anzahl.
 	 */
 	public int getAnzahl() {
 		return anzahl;
@@ -46,7 +50,8 @@ public class LagerBestand implements Serializable {
 	/**
 	 * Aktualisiert die gelagerte Menge.
 	 * Wird zum Beispiel aufgerufen, wenn Ware an der Kasse verkauft oder neu eingelagert wird.
-	 * * @param anzahl Die neue Stückzahl.
+	 *
+	 * @param anzahl Die neue Stückzahl.
 	 */
 	public void setAnzahl(int anzahl) {
 		this.anzahl = anzahl;
@@ -54,7 +59,8 @@ public class LagerBestand implements Serializable {
 
 	/**
 	 * Gibt das Produkt-Objekt zurück, das in diesem Bestand gelagert wird.
-	 * * @return Das zugehörige Produkt.
+	 *
+	 * @return Das zugehörige Produkt.
 	 */
 	public Produkt getProdukt_id() {
 		return produkt_id;
@@ -62,7 +68,8 @@ public class LagerBestand implements Serializable {
 
 	/**
 	 * Weist diesem Bestandseintrag ein Produkt zu.
-	 * * @param produkt_id Das Produkt, das hier gelagert werden soll.
+	 *
+	 * @param produkt_id Das Produkt, das hier gelagert werden soll.
 	 */
 	public void setProdukt_id(Produkt produkt_id) {
 		this.produkt_id = produkt_id;
@@ -70,7 +77,8 @@ public class LagerBestand implements Serializable {
 
 	/**
 	 * Gibt den Lagerplatz zurück, an dem dieses Produkt aktuell liegt.
-	 * * @return Der zugehörige Lagerplatz.
+	 *
+	 * @return Der zugehörige Lagerplatz.
 	 */
 	public LagerPlatz getLagerplatz_id() {
 		return lagerplatz_id;
@@ -88,7 +96,8 @@ public class LagerBestand implements Serializable {
 	/**
 	 * Erstellt einen komplett neuen Bestands-Eintrag.
 	 * Wird genutzt, wenn ein Produkt frisch auf einen bestimmten Lagerplatz gebucht wird.
-	 * * @param id            Die eindeutige Nummer des Eintrags.
+	 *
+	 * @param id            Die eindeutige Nummer des Eintrags.
 	 * @param anzahl        Die gelagerte Stückzahl.
 	 * @param produkt_id    Das Produkt, um das es geht.
 	 * @param lagerplatz_id Der Ort, an dem das Produkt liegt.

@@ -18,33 +18,33 @@ import thw.edu.javaII.port.warehouse.ui.panels.WelcomePage;
  * Sie fängt alle Klicks auf die Menüeinträge der oberen Leiste ab, wertet den dazugehörigen Befehl
  * aus und führt die entsprechende Aktion aus – wie beispielsweise das Wechseln der Hauptansicht
  * im Fenster oder das Beenden des Programms.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class LagerUIHandler implements ActionListener {
 	private final Session ses;
 	private final JFrame frame;
-	private final JFrame parent;
-	private final JPanel contentPane;
+    private final JPanel contentPane;
 
 	/**
 	 * Erstellt den Handler für das Hauptmenü.
-	 * * @param ses         Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
+	 *
+	 * @param ses         Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
 	 * @param frame       Das aktuelle Hauptfenster (LagerUI). Wird benötigt, um das Fenster z. B. beim Beenden schließen zu können.
 	 * @param contentPane Der Hauptbereich (Container) des Fensters, in dem die wechselnden Ansichten (Panels) angezeigt werden.
-	 * @param parent      Das übergeordnete Fenster, das teilweise an Kind-Dialoge oder -Panels weitergereicht wird.
 	 */
-	public LagerUIHandler(Session ses, JFrame frame, JPanel contentPane, JFrame parent) {
+	public LagerUIHandler(Session ses, JFrame frame, JPanel contentPane) {
 		this.ses = ses;
 		this.frame = frame;
 		this.contentPane = contentPane;
-		this.parent = parent;
-	}
+    }
 
 	/**
 	 * Diese Methode wird automatisch aufgerufen, sobald der Benutzer auf einen Menüeintrag klickt.
 	 * Sie liest den hinterlegten Befehl (ActionCommand) aus und wechselt mithilfe
 	 * einer Switch-Anweisung in den entsprechenden Programmzweig.
-	 * * @param e Das ausgelöste Klick-Ereignis, welches den genauen Befehl enthält.
+	 *
+	 * @param e Das ausgelöste Klick-Ereignis, welches den genauen Befehl enthält.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -68,7 +68,7 @@ public class LagerUIHandler implements ActionListener {
 				switchPage(new SearchPage(ses));
 				break;
 			case STATISTIK:
-				switchPage(new StatistikPage(ses, parent));
+				switchPage(new StatistikPage(ses));
 				break;
 			case INFO:
 				switchPage(new InfoPage());
@@ -82,7 +82,8 @@ public class LagerUIHandler implements ActionListener {
 	 * Eine interne Hilfsmethode, die den dynamischen Mittelteil der Benutzeroberfläche austauscht.
 	 * Entfernt die bisherige Ansicht und setzt das übergebene, neue Panel in das Zentrum (BorderLayout.CENTER) ein.
 	 * Anschließend wird die Oberfläche angewiesen, sich selbst neu zu strukturieren und zu zeichnen.
-	 * * @param newPage Das neue JPanel, das dem Benutzer angezeigt werden soll.
+	 *
+	 * @param newPage Das neue JPanel, das dem Benutzer angezeigt werden soll.
 	 */
 	private void switchPage(JPanel newPage) {
 		BorderLayout layout = (BorderLayout) contentPane.getLayout();

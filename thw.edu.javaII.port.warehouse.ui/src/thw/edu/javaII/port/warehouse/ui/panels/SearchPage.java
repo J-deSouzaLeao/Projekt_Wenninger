@@ -30,9 +30,10 @@ import thw.edu.javaII.port.warehouse.ui.model.BestandTableModel;
  * Diese Klasse repräsentiert die Such- und Verwaltungsansicht der grafischen Benutzeroberfläche.
  * Hier kann der Benutzer gezielt nach Lagerbeständen suchen, die angezeigten Ergebnisse
  * in einer Tabelle einsehen, bestehende Bestände bearbeiten oder neue anlegen.
- * * Durch den integrierten TableRowSorter erfolgt die Suche nun in Echtzeit und
+ * Durch den integrierten TableRowSorter erfolgt die Suche nun in Echtzeit und
  * filtert zuverlässig über alle Spalten (inklusive IDs und Namen).
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class SearchPage extends JPanel {
 
@@ -47,7 +48,8 @@ public class SearchPage extends JPanel {
 	 * Erstellt das Such-Panel und baut die komplette Benutzeroberfläche auf.
 	 * Die Tabelle wird initial mit dem kompletten Bestand gefüllt und ein Sorter
 	 * für die Echtzeit-Suche wird darübergelegt.
-	 * * @param ses Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
 	 */
 	public SearchPage(Session ses) {
 		setLayout(new BorderLayout(0, 0));
@@ -151,7 +153,8 @@ public class SearchPage extends JPanel {
 
 	/**
 	 * Erstellt den unteren Bereich (Panel) mit den Haupt-Aktionsschaltflächen.
-	 * * @param ses Die aktuelle Benutzersitzung.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung.
 	 * @return Das fertig konfigurierte Panel für den unteren Rand.
 	 */
 	private JPanel getJPanel(Session ses) {
@@ -170,7 +173,8 @@ public class SearchPage extends JPanel {
 	 * Erstellt den "Suchen"-Button.
 	 * Da wir nun Live-Suche haben, wendet der Button einfach den Sorter an,
 	 * falls der Nutzer aus Gewohnheit darauf klickt.
-	 * * @return Der fertig konfigurierte Such-Button.
+	 *
+	 * @return Der fertig konfigurierte Such-Button.
 	 */
 	private JButton createBtnSearch() {
 		JButton btnSearch = new JButton("Suchen");
@@ -182,7 +186,8 @@ public class SearchPage extends JPanel {
 	 * Erstellt den "Verändern"-Button für die Bearbeitung eines Bestands.
 	 * Da die Tabelle nun gefiltert sein kann, wird hier der korrekte Index
 	 * von der Ansicht (View) auf das Modell umgerechnet.
-	 * * @param ses Die aktuelle Benutzersitzung.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung.
 	 * @return Der fertig konfigurierte "Verändern"-Button.
 	 */
 	private JButton createBtnNewButton(Session ses) {

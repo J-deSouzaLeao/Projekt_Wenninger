@@ -17,7 +17,8 @@ import thw.edu.javaII.port.warehouse.model.exception.NegativeStockException;
  * Sie gibt als feste Vorlage vor, welche Funktionen (z. B. Hinzufügen, Löschen, Suchen)
  * für die verschiedenen Datenmodelle zwingend implementiert werden müssen, egal welche Datenbanktechnologie
  * im Hintergrund letztendlich verwendet wird.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public interface IStorage {
 
@@ -234,11 +235,13 @@ public interface IStorage {
 
 	/**
 	 * Ermittelt die Top 10 Lagerbestände mit der höchsten Kapitalbindung.
+	 * @return Eine Liste der Lagerbestände mit der höchsten Kapitalbindung.
 	 */
 	List<LagerBestand> getKapitalbindungBestand();
 
 	/**
 	 * Ermittelt alle Lagerbestände, die einen kritischen Meldebestand erreicht haben.
+	 * @return Eine Liste der kritischen Lagerbestände.
 	 */
 	List<LagerBestand> getKritischerBestand();
 

@@ -15,7 +15,8 @@ import javax.swing.JPanel;
  * Es handelt sich um ein statisches Panel, das grundlegende Informationen über die Software
  * anzeigt, wie den Namen der Anwendung, die aktuelle Versionsnummer, das Erstelldatum
  * und den ursprünglichen Ersteller.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class InfoPage extends JPanel {
 

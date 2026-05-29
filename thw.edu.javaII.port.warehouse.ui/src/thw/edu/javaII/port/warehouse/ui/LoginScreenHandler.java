@@ -17,7 +17,8 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
  * Sie verarbeitet die Benutzerinteraktionen, indem sie sowohl auf Klicks des Login-Buttons
  * (über den ActionListener) als auch auf Tastatureingaben wie die Enter-Taste in den Textfeldern
  * (über den KeyListener) lauscht.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class LoginScreenHandler implements ActionListener, KeyListener {
 	private final Session ses;
@@ -28,7 +29,8 @@ public class LoginScreenHandler implements ActionListener, KeyListener {
 
 	/**
 	 * Erstellt den Handler und verknüpft ihn mit den relevanten UI-Elementen des Login-Fensters.
-	 * * @param ses         Die aktuelle Benutzersitzung, um den Login-Status zu speichern.
+	 *
+	 * @param ses         Die aktuelle Benutzersitzung, um den Login-Status zu speichern.
 	 * @param frame       Das Login-Fenster, welches bei erfolgreicher Anmeldung geschlossen wird.
 	 * @param txtUser     Das Eingabefeld für den Benutzernamen.
 	 * @param txtPassword Das Eingabefeld für das Passwort.
@@ -46,7 +48,8 @@ public class LoginScreenHandler implements ActionListener, KeyListener {
 
 	/**
 	 * Wird ausgelöst, wenn der Benutzer mit der Maus auf den "Login"-Button klickt.
-	 * * @param e Das Klick-Ereignis.
+	 *
+	 * @param e Das Klick-Ereignis.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -75,7 +78,8 @@ public class LoginScreenHandler implements ActionListener, KeyListener {
 	 * Wird ausgelöst, wenn eine Taste in einem der überwachten Textfelder gedrückt wird.
 	 * Ermöglicht es dem Benutzer, sich komfortabel durch Drücken der Enter-Taste anzumelden,
 	 * ohne die Maus benutzen zu müssen.
-	 * * @param e Das Tastatur-Ereignis.
+	 *
+	 * @param e Das Tastatur-Ereignis.
 	 */
 	@Override
 	public void keyPressed(KeyEvent e) {

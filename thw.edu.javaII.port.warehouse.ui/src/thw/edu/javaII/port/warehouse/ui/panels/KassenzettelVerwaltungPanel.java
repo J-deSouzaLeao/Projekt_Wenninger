@@ -19,7 +19,8 @@ import java.util.List;
  * Das Panel bietet eine fortschrittliche Filterfunktion: Textsuche und Zahlart-Dropdown
  * können kombiniert werden, um Bons in Echtzeit zu filtern.
  * Zudem lassen sich per Knopfdruck die einzelnen Positionen (Artikel) eines Bons detailliert anzeigen.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class KassenzettelVerwaltungPanel extends JPanel {
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(KassenzettelVerwaltungPanel.class.getName());

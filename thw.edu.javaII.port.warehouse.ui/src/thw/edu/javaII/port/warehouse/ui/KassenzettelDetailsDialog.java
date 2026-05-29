@@ -10,12 +10,15 @@ import java.awt.*;
 /**
  * Ein Dialog (Pop-up), der die detaillierten Positionen (gekauften Artikel)
  * eines bestimmten Kassenzettels in einer Tabelle anzeigt.
+ *
+ * @author barbara.liegnitz
  */
 public class KassenzettelDetailsDialog extends JDialog {
 
     /**
      * Erstellt und öffnet den Detail-Dialog für einen Kassenzettel.
-     * * @param parent Das aufrufende Hauptfenster.
+     *
+     * @param parent Das aufrufende Hauptfenster.
      * @param zettel Der Kassenzettel, dessen Positionen angezeigt werden sollen.
      */
     public KassenzettelDetailsDialog(JFrame parent, Kassenzettel zettel) {

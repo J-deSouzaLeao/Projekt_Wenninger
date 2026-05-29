@@ -16,6 +16,8 @@ import java.util.Map;
  * anhand einer Stückelung (Anzahl der jeweiligen Münzen und Scheine) zählen kann.
  * Der ermittelte Ist-Bestand wird live mit dem vom System berechneten Soll-Bestand verglichen.
  * Der Abschluss lässt sich nur speichern, wenn die Differenz exakt 0,00 € beträgt.
+ *
+ * @author juan.de.souza.leao
  */
 public class KassenabschlussDialog extends JDialog {
     private final BackendClient client;
@@ -35,7 +37,8 @@ public class KassenabschlussDialog extends JDialog {
      * Erstellt den Dialog für den Kassenabschluss.
      * Lädt den aktuellen Soll-Bestand vom Server, baut die Benutzeroberfläche
      * für die Zählung der Stückelungen auf und richtet die Live-Berechnung ein.
-     * * @param parent    Das aufrufende Kassen-Hauptfenster (für die modale Blockierung).
+     *
+     * @param parent    Das aufrufende Kassen-Hauptfenster (für die modale Blockierung).
      * @param client    Die Netzwerkverbindung für den Datenabruf und das Speichern.
      * @param kassierer Der Kassierer, der diesen Abschluss durchführt.
      */

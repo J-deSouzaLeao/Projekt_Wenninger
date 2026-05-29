@@ -24,7 +24,8 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
  * Diese Klasse repräsentiert das grafische Anmeldefenster (Login-Screen) für die Hauptanwendung der Lagerverwaltung.
  * Sie stellt die Eingabemasken für Benutzername und Passwort bereit und verknüpft diese
  * mit der entsprechenden Überprüfungslogik (LoginScreenHandler).
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class LoginScreen extends JFrame {
 
@@ -38,7 +39,8 @@ public class LoginScreen extends JFrame {
 	 * Erstellt das Anmeldefenster.
 	 * Konfiguriert die Fenstergröße, zentriert es auf dem Bildschirm und stößt den
 	 * Aufbau der drei Hauptbereiche (Header, Content, Footer) an.
-	 * * @param ses Die aktuelle Benutzersitzung, die nach erfolgreichem Login aktualisiert wird.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung, die nach erfolgreichem Login aktualisiert wird.
 	 */
 	public LoginScreen(Session ses) {
 		this.ses = ses;
