@@ -9,6 +9,8 @@ import java.awt.*;
  * Rückgeldes bei Barzahlung. Alternativ kann eine EC-Kartenzahlung (als Simulation)
  * durchgeführt werden.
  * NEU: Beinhaltet eine smarte Prüfung, ob genügend Wechselgeld in der Kasse vorhanden ist.
+ *
+ * @author juan.de.souza.leao
  */
 public class ZahlungDialog extends JDialog {
     private final BackendClient client; // NEU: Für den Kassenbestand
@@ -21,7 +23,8 @@ public class ZahlungDialog extends JDialog {
     /**
      * Erstellt den Zahlungsdialog und baut die Benutzeroberfläche auf.
      * Blockiert die Hauptansicht (modal = true), bis die Zahlung abgeschlossen oder abgebrochen wurde.
-     * * @param parent         Das aufrufende Hauptfenster (die KassenUI).
+     *
+     * @param parent         Das aufrufende Hauptfenster (die KassenUI).
      * @param client         Netzwerk-Client zum Abruf des aktuellen Kassenbestands.
      * @param zuZahlenSumme  Der Gesamtbetrag des aktuellen Kassenzettels, der bezahlt werden muss.
      */

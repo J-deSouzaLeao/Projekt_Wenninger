@@ -7,7 +7,8 @@ import java.io.Serializable;
  * Diese Klasse repräsentiert einen konkreten Lagerplatz (z. B. ein Regal oder eine Zone)
  * innerhalb eines übergeordneten Lagers. Sie definiert, wo genau Waren abgelegt werden können
  * und wie viel Platz dort maximal zur Verfügung steht.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class LagerPlatz implements Serializable {
 
@@ -21,7 +22,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Gibt die eindeutige Identifikationsnummer des Lagerplatzes zurück.
-	 * * @return Die ID des Lagerplatzes.
+	 *
+	 * @return Die ID des Lagerplatzes.
 	 */
 	public int getId() {
 		return id;
@@ -29,7 +31,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Setzt eine neue Identifikationsnummer für den Lagerplatz.
-	 * * @param id Die neue ID.
+	 *
+	 * @param id Die neue ID.
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -37,7 +40,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Gibt die genaue Bezeichnung des Lagerplatzes zurück (z. B. "Regal A1" oder "Zone 3").
-	 * * @return Der Name des Lagerplatzes.
+	 *
+	 * @return Der Name des Lagerplatzes.
 	 */
 	public String getName() {
 		return name;
@@ -45,7 +49,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Setzt die Bezeichnung für diesen Lagerplatz.
-	 * * @param name Der neue Name.
+	 *
+	 * @param name Der neue Name.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -54,7 +59,8 @@ public class LagerPlatz implements Serializable {
 	/**
 	 * Gibt die maximale Kapazität dieses Lagerplatzes zurück.
 	 * Damit lässt sich prüfen, wie viele Artikel maximal hier eingelagert werden dürfen.
-	 * * @return Die Kapazitätsgrenze als ganze Zahl.
+	 *
+	 * @return Die Kapazitätsgrenze als ganze Zahl.
 	 */
 	public int getKapazitaet() {
 		return kapazitaet;
@@ -62,7 +68,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Legt die maximale Kapazität für diesen Lagerplatz fest.
-	 * * @param kapazitaet Die neue maximale Stückzahl oder Menge.
+	 *
+	 * @param kapazitaet Die neue maximale Stückzahl oder Menge.
 	 */
 	public void setKapazitaet(int kapazitaet) {
 		this.kapazitaet = kapazitaet;
@@ -70,7 +77,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Gibt das übergeordnete Lager-Objekt zurück, in dem sich dieser Lagerplatz physisch befindet.
-	 * * @return Das dazugehörige Lager.
+	 *
+	 * @return Das dazugehörige Lager.
 	 */
 	public Lager getLager_id() {
 		return lager_id;
@@ -78,7 +86,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Weist diesen Lagerplatz einem bestimmten Hauptlager zu.
-	 * * @param lager_id Das Lager, in dem sich der Platz befindet.
+	 *
+	 * @param lager_id Das Lager, in dem sich der Platz befindet.
 	 */
 	public void setLager_id(Lager lager_id) {
 		this.lager_id = lager_id;
@@ -95,7 +104,8 @@ public class LagerPlatz implements Serializable {
 
 	/**
 	 * Erstellt einen neuen, vollständig konfigurierten Lagerplatz.
-	 * * @param id         Die eindeutige Nummer des Lagerplatzes.
+	 *
+	 * @param id         Die eindeutige Nummer des Lagerplatzes.
 	 * @param name       Die Bezeichnung (z. B. "Regal B2").
 	 * @param kapazitaet Die maximale Aufnahmekapazität.
 	 * @param lager_id   Das übergeordnete Lager, zu dem dieser Platz gehört.
@@ -112,7 +122,8 @@ public class LagerPlatz implements Serializable {
 	 * Überschreibt die Standard-Textausgabe des Objekts.
 	 * Sorgt dafür, dass in der Benutzeroberfläche (z. B. in Dropdown-Menüs)
 	 * eine gut lesbare Kombination aus Lagerplatz und dem Hauptlager angezeigt wird.
-	 * * @return Ein formatierter String im Stil "Platzname - Lagername".
+	 *
+	 * @return Ein formatierter String im Stil "Platzname - Lagername".
 	 */
 	@Override
 	public String toString() {

@@ -29,7 +29,8 @@ import javax.swing.JComboBox;
  * Diese Klasse repräsentiert einen Dialog (Pop-up-Fenster) zum Anlegen eines komplett neuen Produkts.
  * Der Benutzer kann hier die Stammdaten (Name, Hersteller, Preis) sowie die erste Einlagerung
  * (Stückzahl und Zuweisung auf einen aktuell noch freien Lagerplatz) komfortabel in einem Schritt vornehmen.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class AddProdukt extends JDialog {
 
@@ -44,7 +45,8 @@ public class AddProdukt extends JDialog {
 	 * Erstellt den Dialog zum Hinzufügen eines Produkts.
 	 * Baut das Formular auf, fragt beim Server alle derzeit komplett leeren Lagerplätze
 	 * für das Dropdown-Menü ab und konfiguriert den Speichervorgang.
-	 * * @param ses Die aktuelle Benutzersitzung für die Netzwerkkommunikation.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung für die Netzwerkkommunikation.
 	 */
 	public AddProdukt(Session ses) {
 		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();

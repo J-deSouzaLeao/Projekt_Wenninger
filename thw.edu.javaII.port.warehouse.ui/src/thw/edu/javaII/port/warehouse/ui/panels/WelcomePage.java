@@ -8,7 +8,8 @@ import java.io.Serial;
  * Diese Klasse repräsentiert die Startseite (Willkommensbildschirm) der grafischen Benutzeroberfläche.
  * Es ist ein simples Panel (JPanel), das den Benutzer direkt nach dem Programmstart
  * oder nach einem erfolgreichen Login freundlich begrüßt.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class WelcomePage extends JPanel {
 

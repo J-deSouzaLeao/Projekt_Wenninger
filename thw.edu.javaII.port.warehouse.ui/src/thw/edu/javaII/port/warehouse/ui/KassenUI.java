@@ -11,7 +11,8 @@ import java.awt.*;
  * Stellt die grafische Benutzeroberfläche für die Kasse dar.
  * Beinhaltet die Artikelanzeige (Kassenzettel), ein dynamisches Numpad zur Eingabe
  * von Artikelnummern und Mengen sowie Funktionen für Bezahlung, Storno, Abmeldung und Kassenabschluss.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class KassenUI extends JFrame {
     private final BackendClient client;
@@ -30,7 +31,8 @@ public class KassenUI extends JFrame {
      * Initialisiert das Kassenfenster für den angemeldeten Kassierer.
      * Baut das Layout auf (Tabelle links, Numpad und Aktionen rechts)
      * und integriert die Mengen-Eingabe.
-     * * @param client    Der BackendClient für die Serverkommunikation.
+     *
+     * @param client    Der BackendClient für die Serverkommunikation.
      * @param kassierer Der aktuell angemeldete Kassierer.
      */
     public KassenUI(BackendClient client, Kassierer kassierer) {
@@ -197,7 +199,8 @@ public class KassenUI extends JFrame {
     /**
      * Erstellt einen Button für das Numpad und deaktiviert dessen Fokus,
      * damit der Cursor im jeweiligen Textfeld (ID oder Menge) bleibt.
-     * * @param text Die Beschriftung des Buttons (Zahl oder "C").
+     *
+     * @param text Die Beschriftung des Buttons (Zahl oder "C").
      * @return Der konfigurierte JButton.
      */
     private JButton createNumButton(String text) {
@@ -219,7 +222,8 @@ public class KassenUI extends JFrame {
     /**
      * Ein intelligenter Listener für die Numpad-Tasten.
      * Fügt die Ziffer automatisch in das Feld ein, in dem der Cursor gerade steht.
-     * * @param digit Die gedrückte Ziffer.
+     *
+     * @param digit Die gedrückte Ziffer.
      */
     private void appendNumpadDigit(String digit) {
         Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
@@ -342,7 +346,8 @@ public class KassenUI extends JFrame {
 
     /**
      * Öffnet einen Dialog zur sicheren PIN-Eingabe.
-     * * @return Die eingegebene PIN als String oder null bei Abbruch.
+     *
+     * @return Die eingegebene PIN als String oder null bei Abbruch.
      */
     private String showPasswordDialog() {
         JPasswordField pf = new JPasswordField();

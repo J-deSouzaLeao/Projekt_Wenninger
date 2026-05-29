@@ -4,7 +4,8 @@ package thw.edu.javaII.port.warehouse.model.deo;
  * Dieses Enum definiert die verschiedenen logischen Bereiche (Zonen) des Systems.
  * Es wird bei der Netzwerkkommunikation genutzt, um Anfragen zwischen dem Client
  * und dem Server direkt dem richtigen Modul zuzuordnen.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public enum Zone {
 

@@ -7,7 +7,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
 
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.JToggleButton;
@@ -26,23 +25,23 @@ import thw.edu.javaII.port.warehouse.model.LagerBestand;
  * Sie liefert dem Management wichtige Kennzahlen zur Optimierung des Lagerbestands.
  * Über eine Schalterleiste (Toggle-Buttons) kann bequem zwischen verschiedenen
  * Analyseverfahren gewechselt werden (Menge, gebundenes Kapital, Engpässe).
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class StatistikPage extends JPanel {
 
 	@Serial
 	private static final long serialVersionUID = 6991507120124679776L;
-	private final JTable table;
 	private final BestandTableModel model;
 
 	/**
 	 * Erstellt das Statistik-Panel und baut die Benutzeroberfläche auf.
 	 * Nutzt eine ButtonGroup für die nahtlose Umschaltung zwischen den
 	 * vier zentralen Business-Metriken, ohne die UI neu laden zu müssen.
-	 * * @param ses    Die aktuelle Benutzersitzung (Session) für die Serverkommunikation.
-	 * @param parent Das übergeordnete Hauptfenster.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung (Session) für die Serverkommunikation.
 	 */
-	public StatistikPage(Session ses, JFrame parent) {
+	public StatistikPage(Session ses) {
 		setLayout(new BorderLayout(10, 10));
 
 		// Kopfbereich
@@ -53,7 +52,7 @@ public class StatistikPage extends JPanel {
 
 		// Tabelle initialisieren (Standardmäßig TOP 10)
 		model = new BestandTableModel(ses.getCommunicator().getTOP10Bestand());
-		table = new JTable(model);
+		JTable table = new JTable(model);
 		model.setJTableColumnsWidth(table, 800, 10, 20, 20, 10, 20, 20);
 		table.setShowGrid(true);
 		table.setShowVerticalLines(true);
@@ -98,7 +97,8 @@ public class StatistikPage extends JPanel {
 	/**
 	 * Tauscht die Daten im Tabellenmodell aus und informiert die Oberfläche
 	 * über die Änderung, anstatt das komplette Panel neu zu zeichnen.
-	 * * @param neueDaten Die vom Server gelieferte, neue Liste an Lagerbeständen.
+	 *
+	 * @param neueDaten Die vom Server gelieferte, neue Liste an Lagerbeständen.
 	 */
 	private void updateTableData(List<LagerBestand> neueDaten) {
 		if (neueDaten == null) {

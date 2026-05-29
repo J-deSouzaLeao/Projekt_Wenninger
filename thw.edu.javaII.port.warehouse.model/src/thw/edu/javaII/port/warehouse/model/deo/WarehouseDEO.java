@@ -7,7 +7,8 @@ import java.io.Serializable;
  * Dieses Objekt dient als Standard-Anfrage (Datenpaket), die der Client an den Server schickt.
  * Es enthält alle nötigen Informationen für den Server: Welcher Bereich angesprochen wird (Zone),
  * was genau getan werden soll (Command) und welche Daten eventuell dafür nötig sind.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class WarehouseDEO implements Serializable {
 
@@ -21,7 +22,8 @@ public class WarehouseDEO implements Serializable {
 	/**
 	 * Gibt die mitgesendeten Nutzdaten der Anfrage zurück.
 	 * Das kann zum Beispiel ein neu angelegtes Produkt-Objekt sein, das der Server speichern soll.
-	 * * @return Die angehängten Daten.
+	 *
+	 * @return Die angehängten Daten.
 	 */
 	public Object getData() {
 		return data;
@@ -29,7 +31,8 @@ public class WarehouseDEO implements Serializable {
 
 	/**
 	 * Fügt der Anfrage Nutzdaten hinzu.
-	 * * @param data Die Daten, die an den Server übermittelt werden sollen.
+	 *
+	 * @param data Die Daten, die an den Server übermittelt werden sollen.
 	 */
 	public void setData(Object data) {
 		this.data = data;
@@ -37,7 +40,8 @@ public class WarehouseDEO implements Serializable {
 
 	/**
 	 * Gibt den logischen Bereich zurück, an den sich die Anfrage richtet.
-	 * * @return Die Ziel-Zone (z. B. LAGER oder KASSE).
+	 *
+	 * @return Die Ziel-Zone (z. B. LAGER oder KASSE).
 	 */
 	public Zone getZone() {
 		return zone;
@@ -45,7 +49,8 @@ public class WarehouseDEO implements Serializable {
 
 	/**
 	 * Legt fest, für welchen Bereich des Systems diese Anfrage gedacht ist.
-	 * * @param zone Die entsprechende Zone aus dem Enum.
+	 *
+	 * @param zone Die entsprechende Zone aus dem Enum.
 	 */
 	public void setZone(Zone zone) {
 		this.zone = zone;
@@ -53,7 +58,8 @@ public class WarehouseDEO implements Serializable {
 
 	/**
 	 * Gibt den auszuführenden Befehl zurück, den der Server abarbeiten soll.
-	 * * @return Die gewünschte Aktion (z. B. Hinzufügen oder Löschen).
+	 *
+	 * @return Die gewünschte Aktion (z. B. Hinzufügen oder Löschen).
 	 */
 	public Command getCommand() {
 		return command;
@@ -61,7 +67,8 @@ public class WarehouseDEO implements Serializable {
 
 	/**
 	 * Setzt die gewünschte Aktion, die der Server mit dieser Anfrage ausführen soll.
-	 * * @param command Der Befehl aus dem Command-Enum.
+	 *
+	 * @param command Der Befehl aus dem Command-Enum.
 	 */
 	public void setCommand(Command command) {
 		this.command = command;

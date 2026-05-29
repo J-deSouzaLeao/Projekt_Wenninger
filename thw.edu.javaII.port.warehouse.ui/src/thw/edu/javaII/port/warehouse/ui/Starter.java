@@ -9,7 +9,8 @@ import java.util.logging.Logger;
  * Sie wartet in einer Schleife, bis der Benutzer sich erfolgreich am Login-Screen angemeldet hat
  * (der Login-Status in der Session auf "true" wechselt), und startet anschließend
  * automatisch das Hauptfenster (LagerUI) der Anwendung.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class Starter extends Thread {
 
@@ -18,7 +19,8 @@ public class Starter extends Thread {
 
 	/**
 	 * Konstruktor für den Starter-Thread.
-	 * * @param ses Die zentrale Benutzersitzung, deren Login-Status überwacht werden soll.
+	 *
+	 * @param ses Die zentrale Benutzersitzung, deren Login-Status überwacht werden soll.
 	 */
 	public Starter(Session ses) {
 		this.ses = ses;

@@ -28,7 +28,8 @@ import thw.edu.javaII.port.warehouse.model.exception.NegativeStockException;
  * Diese Klasse ist das Herzstück der Datenspeicherung. Sie implementiert das IStorage-Interface
  * und baut die tatsächliche Verbindung zu unserer lokalen SQLite-Datenbank auf.
  * Hier werden alle SQL-Befehle ausgeführt, um Daten zu lesen, zu schreiben oder zu löschen.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class Database implements IStorage {
 

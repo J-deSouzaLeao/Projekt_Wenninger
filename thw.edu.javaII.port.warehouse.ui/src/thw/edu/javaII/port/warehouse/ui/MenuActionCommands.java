@@ -6,7 +6,8 @@ package thw.edu.javaII.port.warehouse.ui;
  * Durch die Verwendung eines Enums anstelle von einfachen Text-Strings (Strings)
  * wird die Fehleranfälligkeit (z. B. durch Tippfehler) verringert und die Verarbeitung
  * der Klicks im {@link LagerUIHandler} deutlich sicherer und übersichtlicher.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public enum MenuActionCommands {
 

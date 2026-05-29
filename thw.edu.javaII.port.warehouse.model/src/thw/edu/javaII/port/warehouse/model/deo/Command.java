@@ -4,7 +4,8 @@ package thw.edu.javaII.port.warehouse.model.deo;
  * Dieses Enum definiert alle möglichen Befehle (Aktionen), die der Client an den Server senden kann.
  * Anhand dieses Befehls weiß der Server genau, welche Datenbankoperation oder Logik
  * er für die gewählte Zone ausführen muss.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public enum Command {
 
@@ -71,8 +72,10 @@ public enum Command {
 	/** Bearbeitet einen Kassierer in der Mitarbeiterliste. */
 	KASSIERER_UPDATE,
 
+	/** Berechnet und ruft den aktuell gebundenen Kapitalwert (Gesamtwert) des Lagers ab. */
 	KAPITAL,
 
+	/** Fordert eine Liste aller Produkte an, die einen kritisch niedrigen Lagerbestand erreicht haben. */
 	KRITISCH,
 
 	/** Fordert eine Liste aller Kassenabschlüsse an. */

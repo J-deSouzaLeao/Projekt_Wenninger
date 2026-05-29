@@ -9,6 +9,8 @@ import java.util.List;
  * Dialog zum Zurücksetzen einer vergessenen PIN.
  * Ein Manager muss sich mit seiner Nummer und PIN autorisieren,
  * bevor einem bestehenden Kassierer ein neues Passwort zugewiesen werden kann.
+ *
+ * @author barbara.liegnitz
  */
 public class KassenPinResetDialog extends JDialog {
 

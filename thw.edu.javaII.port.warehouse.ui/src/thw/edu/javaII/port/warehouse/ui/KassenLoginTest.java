@@ -11,6 +11,8 @@ import javax.swing.JOptionPane;
  * Anschließend wird der Kassen-Login-Bildschirm für den Benutzer geöffnet.
  * Sollte der Server nicht erreichbar sein, wird der Programmabsturz verhindert
  * und stattdessen eine saubere Fehlermeldung als Pop-up angezeigt.
+ *
+ * @author juan.de.souza.leao
  */
 public class KassenLoginTest {
 
@@ -18,7 +20,8 @@ public class KassenLoginTest {
      * Der Haupteinstiegspunkt für den Testlauf der Kasse.
      * Sorgt dafür, dass der Netzwerkaufbau und die grafische Oberfläche sicher
      * im Event Dispatch Thread (EDT) von Java Swing ausgeführt werden.
-     * * @param args Kommandozeilenargumente (werden nicht verwendet).
+     *
+     * @param args Kommandozeilenargumente (werden nicht verwendet).
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

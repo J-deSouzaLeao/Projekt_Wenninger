@@ -26,7 +26,8 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
  * Sie zeigt alle relevanten Informationen zu einem ausgewählten Produkt an (z. B. Name, Lagerplatz, aktueller Bestand)
  * und ermöglicht es dem Benutzer, über einfache Plus- und Minus-Schaltflächen die Stückzahl
  * direkt zu erhöhen oder zu verringern (Ein- und Ausbuchen).
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class ChangeLagerBestand extends JDialog {
 
@@ -39,7 +40,8 @@ public class ChangeLagerBestand extends JDialog {
 	 * Baut die Benutzeroberfläche auf, füllt sie mit den Daten des übergebenen Lagerbestands
 	 * und konfiguriert die Logik für das Hinzufügen (+) und Entfernen (-) von Artikeln.
 	 * Änderungen werden sofort über die Session an den Server gesendet.
-	 * * @param l   Der Lagerbestand, der verändert werden soll.
+	 *
+	 * @param l   Der Lagerbestand, der verändert werden soll.
 	 * @param ses Die aktuelle Benutzersitzung für die Kommunikation mit dem Server.
 	 */
 	public ChangeLagerBestand(LagerBestand l, Session ses) {

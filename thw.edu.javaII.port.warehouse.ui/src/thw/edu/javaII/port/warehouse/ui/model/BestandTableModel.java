@@ -13,7 +13,8 @@ import thw.edu.javaII.port.warehouse.model.LagerBestand;
  * Diese Klasse fungiert als Datenmodell (Übersetzer) für grafische Tabellen (JTable) in der Benutzeroberfläche.
  * Sie nimmt eine Liste von komplexen LagerBestand-Objekten entgegen und bricht diese so herunter,
  * dass sie sauber formatiert in den entsprechenden Spalten und Zeilen der Tabelle angezeigt werden können.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class BestandTableModel extends AbstractTableModel {
 
@@ -23,7 +24,8 @@ public class BestandTableModel extends AbstractTableModel {
 
 	/**
 	 * Erstellt ein neues Tabellenmodell.
-	 * * @param data Die Liste der Bestände, die in der Tabelle angezeigt werden sollen.
+	 *
+	 * @param data Die Liste der Bestände, die in der Tabelle angezeigt werden sollen.
 	 */
 	public BestandTableModel(List<LagerBestand> data) {
 		this.data = data;
@@ -33,7 +35,8 @@ public class BestandTableModel extends AbstractTableModel {
 	 * Aktualisiert die Datenbasis der Tabelle.
 	 * Wird z. B. aufgerufen, wenn der Benutzer nach einem Artikel gesucht hat und
 	 * nur noch die Suchergebnisse angezeigt werden sollen.
-	 * * @param data Die neue Liste der Bestände.
+	 *
+	 * @param data Die neue Liste der Bestände.
 	 */
 	public void setData(List<LagerBestand> data) {
 		this.data = data;
@@ -42,7 +45,8 @@ public class BestandTableModel extends AbstractTableModel {
 	/**
 	 * Gibt an, wie viele Zeilen die Tabelle zeichnen muss.
 	 * Das entspricht exakt der Anzahl der Einträge in der übergebenen Datenliste.
-	 * * @return Die Anzahl der Zeilen.
+	 *
+	 * @return Die Anzahl der Zeilen.
 	 */
 	@Override
 	public int getRowCount() {
@@ -52,7 +56,8 @@ public class BestandTableModel extends AbstractTableModel {
 	/**
 	 * Gibt an, wie viele Spalten die Tabelle hat.
 	 * Wir zeigen hier ID, Produkt, Hersteller, Menge, Lagerplatz und Lager an = 6 Spalten.
-	 * * @return Die Anzahl der Spalten.
+	 *
+	 * @return Die Anzahl der Spalten.
 	 */
 	@Override
 	public int getColumnCount() {
@@ -63,7 +68,8 @@ public class BestandTableModel extends AbstractTableModel {
 	 * Diese Methode wird von der JTable für jedes einzelne Feld aufgerufen, um zu erfahren,
 	 * welcher Text dort genau stehen soll. Sie zerlegt das Bestandsobjekt der jeweiligen Zeile
 	 * in seine Einzelteile für die passenden Spalten.
-	 * * @param rowIndex    Die aktuelle Zeile (entspricht dem Objekt in der Liste).
+	 *
+	 * @param rowIndex    Die aktuelle Zeile (entspricht dem Objekt in der Liste).
 	 * @param columnIndex Die aktuelle Spalte (entspricht der Eigenschaft des Objekts).
 	 * @return Der Text oder Wert, der in dieser Zelle angezeigt werden soll.
 	 */
@@ -104,7 +110,8 @@ public class BestandTableModel extends AbstractTableModel {
 	/**
 	 * Eine Hilfsmethode, um die Spalten der Tabelle prozentual auf eine Gesamtbreite zu verteilen.
 	 * Sorgt dafür, dass z. B. die Spalte für die "ID" schmal ist, während "Produktname" viel Platz bekommt.
-	 * * @param table               Die JTable, deren Spaltenbreiten angepasst werden sollen.
+	 *
+	 * @param table               Die JTable, deren Spaltenbreiten angepasst werden sollen.
 	 * @param tablePreferredWidth Die gewünschte Gesamtbreite der Tabelle.
 	 * @param percentages         Ein Array mit den prozentualen Breiten für jede Spalte (z. B. 10, 30, 20...).
 	 */
@@ -123,7 +130,8 @@ public class BestandTableModel extends AbstractTableModel {
 	/**
 	 * Ermittelt das vollständige LagerBestand-Objekt hinter einer vom Benutzer angeklickten Zeile.
 	 * Wird verwendet, wenn der Nutzer eine Zeile auswählt und auf "Bearbeiten" klickt.
-	 * * @param selectedRow Der Index der markierten Zeile in der Tabelle.
+	 *
+	 * @param selectedRow Der Index der markierten Zeile in der Tabelle.
 	 * @return Das dazugehörige LagerBestand-Objekt.
 	 */
 	public LagerBestand getObjectAt(int selectedRow) {

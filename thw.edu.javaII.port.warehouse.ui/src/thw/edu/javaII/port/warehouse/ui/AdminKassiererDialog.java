@@ -11,6 +11,8 @@ import java.util.List;
  * Bietet eine tabellarische Übersicht aller Kassierer sowie Funktionen
  * zum Anlegen, Bearbeiten und Löschen von Personal.
  * Enthält einen Selbstschutz, damit sich Administratoren nicht selbst löschen können.
+ *
+ * @author juan.de.souza.leao
  */
 public class AdminKassiererDialog extends JDialog {
     private final BackendClient client;
@@ -21,6 +23,7 @@ public class AdminKassiererDialog extends JDialog {
 
     /**
      * Erstellt den Dialog und baut die Verwaltungsoberfläche auf.
+     *
      * @param parent Das aufrufende Kassen-Hauptfenster.
      * @param client Die aktive Backend-Verbindung.
      * @param aktiverManager Der aktuell eingeloggte Manager, der diesen Dialog bedient.

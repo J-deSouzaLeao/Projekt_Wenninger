@@ -25,7 +25,8 @@ import thw.edu.javaII.port.warehouse.ui.panels.WelcomePage;
  * Sie dient als Rahmen für die gesamte Anwendung und enthält das Hauptmenü (oben),
  * eine Fußzeile (unten) und einen dynamischen Mittelbereich, in dem die verschiedenen
  * Ansichten (Panels) je nach Menüauswahl ausgetauscht werden.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class LagerUI extends JFrame {
 	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(LagerUI.class.getName());
@@ -34,12 +35,12 @@ public class LagerUI extends JFrame {
 	private static final long serialVersionUID = -5670441158631808726L;
 	private final JPanel contentPane;
 	private final Session ses;
-	private final JFrame parent;
 	private JMenuBar menuBar;
 
 	/**
 	 * Startet die grafische Benutzeroberfläche sicher im Java Swing Event Dispatch Thread (EDT).
-	 * * @param ses Die aktuelle Benutzersitzung, die für die Kommunikation mit dem Server benötigt wird.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung, die für die Kommunikation mit dem Server benötigt wird.
 	 */
 	public static void run(Session ses) {
 		EventQueue.invokeLater(() -> {
@@ -56,11 +57,11 @@ public class LagerUI extends JFrame {
 	 * Konstruktor für das Hauptfenster.
 	 * Richtet die Fenstergröße ein, zentriert es auf dem Bildschirm und
 	 * initialisiert die Menüleiste, die Fußzeile sowie die Startseite (WelcomePage).
-	 * * @param ses Die aktuelle Benutzersitzung.
+	 *
+	 * @param ses Die aktuelle Benutzersitzung.
 	 */
 	public LagerUI(Session ses) {
 		this.ses = ses;
-		parent = this;
 		setTitle("Lagerverwaltung");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		Dimension ss = Toolkit.getDefaultToolkit().getScreenSize();
@@ -109,31 +110,37 @@ public class LagerUI extends JFrame {
 		JMenuItem miStartseite = new JMenuItem("Startseite");
 		miStartseite.setPreferredSize(new Dimension(160, miStartseite.getPreferredSize().height));
 		miStartseite.setActionCommand(MenuActionCommands.STARTSEITE.toString());
-		miStartseite.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+		// KORRIGIERT: 3 Argumente statt 4
+		miStartseite.addActionListener(new LagerUIHandler(ses, this, contentPane));
 
 		JMenuItem miServerBeenden = new JMenuItem("Server Beenden");
-		miServerBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+		// KORRIGIERT: 3 Argumente statt 4
+		miServerBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane));
 		miServerBeenden.setActionCommand(MenuActionCommands.SERVERBEENDEN.toString());
 
 		JMenuItem miBeenden = new JMenuItem("Beenden");
 		miBeenden.setPreferredSize(new Dimension(160, miBeenden.getPreferredSize().height));
 		miBeenden.setActionCommand(MenuActionCommands.BEENDEN.toString());
-		miBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+		// KORRIGIERT: 3 Argumente statt 4
+		miBeenden.addActionListener(new LagerUIHandler(ses, this, contentPane));
 
 		// Weitere Hauptmenüpunkte
 		JMenuItem miStatistik = new JMenuItem("Statistik");
-		miStatistik.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+		// KORRIGIERT: 3 Argumente statt 4
+		miStatistik.addActionListener(new LagerUIHandler(ses, this, contentPane));
 		miStatistik.setActionCommand(MenuActionCommands.STATISTIK.toString());
 		miStatistik.setPreferredSize(new Dimension(160, miStatistik.getPreferredSize().height));
 
 		JMenuItem miSuchen = new JMenuItem("Bestand");
-		miSuchen.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+		// KORRIGIERT: 3 Argumente statt 4
+		miSuchen.addActionListener(new LagerUIHandler(ses, this, contentPane));
 		miSuchen.setActionCommand(MenuActionCommands.SUCHEN.toString());
 		miSuchen.setPreferredSize(new Dimension(160, miSuchen.getPreferredSize().height));
 
 		JMenuItem miInfo = new JMenuItem("Info");
 		miInfo.setPreferredSize(new Dimension(160, miInfo.getPreferredSize().height));
-		miInfo.addActionListener(new LagerUIHandler(ses, this, contentPane, parent));
+		// KORRIGIERT: 3 Argumente statt 4
+		miInfo.addActionListener(new LagerUIHandler(ses, this, contentPane));
 		miInfo.setActionCommand(MenuActionCommands.INFO.toString());
 
 		// Elemente der Menüleiste hinzufügen
@@ -202,7 +209,8 @@ public class LagerUI extends JFrame {
 	 * Tauscht das aktuell in der Mitte des Fensters angezeigte Panel gegen ein neues aus.
 	 * Wird verwendet, um bei Klicks im Menü nahtlos zwischen den verschiedenen
 	 * Ansichten (z. B. Startseite zu Produktverwaltung) zu wechseln, ohne das Fenster neu laden zu müssen.
-	 * * @param panel Das neu anzuzeigende JPanel (die neue Ansicht).
+	 *
+	 * @param panel Das neu anzuzeigende JPanel (die neue Ansicht).
 	 */
 	public void showPanel(JPanel panel) {
 		// Entfernt das aktuelle Panel in der Mitte (z.B. WelcomePage oder andere)

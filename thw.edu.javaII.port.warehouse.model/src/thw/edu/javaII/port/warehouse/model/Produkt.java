@@ -7,7 +7,8 @@ import java.io.Serializable;
  * Diese Klasse repräsentiert ein einzelnes Produkt im System.
  * Sie speichert alle wichtigen Stammdaten wie die Artikelnummer, den Namen,
  * den Hersteller und den Preis, die für den Verkauf und die Lagerverwaltung benötigt werden.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class Produkt implements Serializable {
 
@@ -21,7 +22,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Gibt die eindeutige Identifikationsnummer (Artikelnummer) des Produkts zurück.
-	 * * @return Die ID des Produkts.
+	 *
+	 * @return Die ID des Produkts.
 	 */
 	public int getId() {
 		return id;
@@ -29,7 +31,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Setzt eine neue Identifikationsnummer für das Produkt.
-	 * * @param id Die neue Artikelnummer.
+	 *
+	 * @param id Die neue Artikelnummer.
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -37,7 +40,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Gibt den Namen oder die genaue Bezeichnung des Produkts zurück.
-	 * * @return Der Produktname.
+	 *
+	 * @return Der Produktname.
 	 */
 	public String getName() {
 		return name;
@@ -45,7 +49,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Setzt den Namen oder die Bezeichnung des Produkts.
-	 * * @param name Der neue Produktname.
+	 *
+	 * @param name Der neue Produktname.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -53,7 +58,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Gibt den Hersteller oder die Marke des Produkts zurück.
-	 * * @return Der Name des Herstellers.
+	 *
+	 * @return Der Name des Herstellers.
 	 */
 	public String getHersteller() {
 		return hersteller;
@@ -61,7 +67,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Setzt den Hersteller oder die Marke des Produkts.
-	 * * @param hersteller Der neue Hersteller.
+	 *
+	 * @param hersteller Der neue Hersteller.
 	 */
 	public void setHersteller(String hersteller) {
 		this.hersteller = hersteller;
@@ -69,7 +76,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Gibt den aktuellen Verkaufspreis des Produkts zurück.
-	 * * @return Der Preis (als Dezimalzahl).
+	 *
+	 * @return Der Preis (als Dezimalzahl).
 	 */
 	public double getPreis() {
 		return preis;
@@ -77,7 +85,8 @@ public class Produkt implements Serializable {
 
 	/**
 	 * Legt den Verkaufspreis für das Produkt fest.
-	 * * @param preis Der neue Preis.
+	 *
+	 * @param preis Der neue Preis.
 	 */
 	public void setPreis(double preis) {
 		this.preis = preis;
@@ -95,7 +104,8 @@ public class Produkt implements Serializable {
 	/**
 	 * Erstellt ein neues, vollständig ausgefülltes Produkt.
 	 * Wird genutzt, wenn ein komplett neuer Artikel im System oder in der Datenbank angelegt wird.
-	 * * @param id         Die eindeutige Artikelnummer.
+	 *
+	 * @param id         Die eindeutige Artikelnummer.
 	 * @param name       Die Bezeichnung des Produkts.
 	 * @param hersteller Der Hersteller des Produkts.
 	 * @param preis      Der Verkaufspreis des Produkts.

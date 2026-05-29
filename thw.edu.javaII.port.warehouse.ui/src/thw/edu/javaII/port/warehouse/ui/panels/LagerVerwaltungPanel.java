@@ -17,7 +17,8 @@ import javax.swing.JLabel;
  * Diese Klasse repräsentiert die Verwaltungsoberfläche für die Hauptlager (Standorte).
  * Sie zeigt eine tabellarische Übersicht aller im System registrierten Lager an und bietet
  * eine Echtzeit-Suchfunktion sowie die Möglichkeit, Standorte zu verwalten.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class LagerVerwaltungPanel extends JPanel {
     private final JTable table;

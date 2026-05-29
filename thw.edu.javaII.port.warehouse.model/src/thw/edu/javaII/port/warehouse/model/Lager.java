@@ -7,7 +7,8 @@ import java.io.Serializable;
  * Diese Klasse repräsentiert ein physisches Lager oder einen Standort im System.
  * Ein Lager ist die oberste organisatorische Einheit (z. B. eine Halle oder ein Freigelände),
  * in der sich wiederum verschiedene einzelne Lagerplätze befinden können.
- * * @author juan.de.souza.leao
+ *
+ * @author barbara.liegnitz
  */
 public class Lager implements Serializable {
 
@@ -21,7 +22,8 @@ public class Lager implements Serializable {
 
 	/**
 	 * Gibt die eindeutige Identifikationsnummer des Lagers zurück.
-	 * * @return Die ID des Lagers.
+	 *
+	 * @return Die ID des Lagers.
 	 */
 	public int getId() {
 		return id;
@@ -29,7 +31,8 @@ public class Lager implements Serializable {
 
 	/**
 	 * Setzt eine neue Identifikationsnummer für dieses Lager.
-	 * * @param id Die neue ID.
+	 *
+	 * @param id Die neue ID.
 	 */
 	public void setId(int id) {
 		this.id = id;
@@ -37,7 +40,8 @@ public class Lager implements Serializable {
 
 	/**
 	 * Gibt den Namen oder die Bezeichnung des Lagers zurück (z. B. "Hauptlager").
-	 * * @return Der Name des Lagers.
+	 *
+	 * @return Der Name des Lagers.
 	 */
 	public String getName() {
 		return name;
@@ -45,7 +49,8 @@ public class Lager implements Serializable {
 
 	/**
 	 * Legt den Namen für das Lager fest.
-	 * * @param name Der neue Name.
+	 *
+	 * @param name Der neue Name.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -53,7 +58,8 @@ public class Lager implements Serializable {
 
 	/**
 	 * Gibt den geografischen Standort des Lagers zurück (z. B. die Stadt).
-	 * * @return Der Ort des Lagers.
+	 *
+	 * @return Der Ort des Lagers.
 	 */
 	public String getOrt() {
 		return ort;
@@ -61,7 +67,8 @@ public class Lager implements Serializable {
 
 	/**
 	 * Setzt den Standort für dieses Lager.
-	 * * @param ort Der neue Ort (z. B. "Stuttgart").
+	 *
+	 * @param ort Der neue Ort (z. B. "Stuttgart").
 	 */
 	public void setOrt(String ort) {
 		this.ort = ort;
@@ -70,7 +77,8 @@ public class Lager implements Serializable {
 	/**
 	 * Gibt die Art des Lagers zurück.
 	 * Das beschreibt die bauliche Beschaffenheit, z. B. "Hochregallager" oder "Kühlhaus".
-	 * * @return Die Lagerart.
+	 *
+	 * @return Die Lagerart.
 	 */
 	public String getArt() {
 		return art;
@@ -78,7 +86,8 @@ public class Lager implements Serializable {
 
 	/**
 	 * Legt die Art des Lagers fest.
-	 * * @param art Die neue Lagerart.
+	 *
+	 * @param art Die neue Lagerart.
 	 */
 	public void setArt(String art) {
 		this.art = art;
@@ -96,7 +105,8 @@ public class Lager implements Serializable {
 	/**
 	 * Erstellt ein neues, vollständig konfiguriertes Lager.
 	 * Wird genutzt, wenn ein komplett neuer Standort in das System aufgenommen wird.
-	 * * @param id   Die eindeutige Nummer des Lagers.
+	 *
+	 * @param id   Die eindeutige Nummer des Lagers.
 	 * @param name Die Bezeichnung des Lagers.
 	 * @param ort  Die Stadt oder der Standort.
 	 * @param art  Die bauliche Art (z. B. "Halle").

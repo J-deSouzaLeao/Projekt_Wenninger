@@ -11,7 +11,8 @@ import thw.edu.javaII.port.warehouse.model.common.Info;
  * Sie öffnet einen zentralen Netzwerk-Port und wartet in einer Endlosschleife auf eingehende
  * Verbindungen von Clients (wie dem Kassenterminal oder dem Verwaltungs-PC).
  * Für jeden neu verbundenen Client wird sofort ein eigener Betreuer-Prozess (Service-Thread) gestartet.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class Server {
     private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Server.class.getName());
@@ -27,7 +28,8 @@ public class Server {
      * Die Hauptmethode, die beim Start des Programms ausgeführt wird.
      * Sie richtet den Server-Socket auf dem vorkonfigurierten Port ein, gibt eine Startmeldung aus
      * und blockiert dann, bis sich ein neuer Client anmeldet, um ihn an einen Service-Thread zu übergeben.
-     * * @param args Kommandozeilenargumente (werden hier nicht verwendet).
+     *
+     * @param args Kommandozeilenargumente (werden hier nicht verwendet).
      */
     public static void main(String[] args) {
         try (ServerSocket server = new ServerSocket(Info.PORT_SERVER)) {

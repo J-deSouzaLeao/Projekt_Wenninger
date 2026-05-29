@@ -16,7 +16,8 @@ import java.util.ArrayList;
  * Ein Verwaltungs-Panel für das Hauptfenster, das alle Kassenabschlüsse auflistet.
  * Bietet eine intelligente Suchfunktion, die durch ID-Formatierung (z.B. ABS-00012)
  * präzise Ergebnisse liefert.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class KassenabschlussVerwaltungPanel extends JPanel {
 

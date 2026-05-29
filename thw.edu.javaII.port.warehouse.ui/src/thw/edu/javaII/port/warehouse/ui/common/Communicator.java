@@ -23,7 +23,8 @@ import thw.edu.javaII.port.warehouse.model.Produkt;
  * Sie baut die Socket-Verbindung zum Server auf, wandelt lokale Methodenaufrufe in
  * Datenpakete (DEOs) um, sendet diese über das Netzwerk und gibt die Antworten
  * des Servers an die Oberfläche zurück.
- * * @author juan.de.souza.leao
+ *
+ * @author juan.de.souza.leao
  */
 public class Communicator {
 	private static final java.util.logging.Logger LOGGER = java.util.logging.Logger.getLogger(Communicator.class.getName());
@@ -49,7 +50,8 @@ public class Communicator {
 
 	/**
 	 * Fordert eine vollständige, alphabetisch sortierte Liste aller Lagerbestände vom Server an.
-	 * * @return Eine Liste aller Lagerbestände oder null im Fehlerfall.
+	 *
+	 * @return Eine Liste aller Lagerbestände oder null im Fehlerfall.
 	 */
 	public List<LagerBestand> getBestand() {
 		try {
@@ -66,7 +68,8 @@ public class Communicator {
 
 	/**
 	 * Fordert die Top 10 der Lagerbestände vom Server an (die Produkte mit der höchsten Stückzahl).
-	 * * @return Eine Liste der Top 10 Bestände.
+	 *
+	 * @return Eine Liste der Top 10 Bestände.
 	 */
 	public List<LagerBestand> getTOP10Bestand() {
 		try {
@@ -84,7 +87,8 @@ public class Communicator {
 	/**
 	 * Fordert die Low 10 der Lagerbestände vom Server an (die Produkte mit der niedrigsten Stückzahl).
 	 * Dient oft dazu, Artikel zu finden, die dringend nachbestellt werden müssen.
-	 * * @return Eine Liste der Low 10 Bestände.
+	 *
+	 * @return Eine Liste der Low 10 Bestände.
 	 */
 	public List<LagerBestand> getLOW10Bestand() {
 		try {
@@ -101,7 +105,8 @@ public class Communicator {
 
 	/**
 	 * Fordert vom Server die Top 10 Lagerbestände mit dem höchsten gebundenen Kapital an.
-	 * * @return Liste der kapitalintensivsten Bestände.
+	 *
+	 * @return Liste der kapitalintensivsten Bestände.
 	 */
 	public List<LagerBestand> getKapitalbindungBestand() {
 		try {
@@ -118,7 +123,8 @@ public class Communicator {
 
 	/**
 	 * Fordert vom Server eine Liste aller kritischen Lagerbestände an (Engpässe < 5 Stück).
-	 * * @return Liste der Bestände, die dringend nachbestellt werden müssen.
+	 *
+	 * @return Liste der Bestände, die dringend nachbestellt werden müssen.
 	 */
 	public List<LagerBestand> getKritischerBestand() {
 		try {
@@ -136,7 +142,8 @@ public class Communicator {
 	/**
 	 * Sendet geänderte Informationen eines Lagerbestands (z. B. eine korrigierte Menge)
 	 * an den Server, um diese dort dauerhaft in der Datenbank zu speichern.
-	 * * @param mod Der zu aktualisierende Lagerbestand.
+	 *
+	 * @param mod Der zu aktualisierende Lagerbestand.
 	 */
 	public void updateLagerBestand(LagerBestand mod) {
 		try {
@@ -153,7 +160,8 @@ public class Communicator {
 
 	/**
 	 * Ermittelt, welche Lagerplätze im System aktuell noch komplett leer sind.
-	 * * @return Ein Array mit allen ungenutzten Lagerplätzen.
+	 *
+	 * @return Ein Array mit allen ungenutzten Lagerplätzen.
 	 */
 	public LagerPlatz[] getFreeLagerPlatz() {
 		try {
@@ -206,6 +214,7 @@ public class Communicator {
 
 	/**
 	 * Legt ein komplett neues Produkt an und verknüpft es direkt mit einem Lagerplatz (Bestand).
+	 *
 	 * @param p Das neu anzulegende Produkt (ID ist 0).
 	 * @param l Der neue Lagerbestand, auf dem das Produkt liegen soll.
 	 * @return true, wenn der gesamte Vorgang erfolgreich war, andernfalls false.
@@ -283,6 +292,7 @@ public class Communicator {
 
 	/**
 	 * Fordert vom Server eine Liste aller gespeicherten Kassenabschlüsse an.
+	 *
 	 * @return Eine Liste der Abschlüsse zur Anzeige in der Verwaltungsoberfläche.
 	 */
 	public List<thw.edu.javaII.port.warehouse.model.Kassenabschluss> getAllKassenabschluesse() {

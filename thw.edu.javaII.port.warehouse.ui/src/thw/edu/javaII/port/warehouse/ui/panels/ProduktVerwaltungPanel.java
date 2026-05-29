@@ -25,6 +25,8 @@ import thw.edu.javaII.port.warehouse.ui.common.Session;
 /**
  * Diese Klasse repräsentiert die Verwaltungsoberfläche für die Stammdaten der Produkte.
  * Beinhaltet nun eine Echtzeit-Suchfunktion (Filter) über alle Spalten.
+ *
+ * @author barbara.liegnitz
  */
 public class ProduktVerwaltungPanel extends JPanel {
 

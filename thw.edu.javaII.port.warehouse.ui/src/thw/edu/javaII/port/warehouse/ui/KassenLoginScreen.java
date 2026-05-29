@@ -11,6 +11,8 @@ import java.awt.event.FocusEvent;
  * Sie ist speziell für die Touchscreen-Bedienung optimiert und enthält ein eigenes Numpad
  * zur Eingabe der Kassierer-Nummer, der PIN und des anfänglichen Kassenbestands.
  * Beinhaltet eine Sicherheitsfunktion, die bei wiederholten Fehlversuchen eine Managerfreigabe erzwingt.
+ *
+ * @author barbara.liegnitz
  */
 public class KassenLoginScreen extends JFrame {
     private final JTextField nrField;
@@ -30,7 +32,8 @@ public class KassenLoginScreen extends JFrame {
     /**
      * Erstellt das Login-Fenster und initialisiert die Benutzeroberfläche.
      * Baut die Eingabefelder auf und richtet einen Focus-Listener ein.
-     * * @param client Der BackendClient für die Serverkommunikation (Authentifizierung).
+     *
+     * @param client Der BackendClient für die Serverkommunikation (Authentifizierung).
      */
     public KassenLoginScreen(BackendClient client) {
         this.client = client;
@@ -102,7 +105,8 @@ public class KassenLoginScreen extends JFrame {
 
     /**
      * Hilfsmethode zur Erstellung der einzelnen Ziffern-Buttons für das Numpad.
-     * * @param text Die Ziffer oder "C" (Clear) für den Button.
+     *
+     * @param text Die Ziffer oder "C" (Clear) für den Button.
      * @return Der fertig konfigurierte Numpad-Button.
      */
     private JButton createNumButton(String text) {

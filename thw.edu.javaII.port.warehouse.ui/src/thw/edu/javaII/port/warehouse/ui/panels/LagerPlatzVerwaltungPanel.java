@@ -14,6 +14,8 @@ import thw.edu.javaII.port.warehouse.ui.BackendClient;
 /**
  * Verwaltungsoberfläche für Lagerplätze.
  * Inklusive Echtzeit-Suchfilter und sicherer Zeilennummerierung.
+ *
+ * @author barbara.liegnitz
  */
 public class LagerPlatzVerwaltungPanel extends JPanel {
     private final JTable table;
