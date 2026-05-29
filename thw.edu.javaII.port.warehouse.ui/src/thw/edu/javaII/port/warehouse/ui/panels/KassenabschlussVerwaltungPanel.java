@@ -72,10 +72,29 @@ public class KassenabschlussVerwaltungPanel extends JPanel {
 
     /**
      * Ruft die Liste aller Abschlüsse über den Communicator ab und aktualisiert die Ansicht.
+     * Fängt Server-Null-Rückgaben ab, um Abstürze bei der Filterung zu vermeiden,
+     * und zeigt eine Meldung an, falls keine Einträge vorhanden sind.
      */
     private void ladeDaten() {
         alleAbschluesse = ses.getCommunicator().getAllKassenabschluesse();
-        filterTable(""); // Zeigt initial alle Daten an
+
+        // --- BUGFIX: Schutz vor der NullPointerException ---
+        // Wenn der Server null liefert, initialisieren wir eine leere Liste,
+        // damit die for-Schleife in filterTable() nicht abstürzt.
+        if (alleAbschluesse == null) {
+            alleAbschluesse = new ArrayList<>();
+        }
+
+        // --- Meldung anzeigen, wenn die Liste leer ist ---
+        if (alleAbschluesse.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Fehler beim Laden der Kassenabschlüsse",
+                    "Keine Daten vorhanden",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+
+        // Jetzt kann filterTable gefahrlos aufgerufen werden (die leere Liste wird einfach ignoriert)
+        filterTable("");
     }
 
     /**
