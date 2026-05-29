@@ -107,7 +107,7 @@ public class Communicator {
 		try {
 			WarehouseDEO deo = new WarehouseDEO();
 			deo.setZone(Zone.STATISTIK);
-			deo.setCommand(Command.KAPITAL); // NEU: Muss in der Klasse 'Command' als Enum hinzugefügt werden!
+			deo.setCommand(Command.KAPITAL);
 			toServer.writeObject(deo);
 			return Cast.safeListCast(((WarehouseReturnDEO) fromServer.readObject()).getData(), LagerBestand.class);
 		} catch (IOException | ClassNotFoundException e) {
@@ -124,7 +124,7 @@ public class Communicator {
 		try {
 			WarehouseDEO deo = new WarehouseDEO();
 			deo.setZone(Zone.STATISTIK);
-			deo.setCommand(Command.KRITISCH); // NEU: Muss in der Klasse 'Command' als Enum hinzugefügt werden!
+			deo.setCommand(Command.KRITISCH);
 			toServer.writeObject(deo);
 			return Cast.safeListCast(((WarehouseReturnDEO) fromServer.readObject()).getData(), LagerBestand.class);
 		} catch (IOException | ClassNotFoundException e) {
@@ -153,13 +153,10 @@ public class Communicator {
 
 	/**
 	 * Ermittelt, welche Lagerplätze im System aktuell noch komplett leer sind.
-	 * Dazu lädt die Methode erst alle existierenden Plätze und anschließend alle belegten Bestände.
-	 * Belegte Plätze werden aus der Liste gefiltert, sodass nur die freien Plätze übrig bleiben.
 	 * * @return Ein Array mit allen ungenutzten Lagerplätzen.
 	 */
 	public LagerPlatz[] getFreeLagerPlatz() {
 		try {
-			// 1. Alle verfügbaren Lagerplätze abfragen
 			WarehouseDEO deo = new WarehouseDEO();
 			deo.setZone(Zone.LAGERPLATZ);
 			deo.setCommand(Command.LIST);
@@ -167,7 +164,6 @@ public class Communicator {
 			WarehouseReturnDEO d = ((WarehouseReturnDEO) fromServer.readObject());
 			List<LagerPlatz> lager = Cast.safeListCast(d.getData(), LagerPlatz.class);
 
-			// 2. Alle aktuellen Lagerbestände abfragen
 			deo = new WarehouseDEO();
 			deo.setZone(Zone.LAGERBESTAND);
 			deo.setCommand(Command.LIST);
@@ -175,7 +171,6 @@ public class Communicator {
 			d = ((WarehouseReturnDEO) fromServer.readObject());
 			List<LagerBestand> bestand = Cast.safeListCast(d.getData(), LagerBestand.class);
 
-			// 3. Filtern: Welcher Platz ist in keinem Bestand vermerkt?
 			List<LagerPlatz> removeCandidates = new ArrayList<>();
 			for (LagerPlatz p : lager) {
 				for (LagerBestand b : bestand) {
@@ -211,30 +206,29 @@ public class Communicator {
 
 	/**
 	 * Legt ein komplett neues Produkt an und verknüpft es direkt mit einem Lagerplatz (Bestand).
-	 * Da das Produkt für den Bestand eine Datenbank-ID braucht, wird das Produkt zuerst gespeichert,
-	 * dann mit ID vom Server zurückgeholt und schließlich dem neuen Bestand zugewiesen und gesichert.
-	 * * @param p Das neu anzulegende Produkt.
+	 * @param p Das neu anzulegende Produkt (ID ist 0).
 	 * @param l Der neue Lagerbestand, auf dem das Produkt liegen soll.
 	 * @return true, wenn der gesamte Vorgang erfolgreich war, andernfalls false.
 	 */
 	public boolean addProdukt(Produkt p, LagerBestand l) {
 		try {
-			// 1. Neues Produkt speichern
+			// 1. Neues Produkt an den Server senden
 			WarehouseDEO deo = new WarehouseDEO();
 			deo.setZone(Zone.PRODUKT);
 			deo.setCommand(Command.ADD);
 			deo.setData(p);
 			toServer.writeObject(deo);
-			fromServer.readObject();
+			toServer.reset(); // WICHTIG: Cache leeren
+			toServer.flush();
 
-			// 2. Gespeichertes Produkt (inklusive generierter ID) wieder abrufen
-			WarehouseReturnDEO d;
-			deo = new WarehouseDEO();
-			deo.setZone(Zone.PRODUKT);
-			deo.setCommand(Command.GETBYMODEL);
-			deo.setData(p);
-			toServer.writeObject(deo);
-			d = ((WarehouseReturnDEO) fromServer.readObject());
+			WarehouseReturnDEO d = (WarehouseReturnDEO) fromServer.readObject();
+
+			// Wenn der Server einen Fehler meldet, sofort abbrechen
+			if (d.getStatus() != Status.OK || d.getData() == null) {
+				return false;
+			}
+
+			// 2. Das vom Server zurückgegebene Produkt (inklusive generierter ID) direkt auslesen
 			Produkt pr = Cast.safeCast(d.getData(), Produkt.class);
 
 			// 3. Das vollständige Produkt dem Bestand zuweisen und diesen speichern
@@ -244,19 +238,24 @@ public class Communicator {
 			deo.setCommand(Command.ADD);
 			deo.setData(l);
 			toServer.writeObject(deo);
-			d = ((WarehouseReturnDEO) fromServer.readObject());
+			toServer.reset(); // WICHTIG: Cache leeren
+			toServer.flush();
 
-			return d.getStatus().equals(Status.OK);
+			d = ((WarehouseReturnDEO) fromServer.readObject());
+			return d.getStatus() == Status.OK;
+
 		} catch (Exception e) {
 			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler bei der Kommunikation mit dem Server", e);
 			return false;
 		}
-
 	}
+
+	// ==========================================
+	// BEREICH: KASSENVERWALTUNG (NEU)
+	// ==========================================
 
 	/**
 	 * Sendet einen speziellen Befehl an den Server, um diesen komplett herunterzufahren.
-	 * Wird in der Regel nur für Wartungszwecke oder von einem Admin aufgerufen.
 	 */
 	public void closeServer() {
 		try {
@@ -266,8 +265,6 @@ public class Communicator {
 			toServer.writeObject(deo);
 			WarehouseReturnDEO d = ((WarehouseReturnDEO) fromServer.readObject());
 
-			// Sendet ein zweites END-Kommando, um sicherzugehen,
-			// dass alle Threads des Servers beendet werden.
 			if (d.getStatus() == Status.OK) {
 				sock = new Socket(Info.NAME_SERVER, Info.PORT_SERVER);
 				sock.setSoTimeout(Info.TIMEOUT_CLIENT);
@@ -284,4 +281,24 @@ public class Communicator {
 		}
 	}
 
+	/**
+	 * Fordert vom Server eine Liste aller gespeicherten Kassenabschlüsse an.
+	 * @return Eine Liste der Abschlüsse zur Anzeige in der Verwaltungsoberfläche.
+	 */
+	public List<thw.edu.javaII.port.warehouse.model.Kassenabschluss> getAllKassenabschluesse() {
+		try {
+			WarehouseDEO deo = new WarehouseDEO();
+			deo.setZone(Zone.KASSE);
+			deo.setCommand(Command.ABSCHLUSS_LIST);
+			toServer.writeObject(deo);
+
+			WarehouseReturnDEO d = ((WarehouseReturnDEO) fromServer.readObject());
+			if (d.getStatus() == Status.OK && d.getData() != null) {
+				return Cast.safeListCast(d.getData(), thw.edu.javaII.port.warehouse.model.Kassenabschluss.class);
+			}
+		} catch (Exception e) {
+			LOGGER.log(java.util.logging.Level.SEVERE, "Fehler beim Abruf der Kassenabschlüsse", e);
+		}
+		return new ArrayList<>();
+	}
 }

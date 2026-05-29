@@ -175,16 +175,26 @@ public class LagerUI extends JFrame {
 		itemLagerPlatz.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerPlatzVerwaltungPanel()));
 		itemBestand.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerBestandVerwaltungPanel()));
 
-		// An die bestehende menuBar aus generateMenu() anhängen
+		// An die bestehende menuBar anhängen
 		this.menuBar.add(menuStammdaten);
 		this.menuBar.add(menuLagerbetrieb);
 
 		// Menü Kasse
 		JMenu menuKasse = new JMenu("Kasse");
-		JMenuItem itemKassenzettel = new JMenuItem("Kassenzettel verwalten");
-		menuKasse.add(itemKassenzettel);
-		itemKassenzettel.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.KassenzettelVerwaltungPanel()));
 
+		// 1. ZUERST die Variablen deklarieren
+		JMenuItem itemKassenzettel = new JMenuItem("Kassenzettel verwalten");
+		JMenuItem itemAbschluesse = new JMenuItem("Kassenabschlüsse einsehen"); // NEU
+
+		// 2. DANN die Items an das Menü anhängen
+		menuKasse.add(itemKassenzettel);
+		menuKasse.add(itemAbschluesse); // NEU
+
+		// 3. ZULETZT die Klick-Aktionen (Action-Listener) zuweisen
+		itemKassenzettel.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.KassenzettelVerwaltungPanel()));
+		itemAbschluesse.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.KassenabschlussVerwaltungPanel(ses))); // NEU
+
+		// 4. Das fertige Kassen-Menü an die Leiste anhängen
 		this.menuBar.add(menuKasse);
 	}
 

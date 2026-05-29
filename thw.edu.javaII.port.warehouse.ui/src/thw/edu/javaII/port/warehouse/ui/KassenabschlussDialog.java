@@ -20,6 +20,7 @@ import java.util.Map;
 public class KassenabschlussDialog extends JDialog {
     private final BackendClient client;
     private final Kassierer kassierer;
+    private final JFrame parentFrame; // NEU: Referenz auf das Hauptfenster
     private double sollBestand;
     private double ermittelterIstBestand = 0.0;
 
@@ -34,7 +35,7 @@ public class KassenabschlussDialog extends JDialog {
      * Erstellt den Dialog für den Kassenabschluss.
      * Lädt den aktuellen Soll-Bestand vom Server, baut die Benutzeroberfläche
      * für die Zählung der Stückelungen auf und richtet die Live-Berechnung ein.
-     * * @param parent    Das aufrufende Hauptfenster (für die modale Blockierung).
+     * * @param parent    Das aufrufende Kassen-Hauptfenster (für die modale Blockierung).
      * @param client    Die Netzwerkverbindung für den Datenabruf und das Speichern.
      * @param kassierer Der Kassierer, der diesen Abschluss durchführt.
      */
@@ -42,6 +43,7 @@ public class KassenabschlussDialog extends JDialog {
         super(parent, "Kassenabschluss durchführen", true);
         this.client = client;
         this.kassierer = kassierer;
+        this.parentFrame = parent;
 
         setSize(500, 700);
         setLocationRelativeTo(parent);
@@ -140,7 +142,7 @@ public class KassenabschlussDialog extends JDialog {
     /**
      * Erstellt ein Kassenabschluss-Objekt aus den berechneten Daten,
      * versieht es mit dem aktuellen Zeitstempel und sendet es an den Server.
-     * Bei Erfolg wird das Programmfenster komplett geschlossen (Ende der Schicht).
+     * Bei Erfolg wird das Kassenfenster geschlossen und der nächste Login geladen (Dauerbetrieb).
      */
     private void abschlussSpeichern() {
         try {
@@ -155,8 +157,12 @@ public class KassenabschlussDialog extends JDialog {
 
             client.saveKassenabschluss(a);
             JOptionPane.showMessageDialog(this, "Kassenabschluss erfolgreich gespeichert!");
-            dispose();
-            System.exit(0); // Beendet das Kassen-Terminal nach Abschluss
+
+            // --- NEU: Kontinuierlicher Dauerbetrieb ---
+            this.dispose(); // Schließt den Dialog
+            parentFrame.dispose(); // Schließt die komplette Kassen-Ansicht
+            new KassenLoginScreen(client).setVisible(true); // Startet sofort wieder den Login (Anpassen, falls deine Klasse anders heißt)
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Fehler beim Speichern des Abschlusses: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
         }

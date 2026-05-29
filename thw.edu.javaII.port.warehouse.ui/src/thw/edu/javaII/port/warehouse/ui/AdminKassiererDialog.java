@@ -80,6 +80,7 @@ public class AdminKassiererDialog extends JDialog {
 
     /**
      * Öffnet einen Eingabedialog zum Erstellen eines neuen Kassierers.
+     * Prüft die Server-Antwort und gibt bei Duplikaten der Personalnummer eine Warnung aus.
      */
     private void anlegen() {
         JTextField txtNr = new JTextField();
@@ -97,11 +98,20 @@ public class AdminKassiererDialog extends JDialog {
                 k.setPin(new String(txtPin.getPassword()));
                 k.setManager(chkManager.isSelected());
 
-                if (client.addKassierer(k)) {
-                    loadData();
+                // --- BUGFIX: Abfrage mit else-Block für die Fehlermeldung ---
+                boolean erfolgreich = client.addKassierer(k);
+
+                if (erfolgreich) {
+                    loadData(); // Alles hat geklappt, Tabelle aktualisieren
+                } else {
+                    // Server meldet Fehler (z.B. ID schon vergeben)
+                    JOptionPane.showMessageDialog(this,
+                            "Der Mitarbeiter konnte nicht angelegt werden.\nMöglicherweise ist die Personalnummer bereits vergeben.",
+                            "Eingabefehler",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Fehler beim Anlegen: Bitte gültige Daten eingeben.", "Fehler", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Fehler beim Anlegen: Bitte gültige Daten (Zahlen für Nummer) eingeben.", "Fehler", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -160,7 +170,7 @@ public class AdminKassiererDialog extends JDialog {
 
         int nummer = (int) tableModel.getValueAt(row, 0);
 
-        // NEU: Schutzfunktion vor Selbstlöschung
+        // Schutzfunktion vor Selbstlöschung
         if (nummer == aktiverManager.getNummer()) {
             JOptionPane.showMessageDialog(this, "Aktion verweigert: Du kannst deinen eigenen Account nicht löschen!", "Sicherheitswarnung", JOptionPane.WARNING_MESSAGE);
             return;

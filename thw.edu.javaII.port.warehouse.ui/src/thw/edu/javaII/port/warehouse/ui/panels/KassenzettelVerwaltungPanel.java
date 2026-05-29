@@ -57,7 +57,7 @@ public class KassenzettelVerwaltungPanel extends JPanel {
         filterPanel.add(searchField);
 
         filterPanel.add(new JLabel("Zahlart:"));
-        zahlartComboBox = new JComboBox<>(new String[]{"Alle", "Bar", "Karte"});
+        zahlartComboBox = new JComboBox<>(new String[]{"Alle", "Bar", "EC-Karte"});
         zahlartComboBox.setFont(new Font("Arial", Font.PLAIN, 16));
         filterPanel.add(zahlartComboBox);
 
