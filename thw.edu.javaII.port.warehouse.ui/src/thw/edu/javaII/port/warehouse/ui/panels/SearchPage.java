@@ -68,6 +68,19 @@ public class SearchPage extends JPanel {
 		sorter = new TableRowSorter<>(model);
 		table.setRowSorter(sorter);
 
+		// 1. Spaltenbreiten prozentual verteilen (Gesamtbreite z.B. 1000 Pixel als Basis)
+		// Reihenfolge: ID (10%), Name (25%), Hersteller (20%), Menge (10%), Platz (15%), Standort (20%)
+		model.setJTableColumnsWidth(table, 1000, 10, 25, 20, 10, 15, 20);
+
+		// 2. Die Spalte "Menge (Stk.)" zur besseren Lesbarkeit zentrieren
+		javax.swing.table.DefaultTableCellRenderer centerRenderer = new javax.swing.table.DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(javax.swing.JLabel.CENTER);
+		table.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+
+		// 3. Tabellenkopf (Überschriften) optisch abheben
+		table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+		table.setRowHeight(25); // Zeilen etwas höher machen für leichtere Lesbarkeit (Touch/Klick)
+
 		JPanel pannel_2 = getJPanel(ses);
 		add(pannel_2, BorderLayout.SOUTH);
 
@@ -147,18 +160,8 @@ public class SearchPage extends JPanel {
 		JButton btnNewButton = createBtnNewButton(ses);
 		pannel_2.add(btnNewButton);
 
-		JButton btnNewButton_2 = new JButton("Neues Produkt einlagern");
-		btnNewButton_2.addActionListener(e -> {
-			AddProdukt ap = new AddProdukt(ses);
-			ap.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			ap.setModalityType(ModalityType.APPLICATION_MODAL);
-			ap.setVisible(true);
-
-			// Tabelle updaten und Filter beibehalten
-			model.setData(ses.getCommunicator().getBestand());
-			model.fireTableDataChanged();
-		});
-		pannel_2.add(btnNewButton_2);
+		// Der Button "Neues Produkt einlagern" wurde hier entfernt,
+		// da die Neuanlage nun zentral über die Stammdatenverwaltung erfolgt.
 
 		return pannel_2;
 	}

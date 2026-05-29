@@ -170,7 +170,7 @@ public class LagerUI extends JFrame {
 		menuLagerbetrieb.add(itemBestand);
 
 		// Action Listeners für Stammdaten & Lagerbetrieb
-		itemProdukte.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.ProduktVerwaltungPanel()));
+		itemProdukte.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.ProduktVerwaltungPanel(ses)));
 		itemLager.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerVerwaltungPanel()));
 		itemLagerPlatz.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerPlatzVerwaltungPanel()));
 		itemBestand.addActionListener(e -> showPanel(new thw.edu.javaII.port.warehouse.ui.panels.LagerBestandVerwaltungPanel()));
