@@ -6,37 +6,65 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import thw.edu.javaII.port.warehouse.model.Lager;
 import thw.edu.javaII.port.warehouse.ui.BackendClient;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
 
 /**
  * Diese Klasse repräsentiert die Verwaltungsoberfläche für die Hauptlager (Standorte).
  * Sie zeigt eine tabellarische Übersicht aller im System registrierten Lager an und bietet
- * über entsprechende Schaltflächen die Möglichkeit, neue Standorte hinzuzufügen,
- * bestehende Daten zu ändern oder ein Lager komplett zu löschen.
+ * eine Echtzeit-Suchfunktion sowie die Möglichkeit, Standorte zu verwalten.
  * * @author juan.de.souza.leao
  */
 public class LagerVerwaltungPanel extends JPanel {
     private final JTable table;
     private final DefaultTableModel tableModel;
 
+    // NEU: Variablen für die Suche
+    private final TableRowSorter<DefaultTableModel> sorter;
+    private final JTextField txtSearch;
+
     /**
      * Standard-Konstruktor.
-     * Baut das grundlegende Layout der Lagerverwaltung auf (Tabelle in der Mitte, Aktions-Buttons unten).
-     * Konfiguriert die Klick-Ereignisse der Buttons und ruft direkt beim Start
-     * die aktuellen Lagerdaten vom Server ab.
+     * Baut das grundlegende Layout auf (Suchleiste oben, Tabelle Mitte, Buttons unten).
      */
     public LagerVerwaltungPanel() {
         setLayout(new BorderLayout());
 
+        // --- 1. Suchleiste (Kopfbereich) ---
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.add(new JLabel("Suchen:"));
+        txtSearch = new JTextField(20);
+        topPanel.add(txtSearch);
+        add(topPanel, BorderLayout.NORTH);
+
+        // --- 2. Tabelle und Datenmodell ---
         String[] columnNames = {"ID", "Name", "Ort", "Art"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Direkte Bearbeitung in der Zelle deaktivieren, Bearbeitung nur über Dialog
+                return false; // Direkte Bearbeitung in der Zelle deaktivieren
             }
         };
         table = new JTable(tableModel);
+
+        // --- 3. Sorter an die Tabelle binden ---
+        sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
+        // --- 4. Live-Filter Logik an das Textfeld hängen ---
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filterTable(); }
+            public void removeUpdate(DocumentEvent e) { filterTable(); }
+            public void changedUpdate(DocumentEvent e) { filterTable(); }
+        });
+
+        // --- Buttons (Fußbereich) ---
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         var btnAdd = new JButton("Neu");
         var btnEdit = new JButton("Bearbeiten");
@@ -55,8 +83,21 @@ public class LagerVerwaltungPanel extends JPanel {
     }
 
     /**
+     * Wendet den Text aus dem Suchfeld als Filter auf die Tabelle an.
+     * Ignoriert Groß-/Kleinschreibung durch den Regex-Präfix "(?i)".
+     */
+    private void filterTable() {
+        String text = txtSearch.getText().trim();
+        if (text.isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+        }
+    }
+
+    /**
      * Lädt die Liste aller verfügbaren Lager vom Server herunter und aktualisiert
-     * die Anzeige in der Tabelle. Die Tabelle wird vorher geleert, um Duplikate zu vermeiden.
+     * die Anzeige in der Tabelle.
      */
     private void loadData() {
         tableModel.setRowCount(0);
@@ -73,8 +114,6 @@ public class LagerVerwaltungPanel extends JPanel {
 
     /**
      * Öffnet einen Eingabedialog zum Anlegen eines komplett neuen Lagers.
-     * Nach erfolgreicher Eingabe und Übertragung an den Server wird die Tabellenansicht
-     * automatisch neu geladen.
      */
     private void addLager() {
         var txtId = new JTextField();
@@ -98,15 +137,16 @@ public class LagerVerwaltungPanel extends JPanel {
 
     /**
      * Öffnet einen Eingabedialog zum Bearbeiten eines bestehenden Lagers.
-     * Das zu bearbeitende Lager muss vorher per Mausklick in der Tabelle markiert werden.
-     * Die ID bleibt fix, während Name, Ort und Art angepasst werden können.
      */
     private void editLager() {
-        int row = table.getSelectedRow();
-        if (row == -1) {
+        int viewRow = table.getSelectedRow();
+        if (viewRow == -1) {
             showError("Bitte ein Lager auswählen.");
             return;
         }
+
+        // WICHTIG: Ansicht auf das Modell umrechnen, falls gefiltert wurde!
+        int row = table.convertRowIndexToModel(viewRow);
 
         int id = (int) tableModel.getValueAt(row, 0);
         var txtName = new JTextField(tableModel.getValueAt(row, 1).toString());
@@ -128,18 +168,22 @@ public class LagerVerwaltungPanel extends JPanel {
     }
 
     /**
-     * Entfernt das aktuell in der Tabelle markierte Lager aus dem System,
-     * nachdem der Benutzer eine kurze Sicherheitsabfrage bestätigt hat.
+     * Entfernt das aktuell in der Tabelle markierte Lager aus dem System.
      */
     private void deleteLager() {
-        int row = table.getSelectedRow();
-        if (row == -1) {
+        int viewRow = table.getSelectedRow();
+        if (viewRow == -1) {
             showError("Bitte ein Lager auswählen.");
             return;
         }
 
+        // WICHTIG: Ansicht auf das Modell umrechnen, falls gefiltert wurde!
+        int row = table.convertRowIndexToModel(viewRow);
+
         int id = (int) tableModel.getValueAt(row, 0);
-        if (JOptionPane.showConfirmDialog(this, "Lager " + id + " löschen?", "Löschen", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        String name = tableModel.getValueAt(row, 1).toString();
+
+        if (JOptionPane.showConfirmDialog(this, "Lager '" + name + "' (ID: " + id + ") wirklich löschen?", "Löschen", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             try {
                 var client = new BackendClient();
                 if (client.deleteLager(id)) loadData();
@@ -151,10 +195,6 @@ public class LagerVerwaltungPanel extends JPanel {
         }
     }
 
-    /**
-     * Hilfsmethode, um standardisierte Fehlermeldungen als Pop-up (Dialog-Fenster) anzuzeigen.
-     * @param msg Die Nachricht, die dem Benutzer angezeigt werden soll.
-     */
     private void showError(String msg) {
         JOptionPane.showMessageDialog(this, msg, "Fehler", JOptionPane.ERROR_MESSAGE);
     }

@@ -1,50 +1,76 @@
 package thw.edu.javaII.port.warehouse.ui.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import javax.swing.JDialog;
+
 import thw.edu.javaII.port.warehouse.model.Produkt;
+import thw.edu.javaII.port.warehouse.model.LagerBestand;
 import thw.edu.javaII.port.warehouse.ui.BackendClient;
+import thw.edu.javaII.port.warehouse.ui.common.Session;
 
 /**
  * Diese Klasse repräsentiert die Verwaltungsoberfläche für die Stammdaten der Produkte.
- * Sie zeigt eine Tabelle mit allen im System hinterlegten Artikeln an und bietet über
- * Schaltflächen die Möglichkeit, neue Produkte anzulegen, bestehende Eigenschaften (z. B. Preise)
- * zu bearbeiten oder Artikel komplett aus der Datenbank zu entfernen.
- * * @author juan.de.souza.leao
+ * Beinhaltet nun eine Echtzeit-Suchfunktion (Filter) über alle Spalten.
  */
 public class ProduktVerwaltungPanel extends JPanel {
 
     private final JTable table;
     private final DefaultTableModel tableModel;
+    private final Session ses;
 
-    /**
-     * Standard-Konstruktor.
-     * Baut das grundlegende Layout (Tabelle in der Mitte, Buttons unten) auf.
-     * Verknüpft zudem die Schaltflächen mit ihren jeweiligen Aktionen und
-     * ruft abschließend die Daten vom Server ab, um die Tabelle initial zu füllen.
-     */
-    public ProduktVerwaltungPanel() {
+    // NEU: Variablen für die Suche
+    private final TableRowSorter<DefaultTableModel> sorter;
+    private final JTextField txtSearch;
+
+    public ProduktVerwaltungPanel(Session ses) {
+        this.ses = ses;
         setLayout(new BorderLayout());
 
-        // Tabelle konfigurieren
-        String[] columnNames = {"ID", "Name", "Hersteller", "Preis"};
+        // --- 1. Suchleiste (Kopfbereich) ---
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.add(new JLabel("Suchen:"));
+        txtSearch = new JTextField(20);
+        topPanel.add(txtSearch);
+        add(topPanel, BorderLayout.NORTH);
+
+        // --- 2. Tabelle und Datenmodell ---
+        String[] columnNames = {"Bestands-ID", "Produkt-ID", "Name", "Hersteller", "Preis", "Bestand", "Lagerplatz", "Lager"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Direkte Bearbeitung in der Zelle deaktivieren, Bearbeitung nur über Dialog
+                return false;
             }
         };
         table = new JTable(tableModel);
+
+        // --- 3. Sorter an die Tabelle binden ---
+        sorter = new TableRowSorter<>(tableModel);
+        table.setRowSorter(sorter);
+
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Buttons konfigurieren (Aktualisieren-Button entfernt)
+        // --- 4. Live-Filter Logik an das Textfeld hängen ---
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { filterTable(); }
+            public void removeUpdate(DocumentEvent e) { filterTable(); }
+            public void changedUpdate(DocumentEvent e) { filterTable(); }
+        });
+
+        // --- Buttons (Fußbereich) ---
         var buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         var btnAdd = new JButton("Neu");
         var btnEdit = new JButton("Bearbeiten");
@@ -55,94 +81,76 @@ public class ProduktVerwaltungPanel extends JPanel {
         buttonPanel.add(btnDelete);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // Listener hinzufügen
         btnAdd.addActionListener(e -> addProdukt());
         btnEdit.addActionListener(e -> editProdukt());
         btnDelete.addActionListener(e -> deleteProdukt());
 
-        // Initiale Daten laden
         loadData();
     }
 
     /**
-     * Lädt die aktuelle Produktliste vom Server und aktualisiert die Anzeige in der Tabelle.
-     * Leert vorher die Tabelle, damit es keine doppelten Einträge gibt.
+     * Wendet den Text aus dem Suchfeld als Filter auf die Tabelle an.
+     * Ignoriert Groß-/Kleinschreibung durch den Regex-Präfix "(?i)".
      */
+    private void filterTable() {
+        String text = txtSearch.getText().trim();
+        if (text.isEmpty()) {
+            sorter.setRowFilter(null);
+        } else {
+            sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+        }
+    }
+
     private void loadData() {
         tableModel.setRowCount(0); // Tabelle leeren
         try {
-            var client = new BackendClient();
-            var produkte = client.getAllProdukte();
-            for (var p : produkte) {
-                tableModel.addRow(new Object[]{p.getId(), p.getName(), p.getHersteller(), p.getPreis()});
+            var bestande = ses.getCommunicator().getBestand();
+            for (LagerBestand b : bestande) {
+                tableModel.addRow(new Object[]{
+                        String.format("BST-%05d", b.getId()),
+                        b.getProdukt_id().getId(),
+                        b.getProdukt_id().getName(),
+                        b.getProdukt_id().getHersteller(),
+                        b.getProdukt_id().getPreis(),
+                        b.getAnzahl(),
+                        b.getLagerplatz_id().getName(),
+                        b.getLagerplatz_id().getLager_id().getName()
+                });
             }
-            client.close();
         } catch (Exception e) {
             showError("Fehler beim Laden der Daten: " + e.getMessage());
         }
     }
 
-    /**
-     * Öffnet einen Eingabedialog zum Anlegen eines komplett neuen Produkts.
-     * Die Produkt-ID wird nicht mehr abgefragt, sondern automatisch vom Server generiert.
-     */
     private void addProdukt() {
-        var txtName = new JTextField();
-        var txtHersteller = new JTextField();
-        var txtPreis = new JTextField();
-
-        // Das ID-Feld wurde entfernt
-        Object[] message = {"Name:", txtName, "Hersteller:", txtHersteller, "Preis (Zahl):", txtPreis};
-
-        int option = JOptionPane.showConfirmDialog(this, message, "Neues Produkt anlegen", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            try {
-                // Wir übergeben '0' als Platzhalter für die ID. Der Server überschreibt dies mit der generierten ID.
-                var p = new Produkt(
-                        0,
-                        txtName.getText().trim(),
-                        txtHersteller.getText().trim(),
-                        Double.parseDouble(txtPreis.getText().trim().replace(",", "."))
-                );
-
-                var client = new BackendClient();
-                boolean erfolgreich = client.addProdukt(p);
-                client.close();
-
-                if (erfolgreich) {
-                    loadData();
-                } else {
-                    showError("Das Produkt konnte nicht angelegt werden.");
-                }
-            } catch (NumberFormatException ex) {
-                showError("Ungültige Eingabe beim Preis. Bitte nur Zahlen verwenden.");
-            } catch (Exception ex) {
-                showError("Serverfehler: " + ex.getMessage());
-            }
-        }
+        AddProdukt ap = new AddProdukt(ses);
+        ap.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        ap.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        ap.setVisible(true);
+        loadData();
     }
 
-    /**
-     * Öffnet einen Eingabedialog zum Bearbeiten eines bestehenden Produkts.
-     * Das Produkt muss dafür vorher in der Tabelle per Mausklick markiert worden sein.
-     */
     private void editProdukt() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1) {
+        int selectedRowView = table.getSelectedRow();
+        if (selectedRowView == -1) {
             showError("Bitte wählen Sie zuerst ein Produkt aus der Tabelle aus.");
             return;
         }
 
-        int id = (int) tableModel.getValueAt(selectedRow, 0);
-        var txtName = new JTextField(tableModel.getValueAt(selectedRow, 1).toString());
-        var txtHersteller = new JTextField(tableModel.getValueAt(selectedRow, 2).toString());
-        var txtPreis = new JTextField(tableModel.getValueAt(selectedRow, 3).toString());
-        Object[] message = {"ID: " + id + " (nicht änderbar)", "Name:", txtName, "Hersteller:", txtHersteller, "Preis:", txtPreis};
+        // WICHTIG: Ansicht auf das Modell umrechnen, falls gefiltert wurde!
+        int selectedRow = table.convertRowIndexToModel(selectedRowView);
+
+        int produktId = (int) tableModel.getValueAt(selectedRow, 1);
+        var txtName = new JTextField(tableModel.getValueAt(selectedRow, 2).toString());
+        var txtHersteller = new JTextField(tableModel.getValueAt(selectedRow, 3).toString());
+        var txtPreis = new JTextField(tableModel.getValueAt(selectedRow, 4).toString());
+
+        Object[] message = {"Produkt-ID: " + produktId + " (nicht änderbar)", "Name:", txtName, "Hersteller:", txtHersteller, "Preis:", txtPreis};
 
         int option = JOptionPane.showConfirmDialog(this, message, "Produkt bearbeiten", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             try {
-                var p = new Produkt(id, txtName.getText().trim(), txtHersteller.getText().trim(), Double.parseDouble(txtPreis.getText().trim().replace(",", ".")));
+                var p = new Produkt(produktId, txtName.getText().trim(), txtHersteller.getText().trim(), Double.parseDouble(txtPreis.getText().trim().replace(",", ".")));
                 var client = new BackendClient();
                 if (client.updateProdukt(p)) {
                     loadData();
@@ -158,24 +166,29 @@ public class ProduktVerwaltungPanel extends JPanel {
         }
     }
 
-    /**
-     * Löscht das aktuell in der Tabelle markierte Produkt, nachdem der Nutzer
-     * eine kurze Sicherheitsabfrage ("Wirklich löschen?") bestätigt hat.
-     */
     private void deleteProdukt() {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1) {
+        int selectedRowView = table.getSelectedRow();
+        if (selectedRowView == -1) {
             showError("Bitte wählen Sie zuerst ein Produkt aus der Tabelle aus.");
             return;
         }
 
-        int id = (int) tableModel.getValueAt(selectedRow, 0);
-        int confirm = JOptionPane.showConfirmDialog(this, "Produkt mit ID " + id + " wirklich löschen?", "Löschen bestätigen", JOptionPane.YES_NO_OPTION);
+        // WICHTIG: Ansicht auf das Modell umrechnen!
+        int selectedRow = table.convertRowIndexToModel(selectedRowView);
+
+        int produktId = (int) tableModel.getValueAt(selectedRow, 1);
+        String produktName = tableModel.getValueAt(selectedRow, 2).toString();
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Produkt '" + produktName + "' (ID: " + produktId + ") wirklich komplett löschen?\nAlle Lagerbestände dieses Produkts werden ebenfalls gelöscht!",
+                "Löschen bestätigen",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 var client = new BackendClient();
-                if (client.deleteProdukt(id)) {
+                if (client.deleteProdukt(produktId)) {
                     loadData();
                 } else {
                     showError("Fehler beim Löschen auf dem Server.");
@@ -187,10 +200,6 @@ public class ProduktVerwaltungPanel extends JPanel {
         }
     }
 
-    /**
-     * Hilfsmethode, um standardisierte Fehlermeldungen als Pop-up anzuzeigen.
-     * @param msg Die Nachricht, die dem Benutzer angezeigt werden soll.
-     */
     private void showError(String msg) {
         JOptionPane.showMessageDialog(this, msg, "Fehler", JOptionPane.ERROR_MESSAGE);
     }

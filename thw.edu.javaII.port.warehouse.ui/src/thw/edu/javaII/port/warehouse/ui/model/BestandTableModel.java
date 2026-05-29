@@ -72,7 +72,8 @@ public class BestandTableModel extends AbstractTableModel {
 		LagerBestand bestand = data.get(rowIndex);
 
 		return switch (columnIndex) {
-			case 0 -> bestand.getId();
+			// --- NEU: Hier wird die ID als suchbarer String (z.B. BST-00012) formatiert ---
+			case 0 -> String.format("BST-%05d", bestand.getId());
 			case 1 -> bestand.getProdukt_id() != null ? bestand.getProdukt_id().getName() : "-";
 			case 2 -> bestand.getProdukt_id() != null ? bestand.getProdukt_id().getHersteller() : "-";
 			case 3 -> bestand.getAnzahl();
@@ -85,18 +86,17 @@ public class BestandTableModel extends AbstractTableModel {
 
 	/**
 	 * Gibt die Titel (Überschriften) für die einzelnen Spalten zurück.
-	 * * @param arg0 Der Index der Spalte (0 bis 5).
-	 * @return Der Name der Spalte.
+	 * Präzises Wording für den Logistik-Betrieb.
 	 */
 	@Override
 	public String getColumnName(int arg0) {
 		return switch (arg0) {
-			case 0 -> "ID";
-			case 1 -> "Produkt";
+			case 0 -> "Bestands-ID";
+			case 1 -> "Artikelname";
 			case 2 -> "Hersteller";
-			case 3 -> "Lagerbestand";
-			case 4 -> "Lagerplatz";
-			case 5 -> "Lager";
+			case 3 -> "Menge (Stk.)"; // Vorher: "Lagerbestand" (verwirrend)
+			case 4 -> "Regal / Platz"; // Vorher: "Lagerplatz"
+			case 5 -> "Standort (Halle)"; // Vorher: "Lager"
 			default -> null;
 		};
 	}

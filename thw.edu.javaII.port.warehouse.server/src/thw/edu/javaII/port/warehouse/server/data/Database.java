@@ -554,17 +554,30 @@ public class Database implements IStorage {
 
 	/**
 	 * Löscht ein Produkt aus den Stammdaten.
+	 * Löscht zuvor aus Sicherheitsgründen alle verknüpften Lagerbestände (Kaskadierendes Löschen),
+	 * um Datenbank-Inkonsistenzen ("Geister-Bestände") zu vermeiden.
 	 * @param model Das zu löschende Produkt.
 	 */
 	@Override
 	public void deleteProdukt(Produkt model) {
+		// 1. Zuerst alle Lagerbestände löschen, die dieses Produkt enthalten
+		String sqlBestand = "DELETE FROM LAGERBESTAND WHERE produkt_id=?";
+		try (Connection con = DriverManager.getConnection(dbUrl);
+		     PreparedStatement pstmt = con.prepareStatement(sqlBestand)) {
+			pstmt.setInt(1, model.getId());
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "Fehler beim Löschen der verknüpften Lagerbestände", e);
+		}
+
+		// 2. Danach das eigentliche Produkt sicher löschen
 		String sql = "DELETE FROM PRODUKT WHERE id=?";
 		try (Connection con = DriverManager.getConnection(dbUrl);
 		     PreparedStatement pstmt = con.prepareStatement(sql)) {
 			pstmt.setInt(1, model.getId());
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "Fehler", e);
+			LOGGER.log(Level.SEVERE, "Fehler beim Löschen des Produkts", e);
 		}
 	}
 
